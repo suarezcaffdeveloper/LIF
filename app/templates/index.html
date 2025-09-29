@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Proyecto LIF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f4f4;
+            color: #333;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #333;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        
+
+        /* Contenedor general */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        p.descripcion {
+            text-align: center;
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        /* Grid de equipos estilo card */
+        .equipos-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 2 filas de 6 */
+            gap: 20px;
+            justify-items: center;
+        }
+
+        /* Ajuste para menos de 12 equipos: 3 filas de 4 */
+        @media (max-width: 1100px) {
+            .equipos-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .equipos-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .card-equipo {
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 150px;
+        }
+
+        .card-equipo h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .card-equipo img {
+            width: 100px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .card-equipo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9em;
+        }
+        /* Dropdown dentro del navbar */
+.dropdown {
+    display: inline-block;
+    position: relative;
+}
+
+.dropbtn {
+    background: none;
+    border: none;
+    color: white;
+    font-weight: bold;
+    margin: 0 15px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: #333;
+    min-width: 160px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 6px;
+    z-index: 1;
+    text-align: left;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    display: block;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.dropdown-content a:hover {
+    background: #444;
+}
+
+/* Mostrar el menú cuando paso el mouse */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    text-decoration: underline;
+}
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+    <a href="/">Inicio</a>
+
+    <!-- Fixture Mayores -->
+    <div class="dropdown">
+        <button class="dropbtn">Fixture Mayores</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
+            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
+            <a href="{{ url_for('views.fixture', bloque='mayores') }}">Todas</a>
+        </div>
+    </div>
+
+    <!-- Fixture Inferiores -->
+    <div class="dropdown">
+        <button class="dropbtn">Fixture Inferiores</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='septima') }}">Séptima</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
+        </div>
+    </div>
+
+    <!-- Goleadores y tabla -->
+    <div class="dropdown">
+        <button class="dropbtn">Goleadores</button>
+        <div class="dropdown-content">
+            <a href="/goleadores/primera">Primera</a>
+            <a href="/goleadores/reserva">Reserva</a>
+            <a href="/goleadores/quinta">Quinta</a>
+            <a href="/goleadores/sexta">Sexta</a>
+            <a href="/goleadores/septima">Séptima</a>
+        </div>
+    </div>
+
+    <a href="/tabla">Tabla de posiciones</a>
+</div>
+
+
+
+    <div class="container">
+        <h1>Liga Interprovincial de Fútbol</h1>
+        <p class="descripcion">
+            Bienvenidos a la Liga Interprovincial de Fútbol (LIF). Aquí podrás seguir el fixture, tabla de posiciones, goleadores y mucho más sobre tus equipos favoritos.
+        </p>
+
+        <h2 style="text-align:center; margin-bottom: 20px;">Equipos participantes</h2>
+        <div class="equipos-grid">
+            {% for equipo in equipos %}
+            <div class="card-equipo">
+                <h3>{{ equipo.nombre }}</h3>
+                <img 
+                    src="{{ url_for('static', filename='escudos/' + equipo.nombre + '.jpg') }}" 
+                    alt="{{ equipo.nombre }} escudo"
+                >
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 Liga Interprovincial de Fútbol - Todos los derechos reservados
+    </footer>
+</body>
+</html>

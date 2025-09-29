@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fixture del Torneo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: #333;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            color: #222;
+        }
+
+        /* Contenedor de cards */
+        /* Contenedor de todas las jornadas */
+/* Contenedor de jornadas: 3 por fila */
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Card = jornada */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+/* Partidos dentro de la jornada */
+.partido {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.partido:last-child {
+    border-bottom: none;
+}
+
+
+
+        .equipo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 45%;
+        }
+
+        .equipo img {
+            width: 50px;
+            height: auto;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .vs {
+            font-weight: bold;
+            color: #555;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+@media (max-width: 992px) {
+    .cards-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .cards-container {
+        grid-template-columns: 1fr;
+    }
+}
+        /* Dropdown dentro del navbar */
+.dropdown {
+    display: inline-block;
+    position: relative;
+}
+
+.dropbtn {
+    background: none;
+    border: none;
+    color: white;
+    font-weight: bold;
+    margin: 0 15px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: #333;
+    min-width: 160px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-radius: 6px;
+    z-index: 1;
+    text-align: left;
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    display: block;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+.dropdown-content a:hover {
+    background: #444;
+}
+
+/* Mostrar el menú cuando paso el mouse */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown:hover .dropbtn {
+    text-decoration: underline;
+}
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+    <a href="/">Inicio</a>
+    <a href="/fixture/mayores">Fixture Mayores</a>
+    <a href="/fixture/inferiores">Fixture Inferiores</a>
+
+    <div class="dropdown">
+        <button class="dropbtn">Goleadores</button>
+        <div class="dropdown-content">
+            <a href="/goleadores/primera">Primera</a>
+            <a href="/goleadores/reserva">Reserva</a>
+            <a href="/goleadores/quinta">Quinta</a>
+            <a href="/goleadores/sexta">Sexta</a>
+            <a href="/goleadores/septima">Séptima</a>
+        </div>
+    </div>
+
+    <a href="/tabla">Tabla de posiciones</a>
+</div>
+
+    <h1 class="text-center my-4">{{ titulo }}</h1>
+
+    <div class="cards-container">
+        {% if fechas_partidos %}
+            {% for jornada, partidos in fechas_partidos.items() %}
+                <div class="card">
+                    <h2>{{ jornada }}</h2>
+                    {% for partido in partidos %}
+                        <div class="partido">
+                            <div class="equipo">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.nombre + '.jpg') }}" alt="{{ partido.equipo_local.nombre }}">
+                                <span>{{ partido.equipo_local.nombre }}</span>
+                            </div>
+                            <span class="vs">vs</span>
+                            <div class="equipo">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.nombre + '.jpg') }}" alt="{{ partido.equipo_visitante.nombre }}">
+                                <span>{{ partido.equipo_visitante.nombre }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center">Todavía no hay partidos cargados para esta categoría.</p>
+        {% endif %}
+    </div>
+</body>
+
+
+
+    <footer>
+        &copy; 2025 Liga Interprovincial de Fútbol - Todos los derechos reservados
+    </footer>
+</body>
+</html>
+
