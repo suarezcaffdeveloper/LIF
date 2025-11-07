@@ -11,7 +11,6 @@
             padding: 0;
         }
 
-        /* Navbar */
         .navbar {
             background: #333;
             padding: 1rem;
@@ -35,53 +34,54 @@
             color: #222;
         }
 
-        /* Contenedor de cards */
-        /* Contenedor de todas las jornadas */
-/* Contenedor de jornadas: 3 por fila */
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    padding: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-/* Card = jornada */
-.card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    padding: 20px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-}
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
 
-/* Partidos dentro de la jornada */
-.partido {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 10px 0;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-}
+        .card h2 {
+            text-align: center;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #444;
+        }
 
-.partido:last-child {
-    border-bottom: none;
-}
+        .partido {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
 
-
+        .partido:last-child {
+            border-bottom: none;
+        }
 
         .equipo {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 45%;
+            text-align: center;
         }
 
         .equipo img {
@@ -104,74 +104,91 @@
             font-size: 0.9em;
         }
 
-        /* Responsive */
-@media (max-width: 992px) {
-    .cards-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+        @media (max-width: 992px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
-@media (max-width: 600px) {
-    .cards-container {
-        grid-template-columns: 1fr;
-    }
-}
-        /* Dropdown dentro del navbar */
-.dropdown {
-    display: inline-block;
-    position: relative;
-}
+        @media (max-width: 600px) {
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
 
-.dropbtn {
-    background: none;
-    border: none;
-    color: white;
-    font-weight: bold;
-    margin: 0 15px;
-    font-size: 1rem;
-    cursor: pointer;
-}
+        .dropdown {
+            display: inline-block;
+            position: relative;
+        }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background: #333;
-    min-width: 160px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    border-radius: 6px;
-    z-index: 1;
-    text-align: left;
-}
+        .dropbtn {
+            background: none;
+            border: none;
+            color: white;
+            font-weight: bold;
+            margin: 0 15px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
 
-.dropdown-content a {
-    color: white;
-    padding: 12px 16px;
-    display: block;
-    text-decoration: none;
-    font-weight: normal;
-}
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: #333;
+            min-width: 160px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 6px;
+            z-index: 1;
+            text-align: left;
+        }
 
-.dropdown-content a:hover {
-    background: #444;
-}
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            display: block;
+            text-decoration: none;
+            font-weight: normal;
+        }
 
-/* Mostrar el menú cuando paso el mouse */
-.dropdown:hover .dropdown-content {
-    display: block;
-}
+        .dropdown-content a:hover {
+            background: #444;
+        }
 
-.dropdown:hover .dropbtn {
-    text-decoration: underline;
-}
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
 
+        .dropdown:hover .dropbtn {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="navbar">
     <a href="/">Inicio</a>
-    <a href="/fixture/mayores">Fixture Mayores</a>
-    <a href="/fixture/inferiores">Fixture Inferiores</a>
 
+    <!-- Fixture Mayores -->
+    <div class="dropdown">
+        <button class="dropbtn">Fixture Mayores</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
+            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
+            <a href="{{ url_for('views.fixture', bloque='mayores') }}">Todas</a>
+        </div>
+    </div>
+
+    <!-- Fixture Inferiores -->
+    <div class="dropdown">
+        <button class="dropbtn">Fixture Inferiores</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
+        </div>
+    </div>
+
+    <!-- Goleadores y tabla -->
     <div class="dropdown">
         <button class="dropbtn">Goleadores</button>
         <div class="dropdown-content">
@@ -183,7 +200,17 @@
         </div>
     </div>
 
-    <a href="/tabla">Tabla de posiciones</a>
+        <!-- Tabla de posiciones -->
+    <div class="dropdown">
+        <button class="dropbtn">Tabla de Posiciones</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
+        </div>
+    </div>
 </div>
 
     <h1 class="text-center my-4">{{ titulo }}</h1>
@@ -192,14 +219,20 @@
         {% if fechas_partidos %}
             {% for jornada, partidos in fechas_partidos.items() %}
                 <div class="card">
-                    <h2>{{ jornada }}</h2>
+                    <h2>{{ jornada }}</h2> <!-- Aquí aparece Jornada 1, Jornada 2, etc -->
                     {% for partido in partidos %}
                         <div class="partido">
                             <div class="equipo">
                                 <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.nombre + '.jpg') }}" alt="{{ partido.equipo_local.nombre }}">
                                 <span>{{ partido.equipo_local.nombre }}</span>
                             </div>
-                            <span class="vs">vs</span>
+
+                            {% if mostrar_resultados and partido.jugado %}
+                                <span class="vs">{{ partido.goles_local }} - {{ partido.goles_visitante }}</span>
+                            {% else %}
+                                <span class="vs">vs</span>
+                            {% endif %}
+
                             <div class="equipo">
                                 <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.nombre + '.jpg') }}" alt="{{ partido.equipo_visitante.nombre }}">
                                 <span>{{ partido.equipo_visitante.nombre }}</span>
@@ -212,13 +245,11 @@
             <p class="text-center">Todavía no hay partidos cargados para esta categoría.</p>
         {% endif %}
     </div>
-</body>
-
-
 
     <footer>
         &copy; 2025 Liga Interprovincial de Fútbol - Todos los derechos reservados
     </footer>
 </body>
 </html>
+
 

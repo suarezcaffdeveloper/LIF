@@ -1,20 +1,25 @@
 from app import create_app
 from app.database.db import db
-from seeds.puntajes import cargar_puntajes
 from seeds.goleadores import cargar_goleadores
 from seeds.jugadores import cargar_jugadores
 from seeds.teams import cargar_equipos
 from seeds.fixture import generar_fixtures
+from app.utils.generar_json_datos_partidos import cargar_eventos_jugadores_desde_json, cargar_resultados_partidos_desde_json
+from app.utils.cargar_tabla_posiciones import cargar_datos_tabla_posiciones
+#from app.utils.cargar_datos_prueba import cargar_datos_desde_json
 
 app = create_app()
 
 with app.app_context():
     db.create_all() 
     cargar_equipos()
-    cargar_puntajes()
     cargar_goleadores()
     cargar_jugadores()
     generar_fixtures()
+    cargar_eventos_jugadores_desde_json()
+    cargar_resultados_partidos_desde_json()
+    cargar_datos_tabla_posiciones()
+    #cargar_datos_desde_json()
 
 if __name__ == '__main__':
     app.run(debug=True)

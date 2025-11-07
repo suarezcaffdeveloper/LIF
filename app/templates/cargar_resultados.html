@@ -152,7 +152,17 @@
         </div>
     </div>
 
-    <a href="/tabla">Tabla de posiciones</a>
+        <!-- Tabla de posiciones -->
+    <div class="dropdown">
+        <button class="dropbtn">Tabla de Posiciones</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
+        </div>
+    </div>
 </div>
 
     <div class="container">

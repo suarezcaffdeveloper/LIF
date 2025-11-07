@@ -1,15 +1,26 @@
 from app.models.models import TablaPosiciones, Equipo, Partido
 from app.database.db import db
 
-def cargar_puntajes():
-    TablaPosiciones.query.delete()
+def cargar_puntajes_por_categoria(categoria):
+    
+    TablaPosiciones.query.filter_by(categoria=categoria).delete()
     db.session.commit()
 
     equipos = Equipo.query.all()
 
     for equipo in equipos:
-        partidos_local = Partido.query.filter_by(equipo_local_id=equipo.id, jugado=True).all()
-        partidos_visitante = Partido.query.filter_by(equipo_visitante_id=equipo.id, jugado=True).all()
+        partidos_local = Partido.query.filter_by(
+            equipo_local_id=equipo.id,
+            categoria=categoria,
+            jugado=True
+        ).all()
+
+        partidos_visitante = Partido.query.filter_by(
+            equipo_visitante_id=equipo.id,
+            categoria=categoria,
+            jugado=True
+        ).all()
+
         partidos = partidos_local + partidos_visitante
 
         pj = pg = pe = pp = gf = gc = puntos = 0
@@ -26,7 +37,7 @@ def cargar_puntajes():
                     puntos += 1
                 else:
                     pp += 1
-            else: 
+            else:
                 gf += partido.goles_visitante
                 gc += partido.goles_local
                 if partido.goles_visitante > partido.goles_local:
@@ -44,6 +55,7 @@ def cargar_puntajes():
         fila = TablaPosiciones(
             id_equipo=equipo.id,
             nombre_equipo=equipo.nombre,
+            categoria=categoria,
             partidos_jugados=pj,
             partidos_ganados=pg,
             partidos_empatados=pe,
@@ -56,4 +68,5 @@ def cargar_puntajes():
         db.session.add(fila)
 
     db.session.commit()
-    print("✅ Tabla de posiciones generada correctamente.")
+    print(f"✅ Tabla de posiciones generada correctamente para la categoría '{categoria}'")
+

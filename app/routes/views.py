@@ -5,6 +5,8 @@ from ..models.models import (
 )
 from ..database.db import db
 from sqlalchemy import func
+from seeds.puntajes import cargar_puntajes_por_categoria
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 
 views = Blueprint('views', __name__)
 
@@ -16,10 +18,9 @@ def index():
 @views.route('/fixture/<bloque>')
 @views.route('/fixture/<bloque>/<categoria>')
 def fixture(bloque, categoria=None):
-    # Definimos las categorías que pertenecen a cada bloque
     bloques = {
         "mayores": ["Primera", "Reserva"],
-        "inferiores": ["quinta", "sexta", "septima"]
+        "inferiores": ["Quinta", "Sexta", "Septima"]
     }
 
     if bloque not in bloques:
@@ -32,20 +33,39 @@ def fixture(bloque, categoria=None):
         if categoria not in categorias_bloque:
             flash("Categoría inválida", "danger")
             return redirect(url_for("views.index"))
-        partidos = Partido.query.filter_by(categoria=categoria).order_by(Partido.jornada).all()
+        
+        partidos = (
+            Partido.query
+            .filter_by(categoria=categoria)
+            .order_by(Partido.jornada, Partido.fecha_partido)
+            .distinct()
+            .all()
+        )
         titulo = f"Fixture {categoria.capitalize()}"
-    else:
-        # Si no se elige categoría, mostramos todas del bloque
-        partidos = Partido.query.filter(Partido.categoria.in_(categorias_bloque)).order_by(Partido.jornada).all()
+        mostrar_resultados = True
+
+    else:  
+        partidos = (
+            Partido.query
+            .filter(Partido.categoria.in_(categorias_bloque))
+            .order_by(Partido.jornada, Partido.fecha_partido)
+            .distinct()
+            .all()
+        )
         titulo = f"Fixture {bloque.capitalize()}"
+        mostrar_resultados = False  
 
     fechas_partidos = {}
     for partido in partidos:
         fecha_key = f"Jornada {partido.jornada}"
         fechas_partidos.setdefault(fecha_key, []).append(partido)
 
-    return render_template("fixture_general.html", fechas_partidos=fechas_partidos, titulo=titulo)
-
+    return render_template(
+        "fixture_general.html",
+        fechas_partidos=fechas_partidos,
+        titulo=titulo,
+        mostrar_resultados=mostrar_resultados
+    )
 
 
 @views.route('/goleadores/<categoria>')
@@ -60,7 +80,7 @@ def mostrar_estadisticas(categoria):
         .filter(func.lower(Partido.categoria) == categoria.lower())
         .group_by(Jugador.id)
         .order_by(func.sum(EstadoJugadorPartido.cant_goles).desc())
-        .all()
+        .limit(15)
     )
 
     amarillas = (
@@ -73,7 +93,7 @@ def mostrar_estadisticas(categoria):
         .filter(func.lower(Partido.categoria) == categoria.lower())
         .group_by(Jugador.id)
         .order_by(func.sum(EstadoJugadorPartido.tarjetas_amarillas).desc())
-        .limit(5)
+        .limit(10)
     )
 
     rojas = (
@@ -86,7 +106,7 @@ def mostrar_estadisticas(categoria):
         .filter(func.lower(Partido.categoria) == categoria.lower())
         .group_by(Jugador.id)
         .order_by(func.sum(EstadoJugadorPartido.tarjetas_rojas).desc())
-        .limit(5)
+        .limit(10)
     )
 
     return render_template(
@@ -97,13 +117,23 @@ def mostrar_estadisticas(categoria):
         rojas=rojas
     )
 
-@views.route('/tabla_posiciones')
-def tabla_posiciones():
-    tabla = TablaPosiciones.query.order_by(
-        TablaPosiciones.cantidad_puntos.desc(),
-        TablaPosiciones.diferencia_gol.desc()
-    ).all()
-    return render_template('tabla_posiciones.html', tabla=tabla)
+@views.route('/tabla_posiciones/<categoria>')
+def tabla_posiciones(categoria):
+    
+    #cargar_puntajes_por_categoria(categoria)
+
+    tabla = (
+        TablaPosiciones.query
+        .filter_by(categoria=categoria)
+        .order_by(
+            TablaPosiciones.cantidad_puntos.desc(),
+            TablaPosiciones.diferencia_gol.desc(),
+            TablaPosiciones.goles_a_favor.desc()
+        )
+        .all()
+    )
+
+    return render_template('tabla_posiciones.html', tabla=tabla, categoria=categoria)
 
 @views.route("/cargar_resultados", methods=["GET", "POST"])
 def cargar_resultados():
@@ -143,3 +173,75 @@ def cargar_resultados():
     partidos = Partido.query.filter_by(jugado=False).order_by(Partido.fecha_partido).all()
     jugadores = Jugador.query.order_by(Jugador.nombre).all()
     return render_template("cargar_resultados.html", partidos=partidos, jugadores=jugadores)
+
+#LOGIN
+# ---------------- REGISTRO ----------------
+@views.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        nombre_usuario = request.form['nombre']
+        email = request.form['email']
+        password = request.form['password']
+        rol = request.form['rol']
+
+        if Usuario.query.filter_by(email=email).first():
+            flash('El email ya está registrado.', 'warning')
+            return redirect(url_for('views.register'))
+
+        nuevo_usuario = Usuario(
+            nombre_usuario=nombre_usuario,
+            email=email,
+            rol=rol
+        )
+        nuevo_usuario.set_password(password)
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+
+        flash('Registro exitoso. Ahora podés iniciar sesión.', 'success')
+        return redirect(url_for('views.login'))
+
+    return render_template('register.html')
+
+# ---------------- LOGIN ----------------
+
+@views.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        contraseña = request.form['contraseña']
+
+        usuario = Usuario.query.filter_by(email=email).first()
+
+        if usuario and usuario.check_password(contraseña):
+            login_user(usuario)
+            flash('Inicio de sesión exitoso.', 'success')
+            if usuario.rol == 'usuario':
+                return render_template('index.html')
+            elif usuario.rol == 'administrador':
+                return render_template('adminview.html')
+            else:
+                return render_template('periodistaview.html')
+        else:
+            flash('Credenciales incorrectas.', 'danger')
+            return redirect(url_for('views.login'))
+
+    return render_template('login.html')
+
+# ---------------- LOGOUT ----------------
+@views.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Sesión cerrada correctamente.', 'info')
+    return redirect(url_for('views.login'))
+
+# ---------------- DASHBOARD ----------------
+@views.route('/dashboard')
+@login_required
+def dashboard():
+    if current_user.rol == 'administrador':
+        return render_template('adminview.html', usuario=current_user)
+    elif current_user.rol == 'periodista':
+        return render_template('periodistaview.html', usuario=current_user)
+    else:
+        return render_template('index.html', usuario=current_user)

@@ -1,0 +1,37 @@
+[
+  { "id_partido": 4868, "goles_local": 2, "goles_visitante": 1 },
+  { "id_partido": 4869, "goles_local": 0, "goles_visitante": 2 },
+  { "id_partido": 4870, "goles_local": 3, "goles_visitante": 3 },
+  { "id_partido": 4871, "goles_local": 2, "goles_visitante": 1 },
+  { "id_partido": 4872, "goles_local": 0, "goles_visitante": 0 },
+  { "id_partido": 4873, "goles_local": 5, "goles_visitante": 3 },
+
+  { "id_partido": 4934, "goles_local": 0, "goles_visitante": 3 },
+  { "id_partido": 4935, "goles_local": 1, "goles_visitante": 1 },
+  { "id_partido": 4936, "goles_local": 4, "goles_visitante": 3 },
+  { "id_partido": 4937, "goles_local": 2, "goles_visitante": 2 },
+  { "id_partido": 4938, "goles_local": 1, "goles_visitante": 4 },
+  { "id_partido": 4939, "goles_local": 1, "goles_visitante": 3 },
+  
+  { "id_partido": 5000, "goles_local": 5, "goles_visitante": 2 },
+  { "id_partido": 5001, "goles_local": 1, "goles_visitante": 0 },
+  { "id_partido": 5002, "goles_local": 0, "goles_visitante": 0 },
+  { "id_partido": 5003, "goles_local": 3, "goles_visitante": 3 },
+  { "id_partido": 5004, "goles_local": 4, "goles_visitante": 2 },
+  { "id_partido": 5005, "goles_local": 3, "goles_visitante": 1 },
+
+  { "id_partido": 5066, "goles_local": 5, "goles_visitante": 3 },
+  { "id_partido": 5067, "goles_local": 4, "goles_visitante": 2 },
+  { "id_partido": 5068, "goles_local": 0, "goles_visitante": 0 },
+  { "id_partido": 5069, "goles_local": 2, "goles_visitante": 3 },
+  { "id_partido": 5070, "goles_local": 6, "goles_visitante": 2 },
+  { "id_partido": 5071, "goles_local": 5, "goles_visitante": 7 },
+
+  { "id_partido": 5198, "goles_local": 4, "goles_visitante": 3 },
+  { "id_partido": 5199, "goles_local": 2, "goles_visitante": 4 },
+  { "id_partido": 5200, "goles_local": 1, "goles_visitante": 3 },
+  { "id_partido": 5201, "goles_local": 1, "goles_visitante": 1 },
+  { "id_partido": 5202, "goles_local": 1, "goles_visitante": 2 },
+  { "id_partido": 5203, "goles_local": 3, "goles_visitante": 1 }
+  
+]

@@ -155,6 +155,21 @@
     text-decoration: underline;
 }
 
+.video-wrap {
+  position: relative;
+  width: 100%;
+  /* relación 16:9 -> padding-top = 9/16 * 100 = 56.25% */
+  padding-top: 56.25%;
+  overflow: hidden;
+}
+.video-wrap iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
     </style>
 </head>
 <body>
@@ -175,9 +190,9 @@
     <div class="dropdown">
         <button class="dropbtn">Fixture Inferiores</button>
         <div class="dropdown-content">
-            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='septima') }}">Séptima</a>
-            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='sexta') }}">Sexta</a>
-            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
             <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
         </div>
     </div>
@@ -194,7 +209,17 @@
         </div>
     </div>
 
-    <a href="/tabla">Tabla de posiciones</a>
+        <!-- Tabla de posiciones -->
+    <div class="dropdown">
+        <button class="dropbtn">Tabla de Posiciones</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
+        </div>
+    </div>
 </div>
 
 
@@ -218,7 +243,19 @@
             {% endfor %}
         </div>
     </div>
-
+    <div>
+        <p>Todos los goles de los cuartos de final</p>
+    </div>
+            <!-- Embed básico -->
+    <div class="video-wrap">
+        <iframe
+            src="https://www.youtube.com/watch?v=5rYJ-3Ri1-E"
+            title="YouTube video"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+            loading="lazy">
+        </iframe>
+    </div>  
     <footer>
         &copy; 2025 Liga Interprovincial de Fútbol - Todos los derechos reservados
     </footer>

@@ -141,9 +141,29 @@
 <body>
     <div class="navbar">
     <a href="/">Inicio</a>
-    <a href="/fixture/mayores">Fixture Mayores</a>
-    <a href="/fixture/inferiores">Fixture Inferiores</a>
 
+    <!-- Fixture Mayores -->
+    <div class="dropdown">
+        <button class="dropbtn">Fixture Mayores</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
+            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
+            <a href="{{ url_for('views.fixture', bloque='mayores') }}">Todas</a>
+        </div>
+    </div>
+
+    <!-- Fixture Inferiores -->
+    <div class="dropdown">
+        <button class="dropbtn">Fixture Inferiores</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
+        </div>
+    </div>
+
+    <!-- Goleadores y tabla -->
     <div class="dropdown">
         <button class="dropbtn">Goleadores</button>
         <div class="dropdown-content">
@@ -155,7 +175,17 @@
         </div>
     </div>
 
-    <a href="/tabla">Tabla de posiciones</a>
+        <!-- Tabla de posiciones -->
+    <div class="dropdown">
+        <button class="dropbtn">Tabla de Posiciones</button>
+        <div class="dropdown-content">
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
+            <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
+        </div>
+    </div>
 </div>
 
     <h1>Tabla de Posiciones - Primera División</h1>

@@ -1,4 +1,6 @@
 from ..database.db import db
+from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
 
 class Equipo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -57,11 +59,31 @@ class Usuario(db.Model):
     email = db.Column(db.String, nullable=False, unique=True)
     contraseña = db.Column(db.String, nullable=False)
     rol = db.Column(db.String, nullable=False)
-    fecha_registro = db.Column(db.DateTime, nullable=False)
+    fecha_registro = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now(datetime.UTC))
 
     noticias = db.relationship('Noticia', backref='autor', lazy=True)
     videos = db.relationship('Video', backref='autor', lazy=True)
+    
+    @property
+    def is_active(self):
+        return True
+    
+    @property
+    def is_authenticated(self):
+        return True
 
+    def get_id(self):
+        return str(self.id_usuario)
+    
+    def set_password(self, password):
+        """Guarda el hash de la contraseña."""
+        self.contraseña = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Verifica si la contraseña es correcta."""
+        return check_password_hash(self.contraseña, password)
+    
+    
 
 class Noticia(db.Model):
     id_noticia = db.Column(db.Integer, primary_key=True)
@@ -86,8 +108,9 @@ class TablaPosiciones(db.Model):
     __tablename__ = 'tabla_posiciones'
     __table_args__ = {'extend_existing': True}
 
-    id_equipo = db.Column(db.Integer, primary_key=True)
+    id_equipo = db.Column(db.Integer)
     nombre_equipo = db.Column(db.String)
+    categoria = db.Column(db.String(50), nullable=True)
     partidos_jugados = db.Column(db.Integer)
     partidos_ganados = db.Column(db.Integer)
     partidos_empatados = db.Column(db.Integer)
@@ -96,34 +119,5 @@ class TablaPosiciones(db.Model):
     goles_en_contra = db.Column(db.Integer)
     cantidad_puntos = db.Column(db.Integer)
     diferencia_gol = db.Column(db.Integer)
+    id_posicion = db.Column(db.Integer, primary_key=True)
 
-    
-#class Gol(db.Model):
-#    __tablename__ = 'gol'
-
-#    id = db.Column(db.Integer, primary_key=True)  # Necesario si querés permitir múltiples goles
-#    jugador_id = db.Column(db.Integer, db.ForeignKey('jugador.id'), nullable=False)
-#    partido_id = db.Column(db.Integer, db.ForeignKey('partido.id'), nullable=False)
-#    minuto = db.Column(db.Integer)  # opcional
-#    tipo = db.Column(db.String(20))  # opcional (penal, cabeza, etc.)
-#    categoria = db.Column(db.String(20), nullable=False)
-    
-#    jugador = db.relationship("Jugador", backref="goles")
-#    partido = db.relationship("Partido", backref="goles")
- 
-    
-#class Puntajes(db.Model):
-#    __tablename__ = 'puntajes'
-#    equipo_id = db.Column(db.Integer, db.ForeignKey('equipo.id'), primary_key=True)
-#    categoria = db.Column(db.String(20), primary_key=True)
-
-#    partidos_jugados = db.Column(db.Integer, default=0)
-#    partidos_ganados = db.Column(db.Integer, default=0)
-#    partidos_empatados = db.Column(db.Integer, default=0)
-#    partidos_perdidos = db.Column(db.Integer, default=0)
-#    goles_a_favor = db.Column(db.Integer, default=0)
-#    goles_en_contra = db.Column(db.Integer, default=0)
-#    diferencia_goles = db.Column(db.Integer, default=0)
-#    puntos = db.Column(db.Integer, default=0)
-
-#    equipo = db.relationship('Equipo', backref='puntajes')
