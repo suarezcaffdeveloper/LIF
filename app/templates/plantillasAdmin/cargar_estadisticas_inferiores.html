@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cargar estadísticas - Inferiores</title>
+</head>
+<body>
+
+<h2>Cargar estadísticas – {{ partido.equipo_local.nombre }} vs {{ partido.equipo_visitante.nombre }}</h2>
+
+<form method="POST">
+
+    <h3>Resultado del partido</h3>
+    <label>Goles {{ partido.equipo_local.nombre }}:</label>
+    <input type="number" name="goles_local" required><br>
+
+    <label>Goles {{ partido.equipo_visitante.nombre }}:</label>
+    <input type="number" name="goles_visitante" required><br><br>
+
+    <hr><h3>Jugadores del equipo local</h3>
+    {% for jugador in jugadores_local %}
+        <div class="jugador-box">
+            <strong>{{ jugador.nombre }}</strong>
+            <input type="hidden" name="jugador_id" value="{{ jugador.id }}">
+
+            <label>Goles:</label>
+            <input type="number" name="goles_{{ jugador.id }}" min="0" value="0">
+
+            <label>Amarilla:</label>
+            <input type="checkbox" name="amarilla_{{ jugador.id }}" value="1">
+
+            <label>Roja:</label>
+            <input type="checkbox" name="roja_{{ jugador.id }}" value="1">
+        </div>
+    {% endfor %}
+
+    <hr><h3>Jugadores del equipo visitante</h3>
+    {% for jugador in jugadores_visitante %}
+        <div class="jugador-box">
+            <strong>{{ jugador.nombre }}</strong>
+            <input type="hidden" name="jugador_id" value="{{ jugador.id }}">
+
+            <label>Goles:</label>
+            <input type="number" name="goles_{{ jugador.id }}" min="0" value="0">
+
+            <label>Amarilla:</label>
+            <input type="checkbox" name="amarilla_{{ jugador.id }}" value="1">
+
+            <label>Roja:</label>
+            <input type="checkbox" name="roja_{{ jugador.id }}" value="1">
+        </div>
+    {% endfor %}
+
+    <br>
+    <button type="submit">Guardar estadísticas</button>
+
+</form>
+
+{% include "partials/form_estadisticas.html" %}
+
+</body>
+</html>
+

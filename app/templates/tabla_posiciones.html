@@ -4,35 +4,75 @@
     <meta charset="UTF-8">
     <title>Tabla de posiciones</title>
     <style>
+        /* ======== ESTILO GLOBAL ======== */
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
+            padding: 0;
             color: #333;
-        }
-
-        /* Navbar */
-        .navbar {
-            background: #333;
-            padding: 1rem;
-            text-align: center;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: bold;
-        }
-
-        .navbar a:hover {
-            text-decoration: underline;
         }
 
         h1 {
             text-align: center;
-            margin-top: 30px;
-            color: #222;
+            margin: 40px 0 20px;
+            color: #2c3e50;
+        }
+
+        /* ======== NAVBAR MODERNO ======== */
+        .navbar {
+            background: linear-gradient(90deg, #4b89dc, #3a6ea5);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.8rem 2rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+
+        .navbar-logo span {
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar a, .dropbtn {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .navbar a:hover, .dropdown:hover .dropbtn {
+            background: rgba(255, 255, 255, 0.15);
+            color: #f0f4fa;
         }
 
         /* Contenedor de la tabla */
@@ -47,14 +87,32 @@
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            text-align: center;
+            border-collapse: separate;
+            border-spacing: 0 8px;  /* Espacio vertical entre filas */
         }
 
+
         thead {
-            background-color: #333;
-            color: white;
+            background: #111;                          /* Negro más profundo */
         }
+
+        thead th {
+            color: #fff;
+            font-weight: 600;
+            font-family: "Inter", "Segoe UI", Arial, sans-serif;  /* Tipografía más moderna */
+            letter-spacing: 0.3px;                     /* Pequeño espaciado elegante */
+            font-size: 0.95rem;                        /* Un poquito más compacto */
+            padding: 14px 10px;
+            text-transform: uppercase;                 /* Le da estilo moderno */
+            border-bottom: 2px solid #222;             /* Línea sutil para separar */
+        }
+
+        /* Efecto visual moderno: leve brillo al mover el mouse */
+        thead th:hover {
+            background: #1a1a1a;
+            transition: background 0.2s ease-in-out;
+        }
+
 
         th, td {
             padding: 12px 10px;
@@ -64,13 +122,30 @@
             background: #f8f8f8;
         }
 
+        tbody tr {
+            border-radius: 10px;
+            overflow: hidden;  /* Fuerza que el redondeo recorte el fondo */
+        }
+
+        .top-8 { 
+            background: #d9f7d9 !important;  /* Verde muy claro */
+        }
+
+        .rest { 
+            background: #f9d6d6 !important;  /* Rojo muy claro */
+        }
+
         tbody tr:hover {
             background: #e8e8e8;
         }
 
+        td {
+            background: transparent;
+        }
+
+
         /* Ajuste del primer td con escudo */
         td:first-child {
-            text-align: left;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -82,111 +157,149 @@
             border-radius: 4px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.2);
         }
+
         footer {
             text-align: center;
             padding: 20px;
             color: #777;
             font-size: 0.9em;
         }
-        /* Dropdown dentro del navbar */
-.dropdown {
-    display: inline-block;
-    position: relative;
-}
 
-.dropbtn {
-    background: none;
-    border: none;
-    color: white;
-    font-weight: bold;
-    margin: 0 15px;
-    font-size: 1rem;
-    cursor: pointer;
-}
+        /* ======== COLORES CLASIFICADOS Y ELIMINADOS ======== */
+        .fila-clasificado {
+            background-color: #d8f5d0 !important; /* verde muy clarito */
+        }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background: #333;
-    min-width: 160px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    border-radius: 6px;
-    z-index: 1;
-    text-align: left;
-}
+        .fila-eliminado {
+            background-color: #f9d6d6 !important; /* rojo clarito */
+        }
 
-.dropdown-content a {
-    color: white;
-    padding: 12px 16px;
-    display: block;
-    text-decoration: none;
-    font-weight: normal;
-}
+        /* ======== DROPDOWN ======== */
+        .dropdown {
+            position: relative;
+        }
 
-.dropdown-content a:hover {
-    background: #444;
-}
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background: #ffffff;
+            min-width: 180px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-radius: 10px;
+            top: 110%;
+            left: 0;
+            overflow: hidden;
+            animation: fadeIn 0.2s ease-in-out;
+        }
 
-/* Mostrar el menú cuando paso el mouse */
-.dropdown:hover .dropdown-content {
-    display: block;
-}
+        .dropdown-content a {
+            color: #2c3e50;
+            padding: 12px 16px;
+            display: block;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+        }
 
-.dropdown:hover .dropbtn {
-    text-decoration: underline;
-}
+        .dropdown-content a:hover {
+            background: #f2f6fb;
+            color: #3a6ea5;
+        }
 
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0; transform: translateY(-8px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        /* ======== RESPONSIVE ======== */
+        @media (max-width: 900px) {
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .navbar-links {
+                flex-direction: column;
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            .dropdown-content {
+                position: static;
+                box-shadow: none;
+                border-radius: 0;
+                background: #4b89dc;
+            }
+
+            .dropdown-content a {
+                color: #fff;
+            }
+
+            .dropdown-content a:hover {
+                background: rgba(255,255,255,0.15);
+                color: #fff;
+            }
+        }
     </style>
 </head>
 <body>
+
+    <!-- ======== NAVBAR ======== -->
     <div class="navbar">
-    <a href="/">Inicio</a>
+        <div class="navbar-logo">
+            <img src="{{ url_for('static', filename='escudos/logolif.png') }}" alt="Logo LIF">
+            <span>LIF</span>
+        </div>
 
-    <!-- Fixture Mayores -->
-    <div class="dropdown">
-        <button class="dropbtn">Fixture Mayores</button>
-        <div class="dropdown-content">
-            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
-            <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
-            <a href="{{ url_for('views.fixture', bloque='mayores') }}">Todas</a>
+        <div class="navbar-links">
+            <a href="/">Inicio</a>
+
+            <div class="dropdown">
+                <button class="dropbtn">Fixture Mayores</button>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
+                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
+                    <a href="{{ url_for('views.fixture', bloque='mayores') }}">Todas</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Fixture Inferiores</button>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
+                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
+                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
+                    <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Goleadores</button>
+                <div class="dropdown-content">
+                    <a href="/goleadores/primera">Primera</a>
+                    <a href="/goleadores/reserva">Reserva</a>
+                    <a href="/goleadores/quinta">Quinta</a>
+                    <a href="/goleadores/sexta">Sexta</a>
+                    <a href="/goleadores/septima">Séptima</a>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <button class="dropbtn">Tabla de Posiciones</button>
+                <div class="dropdown-content">
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
+                </div>
+            </div>
         </div>
     </div>
-
-    <!-- Fixture Inferiores -->
-    <div class="dropdown">
-        <button class="dropbtn">Fixture Inferiores</button>
-        <div class="dropdown-content">
-            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
-            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
-            <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
-            <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
-        </div>
-    </div>
-
-    <!-- Goleadores y tabla -->
-    <div class="dropdown">
-        <button class="dropbtn">Goleadores</button>
-        <div class="dropdown-content">
-            <a href="/goleadores/primera">Primera</a>
-            <a href="/goleadores/reserva">Reserva</a>
-            <a href="/goleadores/quinta">Quinta</a>
-            <a href="/goleadores/sexta">Sexta</a>
-            <a href="/goleadores/septima">Séptima</a>
-        </div>
-    </div>
-
-        <!-- Tabla de posiciones -->
-    <div class="dropdown">
-        <button class="dropbtn">Tabla de Posiciones</button>
-        <div class="dropdown-content">
-            <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
-            <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
-            <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
-            <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
-            <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
-        </div>
-    </div>
-</div>
 
     <h1>Tabla de Posiciones - Primera División</h1>
 
@@ -207,7 +320,7 @@
             </thead>
             <tbody>
                 {% for fila in tabla %}
-                <tr>
+                <tr class="{% if loop.index <= 8 %}fila-clasificado{% else %}fila-eliminado{% endif %}">
                     <td>
                         <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo + '.jpg') }}" alt="{{ fila.nombre_equipo }}">
                         {{ fila.nombre_equipo }}

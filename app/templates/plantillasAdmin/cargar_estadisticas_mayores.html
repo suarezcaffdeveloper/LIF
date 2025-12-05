@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Cargar Estadísticas Mayores</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #1f1f1f;
+      color: #f5f6fa;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 40px;
+      margin-bottom: 40px;
+      font-weight: 700;
+      color: #5dade2;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .card {
+      background-color: #2c2c2c;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+      color: #f5f6fa;
+      padding: 25px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #5dade2;
+    }
+
+    select, input {
+      background-color: #1f1f1f !important;
+      color: #fff !important;
+      border: 1px solid #5dade2 !important;
+    }
+
+    .btn-primary {
+      background-color: #5dade2;
+      border-color: #5dade2;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: #3498db;
+    }
+
+    .subtitulo {
+      color: #5dade2;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .side-box {
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      margin-bottom: 12px;
+    }
+
+    .list-row {
+      margin-bottom: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .remove-row {
+      background: transparent;
+      border: 1px solid #aa3333;
+      color: #ffaaaa;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Cargar Estadísticas — Mayores</h1>
+
+  <!-- 🔔 FLASH MESSAGES (Bootstrap 5) -->
+<div class="container mt-3" id="flash-container">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 
+          'success' if category=='success' else 
+          'danger' if category=='error' else 
+          'warning' if category=='warning' else 
+          'info' }}" 
+          role="alert"
+          style="border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+
+          <div class="d-flex justify-content-between align-items-center">
+            <span>{{ message }}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+</div>
+
+  <div class="card">
+
+    <!-- JORNADAS -->
+    <div class="mb-3">
+      <label class="form-label">Seleccionar Jornada</label>
+      <select id="select-jornada" class="form-select">
+        <option value="">Seleccionar...</option>
+        {% for j in jornadas %}
+          <option value="{{ j }}">{{ j }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- PARTIDOS -->
+    <div id="partidos-container" style="display:none;">
+      <div class="mb-3">
+        <label class="form-label">Cruces de la jornada</label>
+        <select id="select-partido" class="form-select">
+          <option value="">Seleccione un cruce...</option>
+        </select>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- FORMULARIOS -->
+    <div id="formularios-estadisticas" style="display:none;">
+
+      <!-- RESERVA -->
+      <div id="bloque-reserva" style="display:none;">
+        <h3 class="subtitulo">Reserva</h3>
+
+        <div class="row">
+          <!-- LOCAL -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="reserva_local_nombre">Local</h5>
+
+              <label class="form-label">Goles Local</label>
+              <input type="number" id="reserva_goles_local" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Local</label>
+              <div id="reserva_goleadores_local_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('reserva','local')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Local</label>
+              <div id="reserva_tarjetas_local_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('reserva','local')">+ Agregar</button>
+            </div>
+          </div>
+
+          <!-- VISITANTE -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="reserva_visitante_nombre">Visitante</h5>
+
+              <label class="form-label">Goles Visitante</label>
+              <input type="number" id="reserva_goles_visitante" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Visitante</label>
+              <div id="reserva_goleadores_visitante_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('reserva','visitante')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Visitante</label>
+              <div id="reserva_tarjetas_visitante_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('reserva','visitante')">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
+      </div>
+
+      <!-- PRIMERA -->
+      <div id="bloque-primera" style="display:none;">
+        <h3 class="subtitulo">Primera</h3>
+
+        <div class="row">
+          <!-- LOCAL -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="primera_local_nombre">Local</h5>
+
+              <label class="form-label">Goles Local</label>
+              <input type="number" id="primera_goles_local" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Local</label>
+              <div id="primera_goleadores_local_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('primera','local')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Local</label>
+              <div id="primera_tarjetas_local_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('primera','local')">+ Agregar</button>
+            </div>
+          </div>
+
+          <!-- VISITANTE -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="primera_visitante_nombre">Visitante</h5>
+
+              <label class="form-label">Goles Visitante</label>
+              <input type="number" id="primera_goles_visitante" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Visitante</label>
+              <div id="primera_goleadores_visitante_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('primera','visitante')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Visitante</label>
+              <div id="primera_tarjetas_visitante_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('primera','visitante')">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn_guardar_primera" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('primera')">Guardar Primera</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+<!-- ✔️ Agregar SweetAlert2 ANTES de tu código -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+
+/* ---------------------------------------------------
+   🔧 Estado Global
+--------------------------------------------------- */
+let current = {
+  jornada: null,
+  local_club_id: null,
+  visitante_club_id: null,
+  equipos_por_categoria: {},
+  jugadores_primera_local: [],
+  jugadores_primera_visitante: [],
+  jugadores_reserva_local: [],
+  jugadores_reserva_visitante: [],
+  id_reserva: null,
+  id_primera: null,
+  reserva_guardada: false,
+  primera_guardada: false
+};
+
+
+/* ---------------------------------------------------
+   🔧 Helpers
+--------------------------------------------------- */
+function disableButtonAfterSubmit(btnId) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = true;
+  btn.classList.remove("btn-primary");
+  btn.classList.add("btn-success");
+  btn.textContent = "Guardado ✔";
+}
+
+function limpiarFormularioCategoria(cat) {
+  document.getElementById(`${cat}_goles_local`).value = 0;
+  document.getElementById(`${cat}_goles_visitante`).value = 0;
+
+  [
+    `${cat}_goleadores_local_list`,
+    `${cat}_goleadores_visitante_list`,
+    `${cat}_tarjetas_local_list`,
+    `${cat}_tarjetas_visitante_list`
+  ].forEach(id => document.getElementById(id).innerHTML = "");
+}
+
+function buildPlayerOptions(players) {
+  return players.map(p => `<option value="${p.id}">${p.nombre}</option>`).join("");
+}
+
+
+/* ---------------------------------------------------
+   🔎 Validación de goles vs goleadores
+--------------------------------------------------- */
+function validarGolesVsGoleadores(cat) {
+  const golesLocal = parseInt(document.getElementById(`${cat}_goles_local`).value);
+  const golesVisitante = parseInt(document.getElementById(`${cat}_goles_visitante`).value);
+
+  const sumLocal = [...document.querySelectorAll(`#${cat}_goleadores_local_list [data-goles]`)]
+    .reduce((a,b) => a + parseInt(b.value), 0);
+
+  const sumVisitante = [...document.querySelectorAll(`#${cat}_goleadores_visitante_list [data-goles]`)]
+    .reduce((a,b) => a + parseInt(b.value), 0);
+
+  if (sumLocal !== golesLocal) {
+    alert(`⚠ El total de goles locales (${sumLocal}) no coincide con el resultado (${golesLocal})`);
+    return false;
+  }
+
+  if (sumVisitante !== golesVisitante) {
+    alert(`⚠ El total de goles visitantes (${sumVisitante}) no coincide con el resultado (${golesVisitante})`);
+    return false;
+  }
+
+  return true;
+}
+
+
+/* ---------------------------------------------------
+   📌 Selección de jornada
+--------------------------------------------------- */
+document.getElementById("select-jornada").addEventListener("change", function () {
+  current.jornada = this.value;
+
+  if (!this.value) return;
+
+  fetch(`/api/cruces_por_jornada/${this.value}`)
+    .then(r => r.json())
+    .then(data => {
+      const select = document.getElementById("select-partido");
+      select.innerHTML = `<option value="">Seleccionar...</option>`;
+      data.forEach(p => {
+        if (!p.jugado)
+          select.innerHTML += `<option value="${p.id}">${p.local} vs ${p.visitante}</option>`;
+      });
+
+      document.getElementById("partidos-container").style.display = "block";
+    });
+});
+
+
+/* ---------------------------------------------------
+   📌 Selección de cruce
+--------------------------------------------------- */
+document.getElementById("select-partido").addEventListener("change", async function () {
+
+  const partidoId = this.value;
+  if (!partidoId) return;
+
+  try {
+    const info = await fetch(`/api/info_cruce/${partidoId}`).then(r => r.json());
+
+    current.local_club_id = info.local_id;
+    current.visitante_club_id = info.visitante_id;
+    current.jornada = info.jornada;
+
+    document.getElementById("reserva_local_nombre").innerText = info.local_nombre;
+    document.getElementById("reserva_visitante_nombre").innerText = info.visitante_nombre;
+    document.getElementById("primera_local_nombre").innerText = info.local_nombre;
+    document.getElementById("primera_visitante_nombre").innerText = info.visitante_nombre;
+
+    const cruceData = await fetch("/get_partidos_cruce", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        jornada: current.jornada,
+        local: current.local_club_id,
+        visitante: current.visitante_club_id
+      })
+    }).then(r => r.json());
+
+
+    current.id_primera   = cruceData.primera?.id ?? null;
+    current.id_reserva   = cruceData.reserva?.id ?? null;
+
+
+    current.equipos_por_categoria = {
+      primera: cruceData.primera ? {
+        local: cruceData.primera.id_equipo_local,
+        visitante: cruceData.primera.id_equipo_visitante
+      } : null,
+      reserva: cruceData.reserva ? {
+        local: cruceData.reserva.id_equipo_local,
+        visitante: cruceData.reserva.id_equipo_visitante
+      } : null
+    };
+
+    // Jugadores
+    if (current.equipos_por_categoria.primera) {
+      const ids = current.equipos_por_categoria.primera;
+      current.jugadores_primera_local = await fetch(`/api/jugadores_por_equipo/${ids.local}`).then(r=>r.json());
+      current.jugadores_primera_visitante = await fetch(`/api/jugadores_por_equipo/${ids.visitante}`).then(r=>r.json());
+    }
+
+    if (current.equipos_por_categoria.reserva) {
+      const ids = current.equipos_por_categoria.reserva;
+      current.jugadores_reserva_local = await fetch(`/api/jugadores_por_equipo/${ids.local}`).then(r=>r.json());
+      current.jugadores_reserva_visitante = await fetch(`/api/jugadores_por_equipo/${ids.visitante}`).then(r=>r.json());
+    }
+
+    limpiarFormularioCategoria("reserva");
+    limpiarFormularioCategoria("primera");
+
+    // Mostrar formularios
+    document.getElementById("formularios-estadisticas").style.display = "block";
+    document.getElementById("bloque-reserva").style.display = current.id_reserva ? "block" : "none";
+    document.getElementById("bloque-primera").style.display = current.id_primera ? "block" : "none";
+
+    // Reset visual botones
+    ["btn_guardar_reserva","btn_guardar_primera"].forEach(id => {
+      const b = document.getElementById(id);
+      b.disabled = false;
+      b.classList.add("btn-primary");
+      b.classList.remove("btn-success");
+      b.textContent = b.id.includes("reserva") ? "Guardar Reserva" : "Guardar Primera";
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Error cargando cruce");
+  }
+});
+
+
+/* ---------------------------------------------------
+   ➕ Agregar elementos dinámicos
+--------------------------------------------------- */
+function addGoleador(cat, side) {
+  const cont = document.getElementById(`${cat}_goleadores_${side}_list`);
+
+  const players = cat === "primera"
+    ? (side === "local" ? current.jugadores_primera_local : current.jugadores_primera_visitante)
+    : (side === "local" ? current.jugadores_reserva_local : current.jugadores_reserva_visitante);
+
+  const row = document.createElement("div");
+  row.className = "list-row";
+  row.innerHTML = `
+    <select class="form-select" data-player>
+      <option value="">Jugador</option>
+      ${buildPlayerOptions(players)}
+    </select>
+    <input type="number" class="form-control" data-goles min="1" value="1" style="max-width:90px;">
+    <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()">✕</button>
+  `;
+  cont.appendChild(row);
+}
+
+function addTarjeta(cat, side) {
+  const cont = document.getElementById(`${cat}_tarjetas_${side}_list`);
+
+  const players = cat === "primera"
+    ? (side === "local" ? current.jugadores_primera_local : current.jugadores_primera_visitante)
+    : (side === "local" ? current.jugadores_reserva_local : current.jugadores_reserva_visitante);
+
+  const row = document.createElement("div");
+  row.className = `${cat}_${side}_tarjeta_item list-row`;
+
+  row.innerHTML = `
+    <select class="form-select tarjeta-player">
+      <option value="">Jugador</option>
+      ${buildPlayerOptions(players)}
+    </select>
+    <select class="form-select tarjeta-tipo">
+      <option value="amarilla">Amarilla</option>
+      <option value="roja">Roja</option>
+    </select>
+    <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()">✕</button>
+  `;
+  cont.appendChild(row);
+}
+
+
+/* ---------------------------------------------------
+   📤 Recolectar datos
+--------------------------------------------------- */
+function collectGoleadores(cat, side) {
+  return [...document.querySelectorAll(`#${cat}_goleadores_${side}_list .list-row`)]
+    .map(r => ({
+      jugador_id: parseInt(r.querySelector("[data-player]").value),
+      goles: parseInt(r.querySelector("[data-goles]").value)
+    }))
+    .filter(x => x.jugador_id);
+}
+
+function collectTarjetas(cat, side) {
+  const amarillas = [], rojas = [];
+  document.querySelectorAll(`.${cat}_${side}_tarjeta_item`).forEach(el => {
+    const jug = parseInt(el.querySelector(".tarjeta-player").value);
+    const tipo = el.querySelector(".tarjeta-tipo").value;
+    if (!jug) return;
+    (tipo === "amarilla" ? amarillas : rojas).push(jug);
+  });
+  return { amarillas, rojas };
+}
+
+
+/* ---------------------------------------------------
+   🟢 Guardar estadísticas
+--------------------------------------------------- */
+async function guardarCategoria(cat) {
+  const pid = cat === "reserva" ? current.id_reserva : current.id_primera;
+  if (!pid) {
+    return Swal.fire("Error", "Este cruce no tiene partido en esta categoría.", "error");
+  }
+
+  if (!validarGolesVsGoleadores(cat)) return;
+
+  const goles_local = parseInt(document.getElementById(`${cat}_goles_local`).value);
+  const goles_visitante = parseInt(document.getElementById(`${cat}_goles_visitante`).value);
+
+  const tarjetasLocal = collectTarjetas(cat, "local");
+  const tarjetasVisita = collectTarjetas(cat, "visitante");
+
+  const payload = {
+    partido_id: pid,
+    categoria: cat,
+    goles_local,
+    goles_visitante,
+    goleadores_local: collectGoleadores(cat, "local"),
+    goleadores_visitante: collectGoleadores(cat, "visitante"),
+    amarillas_local: tarjetasLocal.amarillas,
+    rojas_local: tarjetasLocal.rojas,
+    amarillas_visitante: tarjetasVisita.amarillas,
+    rojas_visitante: tarjetasVisita.rojas
+  };
+
+  try {
+    const r = await fetch(`/api/guardar_${cat}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await r.json().catch(() => null);
+
+    if (!r.ok || !data?.success) {
+      return Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: data?.message || "Error desconocido"
+      });
+    }
+
+    limpiarFormularioCategoria(cat);
+
+    const btnId = cat === "reserva" ? "btn_guardar_reserva" : "btn_guardar_primera";
+    disableButtonAfterSubmit(btnId);
+
+    current[cat === "reserva" ? "reserva_guardada" : "primera_guardada"] = true;
+
+    if (current.reserva_guardada && current.primera_guardada) {
+      document.querySelector(`#select-partido option[value="${pid}"]`)?.remove();
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Datos guardados",
+      text: data.message,
+      timer: 2000,
+      showConfirmButton: false
+    });
+
+  } catch (err) {
+    console.error("❌ Error real detectado:", err);
+    Swal.fire("Error", "No se pudo guardar. Problema de conexión.", "error");
+  }
+}
+
+
+setTimeout(() => {
+    document.querySelectorAll("#flash-container .alert").forEach(a => {
+      a.style.transition = "opacity 0.8s";
+      a.style.opacity = "0";
+      setTimeout(() => a.remove(), 800);
+    });
+  }, 3500); // Tiempo visible
+</script>
+
+</body>
+</html>
