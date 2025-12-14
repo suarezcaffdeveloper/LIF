@@ -5,193 +5,459 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cargar Fixture Inferiores</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
-            background-color: #1e1e1e;
-            color: #f1f1f1;
+            background-color: #1e1e2f;
+            color: #fff;
             min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            padding: 40px;
+        }
+
+        .wrapper {
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 2rem 0;
+            align-items: flex-start;
+            gap: 40px;
+            flex-wrap: wrap;
         }
 
-        .form-container {
-            background-color: #2b2b2b;
-            padding: 2.5rem;
+        /* FORMULARIO */
+        .container-form {
+            background-color: #2a2a3d;
+            padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
             width: 100%;
-            max-width: 700px;
+            max-width: 520px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
         }
 
-        h2 {
+        .container-form h2 {
             text-align: center;
-            margin-bottom: 2rem;
-            color: #00bfff;
-            font-weight: bold;
-            letter-spacing: 1px;
+            margin-bottom: 25px;
+            color: #4fc3f7;
+            font-weight: 700;
+            font-size: 1.6rem;
         }
 
-        label {
-            font-weight: 500;
-            margin-top: 0.5rem;
+        .form-control,
+        .form-select {
+            background-color: #1e1e2f;
+            border: 1px solid #4fc3f7;
+            color: #fff;
         }
 
-        .form-control, .form-select {
-            background-color: #1e1e1e;
-            border: 1px solid #00bfff;
-            color: #f1f1f1;
-        }
-
-        .form-control:focus, .form-select:focus {
-            border-color: #00bfff;
-            box-shadow: 0 0 8px #00bfff;
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 8px rgba(79, 195, 247, 0.6);
         }
 
         .btn-primary {
-            background-color: #00bfff;
+            background-color: #4fc3f7 !important;
             border: none;
-            font-weight: 600;
             transition: 0.3s;
-            width: 100%;
+            font-weight: 600;
+            margin-top: 20px;
         }
 
         .btn-primary:hover {
-            background-color: #0099cc;
+            background-color: #39b0e0 !important;
+        }
+
+        /* PANEL PARTIDOS */
+        .card-custom {
+            background-color: #2a2a3d;
+            padding: 25px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px; /* un poco más chico que el formulario */
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .card-custom h5 {
+            text-align: center;
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        /* LISTA DE PARTIDOS */
+        #partidos-list {
+            min-height: 400px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* CARD DE CRUCE */
+        .cruce-card {
+            background-color: #ffffff;
+            border: 2px solid #4fc3f7;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 12px;
+            color: #000;
+
+            opacity: 0;
+            transform: translateX(-12px);
+            animation: slideIn 0.25s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-12px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .cruce-flex {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .cruce-team {
+            flex: 1;
+            text-align: center;
+        }
+
+        .cruce-vs {
+            flex: 0;
+            font-weight: 800;
+            color: #39b0e0;
+        }
+
+        .muted {
+            color: #aaa;
+            text-align: center;
         }
 
         .back-link {
             display: block;
+            margin-top: 30px;
             text-align: center;
-            margin-top: 1rem;
             color: #ccc;
         }
-
         .back-link:hover {
-            color: #00bfff;
+            color: #4fc3f7;
         }
+
+        /* Contenedor flotante para flashes */
+        #flash-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        /* Estilo para flash messages */
+        .flash-message {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            margin-bottom: 0.5rem;
+            transform: translateY(-20px);
+            pointer-events: auto;
+        }
+
+        /* Colores */
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
     </style>
 </head>
+
 <body>
 
-    <div class="form-container">
-        <h2>CARGAR FIXTURE - INFERIORES</h2>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% set last = messages[-1] %}
-                <div class="alert alert-{{ 'danger' if last[0]=='error' else last[0] }}">
-                    {{ last[1] }}
+<!-- Contenedor para flashes -->
+<div id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ 'danger' if category=='error' else category }}">
+                    {{ message }}
                 </div>
-            {% endif %}
-        {% endwith %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
 
-        <form action="{{ url_for('views.cargar_fixture_inferiores') }}" method="POST">
+<div class="wrapper">
 
-            <!-- Jornada -->
-            <div class="mb-3">
-                <label class="form-label">Jornada / Fecha</label>
-                <select class="form-select" id="jornada" name="jornada" required>
-                    <option value="">Seleccionar jornada</option>
-                    {% for i in range(1, total_jornadas + 1) %}
-                        <option value="{{ i }}">Fecha {{ i }}</option>
-                    {% endfor %}
-                </select>
+    <!-- FORMULARIO -->
+    <div class="container-form">
+        <h2>Cargar Fixture Inferiores</h2>
+
+        <form method="POST" action="{{ url_for('views.cargar_fixture_inferiores') }}">
+
+            <label class="mt-2">Jornada:</label>
+            <select name="jornada" id="jornada" class="form-select" required>
+                <option value="">Seleccionar jornada...</option>
+                {% for j in range(1, total_jornadas + 1) %}
+                    <option value="{{ j }}">{{ j }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="mt-3">Fecha (opcional):</label>
+            <input type="date" id="fecha" name="fecha" class="form-control">
+
+            <label class="mt-3">Hora (opcional):</label>
+            <input type="time" id="hora" name="hora" class="form-control">
+
+            <label class="mt-3">Club Local:</label>
+            <select name="local" id="local" class="form-select" required>
+                <option value="">Seleccionar club...</option>
+                {% for club in clubes %}
+                    <option value="{{ club.id }}">{{ club.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="mt-3">Club Visitante:</label>
+            <select name="visitante" id="visitante" class="form-select" required>
+                <option value="">Seleccionar club...</option>
+                {% for club in clubes %}
+                    <option value="{{ club.id }}">{{ club.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <div class="d-flex justify-content-center mt-4">
+                <button type="button" id="btn-guardar" class="btn btn-primary px-4">
+                    Crear partido
+                </button>
             </div>
 
-            <!-- Clubes -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Club local</label>
-                    <select class="form-select" id="local" name="local" required>
-                        <option value="">Seleccionar club</option>
-                        {% for club in clubes %}
-                            <option value="{{ club.id }}">{{ club.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
 
-                <div class="col-md-6">
-                    <label class="form-label">Club visitante</label>
-                    <select class="form-select" id="visitante" name="visitante" required>
-                        <option value="">Seleccionar club</option>
-                        {% for club in clubes %}
-                            <option value="{{ club.id }}">{{ club.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <!-- Fecha y hora opcional -->
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label class="form-label">Fecha del partido (opcional)</label>
-                    <input type="date" class="form-control" id="fecha" name="fecha">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Hora (opcional)</label>
-                    <input type="time" class="form-control" id="hora" name="hora">
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary mt-3">Agregar Partido</button>
         </form>
 
         <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
     </div>
 
-<!-- JS -->
+    <!-- PANEL PARTIDOS -->
+    <div class="card-custom" style="align-self: center;">
+        <h5>Partidos cargados – Jornada <span id="jornada-seleccionada">-</span></h5>
+
+        <div id="partidos-list">
+            <p class="muted">Seleccione una jornada.</p>
+        </div>
+    </div>
+
+</div>
+
 <script>
-    // Guardar lista original de clubes
-    const clubesOriginales = [
-        {% for club in clubes %}
-            { id: "{{ club.id }}", nombre: "{{ club.nombre }}" }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
+const clubesOriginales = [
+    {% for club in clubes %}
+        { id: {{ club.id }}, nombre: "{{ club.nombre }}" }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
 
-    function actualizarOpcionesInf() {
-        const localSelect = document.getElementById('local');
-        const visitanteSelect = document.getElementById('visitante');
+const jornadaSelect   = document.getElementById("jornada");
+const localSelect     = document.getElementById("local");
+const visitanteSelect = document.getElementById("visitante");
+const listDiv         = document.getElementById("partidos-list");
+const jornadaLabel    = document.getElementById("jornada-seleccionada");
 
-        const localSeleccionado = localSelect.value;
-        const visitanteSeleccionado = visitanteSelect.value;
+let ocupados = [];
 
-        // Resetear selects
-        localSelect.innerHTML = '<option value="">Seleccionar club</option>';
-        visitanteSelect.innerHTML = '<option value="">Seleccionar club</option>';
+function reconstruirSelects() {
+    const localSel = localSelect.value;
+    const visSel   = visitanteSelect.value;
 
-        clubesOriginales.forEach(club => {
+    localSelect.innerHTML     = '<option value="">Seleccionar club</option>';
+    visitanteSelect.innerHTML = '<option value="">Seleccionar club</option>';
 
-            // LOCAL: no mostrar visitante elegido
-            if (club.id !== visitanteSeleccionado) {
-                let optLocal = document.createElement("option");
-                optLocal.value = club.id;
-                optLocal.textContent = club.nombre;
-                if (club.id === localSeleccionado) optLocal.selected = true;
-                localSelect.appendChild(optLocal);
-            }
+    clubesOriginales.forEach(club => {
+        if (ocupados.includes(club.id)) return;
 
-            // VISITANTE: no mostrar local elegido
-            if (club.id !== localSeleccionado) {
-                let optVisit = document.createElement("option");
-                optVisit.value = club.id;
-                optVisit.textContent = club.nombre;
-                if (club.id === visitanteSeleccionado) optVisit.selected = true;
-                visitanteSelect.appendChild(optVisit);
-            }
-        });
+        if (club.id != visSel) {
+            const op = document.createElement("option");
+            op.value = club.id;
+            op.textContent = club.nombre;
+            if (club.id == localSel) op.selected = true;
+            localSelect.appendChild(op);
+        }
+
+        if (club.id != localSel) {
+            const op2 = document.createElement("option");
+            op2.value = club.id;
+            op2.textContent = club.nombre;
+            if (club.id == visSel) op2.selected = true;
+            visitanteSelect.appendChild(op2);
+        }
+    });
+}
+
+localSelect.addEventListener("change", reconstruirSelects);
+visitanteSelect.addEventListener("change", reconstruirSelects);
+
+async function cargarPartidos(jornada) {
+    if (!jornada) {
+        listDiv.innerHTML = '<p class="muted">Seleccione una jornada.</p>';
+        return;
     }
 
-    // Eventos
-    document.getElementById("local").addEventListener("change", actualizarOpcionesInf);
-    document.getElementById("visitante").addEventListener("change", actualizarOpcionesInf);
+    jornadaLabel.textContent = jornada;
 
-    // Inicial
-    actualizarOpcionesInf();
+    try {
+        const res = await fetch(
+            `{{ url_for('views.fixture_ocupados_inferiores', jornada=0) }}`.replace("/0", `/${jornada}`)
+        );
+
+        const data = await res.json();
+        if (!data.ok) {
+            listDiv.innerHTML = '<p class="text-danger">Error cargando partidos.</p>';
+            return;
+        }
+
+        ocupados = data.ocupados.map(n => Number(n));
+        reconstruirSelects();
+
+        const partidos = data.partidos || [];
+        listDiv.innerHTML = "";
+
+        if (partidos.length === 0) {
+            listDiv.innerHTML = '<p class="muted">No hay partidos cargados para esta jornada.</p>';
+            return;
+        }
+
+        partidos.forEach((p, idx) => {
+            const localName     = p.local || p.local_club_nombre || "Local";
+            const visitanteName = p.visitante || p.visitante_club_nombre || "Visitante";
+
+            const card = document.createElement("div");
+            card.classList.add("cruce-card");
+            card.style.opacity = 0;
+            card.style.transform = "translateY(20px)";
+            card.innerHTML = `
+                <div class="cruce-flex">
+                    <div class="cruce-team">${localName}</div>
+                    <div class="cruce-vs">VS</div>
+                    <div class="cruce-team">${visitanteName}</div>
+                </div>
+            `;
+            listDiv.appendChild(card);
+
+            setTimeout(() => {
+                card.style.transition = "all 0.35s ease";
+                card.style.opacity = 1;
+                card.style.transform = "translateY(0)";
+            }, idx * 50);
+        });
+
+    } catch (err) {
+        console.error("❌ Error cargando partidos:", err);
+        listDiv.innerHTML = '<p class="text-danger">Error del servidor.</p>';
+    }
+}
+
+async function guardarPartidoInferiores() {
+    const jornada   = Number(jornadaSelect.value);
+    const fecha     = document.getElementById("fecha").value || null;
+    const hora      = document.getElementById("hora").value || null;
+    const local     = Number(localSelect.value);
+    const visitante = Number(visitanteSelect.value);
+
+    if (!jornada || !local || !visitante) {
+        alert("Complete todos los campos.");
+        return;
+    }
+
+    try {
+        const res = await fetch("/guardar_partido_inferiores", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                jornada,
+                fecha,
+                hora,
+                local_id: local,
+                visitante_id: visitante
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+            mostrarFlash(data.error || "No se pudo cargar el partido.", "danger");
+            return;
+        }
+
+        mostrarFlash("Partido cargado correctamente.", "success");
+
+        await cargarPartidos(jornada);
+
+        localSelect.value = "";
+        visitanteSelect.value = "";
+        reconstruirSelects();
+
+        const cards = listDiv.querySelectorAll(".cruce-card");
+        const lastCard = cards[cards.length - 1];
+        if (lastCard) {
+            lastCard.style.backgroundColor = "#e0f7ff";
+            setTimeout(() => lastCard.style.backgroundColor = "#ffffff", 500);
+        }
+
+    } catch (err) {
+        console.error("❌ Error guardando partido:", err);
+        alert("Error enviando datos al servidor.");
+    }
+}
+
+jornadaSelect.addEventListener("change", () => {
+    cargarPartidos(jornadaSelect.value);
+});
+
+document.getElementById("btn-guardar").addEventListener("click", (e) => {
+    e.preventDefault();
+    guardarPartidoInferiores();
+});
+
+function mostrarFlash(mensaje, tipo = "success") {
+    const container = document.getElementById("flash-container");
+
+    const flash = document.createElement("div");
+    flash.className = `flash-message flash-${tipo}`;
+    flash.textContent = mensaje;
+
+    container.appendChild(flash);
+
+    // Slide + fade in
+    setTimeout(() => {
+        flash.style.opacity = 1;
+        flash.style.transform = "translateY(0)";
+    }, 100);
+
+    // Desaparece a los 3 segundos
+    setTimeout(() => {
+        flash.style.opacity = 0;
+        flash.style.transform = "translateY(-20px)";
+        setTimeout(() => flash.remove(), 500);
+    }, 3000);
+}
 </script>
 
 </body>

@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
+
     body {
       background-color: #1f1f1f;
       color: #f5f6fa;
@@ -24,35 +25,102 @@
       letter-spacing: 2px;
     }
 
-    .card {
+    /* ===== GRID PRINCIPAL ===== */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 25px;
+      padding-bottom: 60px;
+    }
+
+    /* ===== ESTILO BASE DE TODOS LOS PANELS ===== */
+    .admin-card {
+      position: relative;
       background-color: #2c2c2c;
-      border: none;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-radius: 16px;
+      overflow: hidden;
       cursor: pointer;
-      color: #f5f6fa;
+      border: none;
+      transition: transform .3s ease, box-shadow .3s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 20px;
+      height: 180px; /* tamaño base */
     }
 
-    .card:hover {
+    /* ↑ usaré diferentes tamaños más abajo */
+
+    /* Overlay oscuro para legibilidad */
+    .admin-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1;
+      transition: background .3s ease;
+    }
+
+    /* Imagen de fondo */
+    .admin-card.bg-img {
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .admin-card:hover {
       transform: translateY(-6px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      background-color: #34495e;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
-    .card-title {
+    .admin-card:hover::before {
+      background: rgba(0,0,0,0.25);
+    }
+
+    .admin-card h5 {
+      margin: 0;
+      position: relative;
+      z-index: 2;
       color: #5dade2;
+      font-weight: 700;
+      text-shadow: 0 0 6px rgba(0,0,0,0.9);
+    }
+
+    /* ===== TAMAÑOS DIFERENCIADOS ===== */
+
+    /* PANEL GRANDE VERTICAL (Estadísticas mayores) */
+    .tall {
+      height: 270px;
+    }
+
+    /* PANEL ANCHO (Cargar jugadores) */
+    .wide {
+      grid-column: span 2;
+    }
+
+    /* PANEL CUADRADO CHICO */
+    .square {
+      height: 160px;
+    }
+
+    /* ===== BOTÓN LOGOUT ===== */
+    .logout-btn {
+      background-color: #2c2c2c;
+      color: #5dade2;
+      border: 2px solid #5dade2;
+      border-radius: 10px;
+      padding: 10px 18px;
+      text-decoration: none;
       font-weight: 600;
-      text-align: center;
-      margin-bottom: 0;
+      transition: .3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
-    .container {
-      max-width: 1200px;
-    }
-
-    .row {
-      margin-bottom: 30px;
+    .logout-btn:hover {
+      background-color: #5dade2;
+      color: #1f1f1f;
+      border-color: #5dade2;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.5);
     }
   </style>
 </head>
@@ -60,108 +128,97 @@
 <body>
 
   <div class="container">
+
     <h1>PANEL DE ADMINISTRACIÓN</h1>
 
-    <!-- CARD GRANDE - RESULTADOS 
-    <div class="row justify-content-center mb-4">
-      <div class="col-12">
-        <a href="/cargar_resultados" class="text-decoration-none">
-          <div class="card p-4 text-center">
-            <h4 class="card-title">CARGAR RESULTADOS, GOLES Y TARJETAS</h4>
-          </div>
-        </a>
-      </div>
-    </div>-->
-    <div class="col-md-3 mb-4">
-    <a href="/cargar_estadisticas_mayores" class="text-decoration-none">
-      <div class="card p-4">
-        <h5 class="card-title">CARGAR ESTADÍSTICAS MAYORES</h5>
-      </div>
-    </a>
-  </div>
+    <div style="position:absolute; top:20px; right:20px;">
+      <a href="{{ url_for('views.logout') }}" class="logout-btn">🔒 Cerrar Sesión</a>
+    </div>
 
-  <div class="col-md-3 mb-4">
-    <a href="/cargar_estadisticas_inferiores" class="text-decoration-none">
-      <div class="card p-4">
-        <h5 class="card-title">CARGAR ESTADÍSTICAS INFERIORES</h5>
-      </div>
-    </a>
-  </div>
+    <!-- GRID PRINCIPAL -->
+    <div class="panel-grid">
 
+      <!-- ===== ESTADÍSTICAS MAYORES (Vertical Grande + Fondo) ===== -->
+      <a href="/cargar_estadisticas_mayores" class="text-decoration-none">
+        <div class="admin-card bg-img tall"
+             style="background-image:url('/static/imagenesPaneles/estadisticasmayores.jpg');">
+          <h5>CARGAR ESTADÍSTICAS MAYORES</h5>
+        </div>
+      </a>
 
-    <!-- 5 CARDS INTERMEDIAS (AGREGAMOS CLUBES Y JUGADOR-EQUIPO) -->
-    <div class="row text-center justify-content-center">
+      <!-- ===== ESTADÍSTICAS INFERIORES (Square) ===== -->
+      <a href="/cargar_estadisticas_inferiores" class="text-decoration-none">
+        <div class="admin-card square">
+          <h5>CARGAR ESTADÍSTICAS INFERIORES</h5>
+        </div>
+      </a>
 
-      <div class="col-md-3 mb-4">
-        <a href="/cargar_clubes" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">CARGAR CLUBES</h5>
-          </div>
-        </a>
-      </div>
+      <!-- ===== CARGAR JUGADORES (Panel Ancho + Fondo) ===== -->
+      <a href="/cargar_jugadores" class="text-decoration-none">
+        <div class="admin-card bg-img wide"
+             style="background-image:url('/static/imagenesPaneles/cargajugadores.jpg');">
+          <h5>CARGAR JUGADORES</h5>
+        </div>
+      </a>
 
-      <div class="col-md-3 mb-4">
-        <a href="/cargar_equipos" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">CARGAR EQUIPOS</h5>
-          </div>
-        </a>
-      </div>
+      <!-- ===== CARGAR CLUBES ===== -->
+      <a href="/cargar_clubes" class="text-decoration-none">
+        <div class="admin-card square">
+          <h5>CARGAR CLUBES</h5>
+        </div>
+      </a>
 
-      <div class="col-md-3 mb-4">
-        <a href="/cargar_jugadores" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">CARGAR JUGADORES</h5>
-          </div>
-        </a>
-      </div>
+      <!-- ===== CARGAR EQUIPOS ===== -->
+      <a href="/cargar_equipos" class="text-decoration-none">
+        <div class="admin-card square">
+          <h5>CARGAR EQUIPOS</h5>
+        </div>
+      </a>
 
-      <div class="col-md-3 mb-4">
-        <a href="/asignar_jugador_categoria" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">ASOCIAR JUGADOR A EQUIPO</h5>
-          </div>
-        </a>
-      </div>
+      <!-- ===== ASIGNAR JUGADOR A EQUIPO ===== -->
+      <a href="/asignar_jugador_categoria" class="text-decoration-none">
+        <div class="admin-card square">
+          <h5>ASOCIAR JUGADOR A EQUIPO</h5>
+        </div>
+      </a>
+
+      <!-- ===== FIXTURE MAYORES (Fondo con imagen) ===== -->
+      <a href="/cargar_fixture_mayores" class="text-decoration-none">
+        <div class="admin-card bg-img tall"
+            style="background-image: url('{{ url_for('static', filename='imagenesPaneles/fixture_mayores.jpg') }}');">
+          <h5>CARGAR FIXTURE MAYORES</h5>
+        </div>
+      </a>
+
+      <!-- ===== FIXTURE INFERIORES (Normal) ===== -->
+      <a href="/cargar_fixture_inferiores" class="text-decoration-none">
+        <div class="admin-card square">
+          <h5>CARGAR FIXTURE INFERIORES</h5>
+        </div>
+      </a>
+
+      <!-- ===== CARGAR NOTICIA ===== -->
+      <a href="/cargar_noticia" class="text-decoration-none">
+        <div class="admin-card square">
+          <h5>CARGAR NOTICIA</h5>
+        </div>
+      </a>
+
+      <!-- ===== CARGAR VIDEO ===== -->
+      <a href="/cargar_video" class="text-decoration-none">
+        <div class="admin-card square">
+          <h5>CARGAR VIDEO</h5>
+        </div>
+      </a>
 
     </div>
 
-    <!-- 4 CARDS INFERIORES -->
-    <div class="row text-center justify-content-center">
-
-      <div class="col-md-3 mb-4">
-        <a href="/cargar_fixture_mayores" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">CARGAR FIXTURE MAYORES</h5>
-          </div>
-        </a>
+    <!-- ===== CREAR PERIODISTA ===== -->
+    <a href="/crear_periodista" class="text-decoration-none">
+      <div class="admin-card square">
+        <h5>REGISTRAR PERIODISTA</h5>
       </div>
-
-      <div class="col-md-3 mb-4">
-        <a href="/cargar_fixture_inferiores" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">CARGAR FIXTURE INFERIORES</h5>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-md-3 mb-4">
-        <a href="/cargar_video" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">CARGAR VIDEO</h5>
-          </div>
-        </a>
-      </div>
-
-      <div class="col-md-3 mb-4">
-        <a href="/cargar_noticia" class="text-decoration-none">
-          <div class="card p-4">
-            <h5 class="card-title">CARGAR NOTICIA</h5>
-          </div>
-        </a>
-      </div>
-
-    </div>
+    </a>
 
   </div>
 

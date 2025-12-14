@@ -1,332 +1,259 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Proyecto LIF</title>
-    <style>
-        /* ======== ESTILO GLOBAL ======== */
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
+{% extends "base.html" %}
 
-        h1 {
-            text-align: center;
-            margin: 40px 0 20px;
-            color: #2c3e50;
-        }
-  
+{% block title %}Inicio - LIF{% endblock %}
 
-        /* Contenedor general */
-        .container {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+{% block extra_styles %}
+<style>
 
-        p.descripcion {
-            text-align: center;
-            font-size: 1.1em;
-            color: #555;
-            margin-bottom: 30px;
-        }
+    /* ======== ESTILOS DEL INDEX ======== */
 
-        /* Grid de equipos estilo card */
-        .equipos-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); /* 2 filas de 6 */
-            gap: 20px;
-            justify-items: center;
-        }
+    .container-principal {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
 
-        /* Ajuste para menos de 12 equipos: 3 filas de 4 */
-        @media (max-width: 1100px) {
-            .equipos-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .equipos-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        .card-equipo {
-            background: #fff;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            width: 150px;
-        }
-
-        .card-equipo h3 {
-            font-size: 1rem;
-            margin-bottom: 10px;
-        }
-
-        .card-equipo img {
-            width: 100px;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-
-        .card-equipo:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            font-size: 0.9em;
-        }
-/* ======== NAVBAR MODERNO ======== */
-        .navbar {
-            background: linear-gradient(90deg, #4b89dc, #3a6ea5);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.8rem 2rem;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        /* Logo + texto “LIF” */
-        .navbar-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .navbar-logo img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-        }
-
-        .navbar-logo span {
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        /* Contenedor de enlaces */
-        .navbar-links {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .navbar a, .dropbtn {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-
-        .navbar a:hover, .dropdown:hover .dropbtn {
-            background: rgba(255, 255, 255, 0.15);
-            color: #f0f4fa;
-        }
-
-        /* ======== DROPDOWN ======== */
-        .dropdown {
-            position: relative;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background: #ffffff;
-            min-width: 180px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border-radius: 10px;
-            top: 110%;
-            left: 0;
-            overflow: hidden;
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        .dropdown-content a {
-            color: #2c3e50;
-            padding: 12px 16px;
-            display: block;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .dropdown-content a:hover {
-            background: #f2f6fb;
-            color: #3a6ea5;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(-8px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-
-.video-wrap {
-  position: relative;
-  width: 100%;
-  /* relación 16:9 -> padding-top = 9/16 * 100 = 56.25% */
-  padding-top: 56.25%;
-  overflow: hidden;
+    h1 {
+        text-align: center;
+        margin: 40px 0 20px;
+        color: #2c3e50;
+    }
+    
+    p.descripcion {
+        text-align: center;
+        font-size: 1.1em;
+        color: #555;
+        margin-bottom: 30px;
+    }
+    .hero-card {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 30px 40px;
+    background: linear-gradient(135deg, #f8f9fb, #ffffff);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
-.video-wrap iframe {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
+
+.hero-card h1 {
+    text-align: center;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 10px;
 }
-/* ======== RESPONSIVE ======== */
-        @media (max-width: 900px) {
-            .navbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
 
-            .navbar-links {
-                flex-direction: column;
-                width: 100%;
-                margin-top: 10px;
-            }
+.hero-card p.descripcion {
+    text-align: center;
+    font-size: 1.05rem;
+    color: #555;
+    max-width: 900px;
+    margin: 0 auto 30px;
+}
 
-            .dropdown-content {
-                position: static;
-                box-shadow: none;
-                border-radius: 0;
-                background: #4b89dc;
-            }
+    /* ===== CLUBES ===== */
+    .equipos-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 22px;
+        justify-items: center;
+    }   
 
-            .dropdown-content a {
-                color: #fff;
-            }
+    @media (max-width: 1100px) {
+    .equipos-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (max-width: 768px) {
+        .equipos-grid { grid-template-columns: repeat(2, 1fr); }
+    }
 
-            .dropdown-content a:hover {
-                background: rgba(255,255,255,0.15);
-                color: #fff;
-            }
-        }
+    .card-equipo {
+    background: #ffffff;
+    border-radius: 14px;
+    width: 150px;
+    height: 190px;
+    padding: 14px;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-    </style>
-</head>
-<body>
-    <!-- ======== NAVBAR ======== -->
-    <div class="navbar">
-        <div class="navbar-logo">
-            <img src="{{ url_for('static', filename='escudos/logolif.png') }}" alt="Logo LIF">
-            <span>LIF</span>
+.card-equipo:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+}
+
+.card-equipo h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #2c3e50;
+}
+
+.card-equipo img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #f2f3f7;
+    padding: 8px;
+}
+
+    /* ===== HEADER SECCIONES (VIDEOS / NOTICIAS) ===== */
+    .section-header {
+        position: relative;
+        padding: 0 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-header h2 {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        font-family: 'Poppins', 'Segoe UI', sans-serif;
+        font-weight: 600;
+        color: #5dade2;
+        letter-spacing: 0.4px;
+    }
+
+    .btn-ver-todas {
+        margin-left: auto;
+        background: transparent;
+        border: 1px solid #5dade2;
+        color: #5dade2;
+        padding: 0.25rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-ver-todas:hover {
+        background: #5dade2;
+        color: #fff;
+    }
+
+    /* ===== CARDS UNIFICADAS ===== */
+    .card-unificada {
+        height: 100%;
+        border-radius: 14px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .card-unificada img {
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .card-unificada .card-body {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .card-unificada p.texto {
+        font-size: 0.9rem;
+        height: 70px;
+        overflow: hidden;
+    }
+
+    /* ===== VIDEOS ===== */
+    .video-wrap {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%;
+    }
+
+    .video-wrap iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+</style>
+
+{% endblock %}
+{% block content %}
+
+<!-- ===== CLUBES ===== -->
+<div class="container-principal">
+    <h1>Liga Interprovincial de Fútbol</h1>
+
+    <p class="descripcion">
+        Bienvenidos a la Liga Interprovincial de Fútbol (LIF).
+    </p>
+
+    <h2 style="text-align:center; margin-bottom: 20px;">Clubes participantes</h2>
+
+    <div class="equipos-grid">
+        {% for club in clubes %}
+        <div class="card-equipo">
+            <h3>{{ club.nombre }}</h3>
+            <img src="{{ url_for('static', filename='escudos/' + club.nombre|replace(' ', '_') + '.jpg') }}">
         </div>
+        {% endfor %}
+    </div>
+</div>
 
-        <div class="navbar-links">
-            <a href="/login">Log-In</a>
-            <a href="/">Inicio</a>
-
-        <div class="dropdown">
-            <button class="dropbtn">Fixture Mayores</button>
-            <div class="dropdown-content">
-                <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
-                <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
-                <a href="{{ url_for('views.fixture', bloque='mayores', categoria='todas') }}">Todas</a>
-            </div>
-        </div>
-
-            <div class="dropdown">
-                <button class="dropbtn">Fixture Inferiores</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
-                </div>
-            </div>
-
-            <div class="dropdown">
-                <button class="dropbtn">Goleadores</button>
-                <div class="dropdown-content">
-                    <a href="/goleadores/primera">Primera</a>
-                    <a href="/goleadores/reserva">Reserva</a>
-                    <a href="/goleadores/quinta">Quinta</a>
-                    <a href="/goleadores/sexta">Sexta</a>
-                    <a href="/goleadores/septima">Séptima</a>
-                </div>
-            </div>
-
-            <div class="dropdown">
-                <button class="dropbtn">Tabla de Posiciones</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
-                </div>
-            </div>
-        </div>
+<!-- ===== VIDEOS ===== -->
+<div class="container mt-5">
+    <div class="d-flex align-items-center section-header">
+        <h2>Últimos Videos</h2>
+        <a href="{{ url_for('views.todos_videos') }}" class="btn btn-ver-todas">Ver todos</a>
     </div>
 
-
-
-    <div class="container">
-        <h1>Liga Interprovincial de Fútbol</h1>
-        <p class="descripcion">
-            Bienvenidos a la Liga Interprovincial de Fútbol (LIF). Aquí podrás seguir el fixture, tabla de posiciones, goleadores y mucho más sobre tus equipos favoritos.
-        </p>
-
-        <h2 style="text-align:center; margin-bottom: 20px;">Clubes participantes</h2>
-        <div class="equipos-grid">
-            {% for club in clubes %}
-            <div class="card-equipo">
-                <h3>{{ club.nombre }}</h3>
-                <img 
-                    src="{{ url_for('static', filename='escudos/' + club.nombre + '.jpg') }}" 
-                    alt="{{ club.nombre }} escudo"
-                >
+    <div class="row g-4">
+        {% for video in videos %}
+        <div class="col-md-4">
+            <div class="card card-unificada shadow-sm">
+                <div class="video-wrap">
+                    <iframe src="{{ video.url | replace('watch?v=', 'embed/') }}" allowfullscreen></iframe>
+                </div>
+                <div class="card-body">
+                    <h5 class="fw-bold">{{ video.titulo_video }}</h5>
+                    <p class="texto">{{ video.descripcion }}</p>
+                    <p class="text-muted small">{{ video.fecha_subida.strftime('%d/%m/%Y') }}</p>
+                </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
     </div>
-    <div>
-        <p>Todos los goles de los cuartos de final</p>
+</div>
+
+<!-- ===== NOTICIAS ===== -->
+<div class="container mt-5">
+    <div class="d-flex align-items-center section-header">
+        <h2>Últimas Noticias</h2>
+        <a href="{{ url_for('views.todas_noticias') }}" class="btn btn-ver-todas">Ver todas</a>
     </div>
-            <!-- Embed básico -->
-    <div class="video-wrap">
-        <iframe
-            src="https://accounts.youtube.com/RotateCookiesPage?origin=https://www.youtube.com&yt_pid=1"
-            title="YouTube video"
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy">
-        </iframe>
-    </div>  
-    <footer>
-        &copy; 2025 Liga Interprovincial de Fútbol - Todos los derechos reservados
-    </footer>
-</body>
-</html>
+
+    <div class="row g-4">
+        {% for noticia in noticias %}
+        <div class="col-md-4">
+            <div class="card card-unificada shadow-sm">
+                {% if noticia.imagen_url %}
+                <img src="{{ noticia.imagen_url }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="fw-bold">{{ noticia.titulo }}</h5>
+                    <p class="texto">{{ noticia.contenido }}</p>
+                    <p class="text-muted small">{{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

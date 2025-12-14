@@ -24,6 +24,8 @@
             box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
             width: 100%;
             max-width: 500px;
+            position: relative;
+            z-index: 1;
         }
 
         h2 {
@@ -59,15 +61,66 @@
         .back-link:hover {
             color: #00bfff;
         }
+
+        /* Contenedor flotante para flashes */
+        #flash-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            pointer-events: none; /* no bloquea clicks */
+        }
+
+        /* Estilo de los flashes */
+        .flash-message {
+            display: inline-block;          /* tamaño según el texto */
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;                     /* inicial invisible */
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            margin-bottom: 0.5rem;
+            transform: translateY(-20px);   /* slide inicial hacia arriba */
+            pointer-events: auto;
+        }
+
+        /* Colores por categoría */
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Contenedor de flashes flotante -->
+    <div id="flash-container">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 
     <div class="form-container">
         <h2>CARGAR EQUIPO</h2>
 
         <form method="POST" action="{{ url_for('views.cargar_equipos') }}">
 
+            <!-- CLUB -->
             <div class="mb-3">
                 <label for="club_id" class="form-label">Club</label>
                 <select class="form-select" id="club_id" name="club_id" required>
@@ -78,6 +131,7 @@
                 </select>
             </div>
 
+            <!-- CATEGORIA -->
             <div class="mb-3">
                 <label for="categoria" class="form-label">Categoría</label>
                 <select class="form-select" id="categoria" name="categoria" required>
@@ -95,6 +149,55 @@
 
         <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
     </div>
+
+    <!-- JS PARA OCULTAR O DESHABILITAR CATEGORÍAS YA CARGADAS -->
+    <script>
+        document.getElementById("club_id").addEventListener("change", function () {
+            const clubId = this.value;
+            const categoriaSelect = document.getElementById("categoria");
+
+            // Resetear todas las categorías visibles/habilitadas
+            for (let opt of categoriaSelect.options) {
+                opt.hidden = false;
+                opt.disabled = false;
+            }
+
+            if (!clubId) return;
+
+            fetch(`/categorias_cargadas/${clubId}`)
+                .then(response => response.json())
+                .then(cargadas => {
+
+                    for (let opt of categoriaSelect.options) {
+                        if (cargadas.includes(opt.value)) {
+                            // Ocultar categoría ya cargada
+                            opt.hidden = true;
+                        }
+                    }
+
+                    categoriaSelect.value = "";
+                });
+        });
+
+        // JS para mostrar flash con slide y desaparecer
+        document.addEventListener("DOMContentLoaded", () => {
+            const flashes = document.querySelectorAll(".flash-message");
+            flashes.forEach(flash => {
+                // Fade + slide in
+                setTimeout(() => {
+                    flash.style.opacity = 1;
+                    flash.style.transform = "translateY(0)";
+                }, 100);
+
+                // Desaparece después de 3 segundos
+                setTimeout(() => {
+                    flash.style.opacity = 0;
+                    flash.style.transform = "translateY(-20px)";
+                    setTimeout(() => flash.remove(), 500);
+                }, 3000);
+            });
+        });
+    </script>
 
 </body>
 </html>

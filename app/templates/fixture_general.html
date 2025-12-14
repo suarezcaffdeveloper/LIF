@@ -1,306 +1,156 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Fixture del Torneo</title>
-    <style>
-        /* ======== ESTILO GLOBAL ======== */
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
+{% extends "base.html" %}
 
-        h1 {
-            text-align: center;
-            margin: 40px 0 20px;
-            color: #2c3e50;
-        }
+{% block title %}{{ titulo }} - Fixture{% endblock %}
 
-        /* ======== NAVBAR MODERNO ======== */
-        .navbar {
-            background: linear-gradient(90deg, #4b89dc, #3a6ea5);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.8rem 2rem;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+{% block extra_styles %}
+<style>
 
-        /* Logo + texto “LIF” */
-        .navbar-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    /* ======== TÍTULO ======== */
+    h1 {
+        text-align: center;
+        margin: 30px 0 10px;
+        color: #2c3e50;
+        font-weight: 700;
+    }
 
-        .navbar-logo img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-        }
+    /* ======== CONTENEDOR DE CARDS ======== */
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* AHORA 4 POR FILA */
+        gap: 25px;
+        padding: 35px;
+        max-width: 1500px;
+        margin: 0 auto;
+    }
 
-        .navbar-logo span {
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        /* Contenedor de enlaces */
-        .navbar-links {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .navbar a, .dropbtn {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
-
-        .navbar a:hover, .dropdown:hover .dropbtn {
-            background: rgba(255, 255, 255, 0.15);
-            color: #f0f4fa;
-        }
-
-        /* ======== DROPDOWN ======== */
-        .dropdown {
-            position: relative;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background: #ffffff;
-            min-width: 180px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border-radius: 10px;
-            top: 110%;
-            left: 0;
-            overflow: hidden;
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        .dropdown-content a {
-            color: #2c3e50;
-            padding: 12px 16px;
-            display: block;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .dropdown-content a:hover {
-            background: #f2f6fb;
-            color: #3a6ea5;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(-8px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-
-        /* ======== CARDS ======== */
+    /* RESPONSIVE */
+    @media (max-width: 1400px) {
         .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
+            grid-template-columns: repeat(3, 1fr);
         }
+    }
 
-        .card {
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
+    @media (max-width: 1100px) {
+        .cards-container {
+            grid-template-columns: repeat(2, 1fr);
         }
+    }
 
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    @media (max-width: 700px) {
+        .cards-container {
+            grid-template-columns: 1fr;
         }
+    }
 
-        .card h2 {
-            text-align: center;
-            font-size: 1.3rem;
-            color: #2c3e50;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #e3e9f0;
-            padding-bottom: 8px;
-        }
+    /* ======== CARD ======== */
+    .card {
+        background: #fff;
+        border-radius: 13px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 1px solid #e0e0e0;
 
-        /* ======== PARTIDOS ======== */
-        .partido {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 10px 0;
-            padding: 10px 0;
-            border-bottom: 1px solid #e8e8e8;
-        }
+        display: flex;
+        flex-direction: column;
 
-        .partido:last-child {
-            border-bottom: none;
-        }
-
-        .equipo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 45%;
-            text-align: center;
-        }
-
-        .equipo img {
-            width: 55px;
-            height: auto;
-            margin-bottom: 6px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-
-        .vs {
-            font-weight: bold;
-            color: #3a6ea5;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            white-space: nowrap;
-        }
-        
+        height: 340px; /* altura fija más compacta */
+        overflow: hidden; /* evita scroll en toda la card */
+        position: relative;
+        padding: 0;
+    }
 
 
-        /* ======== FOOTER ======== */
-        footer {
-            text-align: center;
-            padding: 25px;
-            color: #666;
-            font-size: 0.9em;
-            border-top: 1px solid #ddd;
-            background: #f8f9fa;
-            margin-top: 30px;
-        }
+    .card::-webkit-scrollbar {
+        width: 6px;
+    }
 
-        /* ======== RESPONSIVE ======== */
-        @media (max-width: 900px) {
-            .navbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
+    .card::-webkit-scrollbar-thumb {
+        background: #c7c7c7;
+        border-radius: 10px;
+    }
 
-            .navbar-links {
-                flex-direction: column;
-                width: 100%;
-                margin-top: 10px;
-            }
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
 
-            .dropdown-content {
-                position: static;
-                box-shadow: none;
-                border-radius: 0;
-                background: #4b89dc;
-            }
+    .card h2 {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        padding: 12px;
+        margin: 0;
+        text-align: center;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #e3e9f0;
+        z-index: 10;
+    }
 
-            .dropdown-content a {
-                color: #fff;
-            }
+    /* ======== PARTIDOS ======== */
+    .partido {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e8e8e8;
+    }
+    .partidos-lista {
+        padding: 10px 15px;
+        overflow-y: auto;
+    }
 
-            .dropdown-content a:hover {
-                background: rgba(255,255,255,0.15);
-                color: #fff;
-            }
-        }
+    .partidos-lista::-webkit-scrollbar {
+        width: 6px;
+    }
+    .partidos-lista::-webkit-scrollbar-thumb {
+        background: #c7c7c7;
+        border-radius: 10px;
+    }
 
-    </style>
-</head>
-<body>
-    <!-- ======== NAVBAR ======== -->
-    <div class="navbar">
-        <div class="navbar-logo">
-            <img src="{{ url_for('static', filename='escudos/logolif.png') }}" alt="Logo LIF">
-            <span>LIF</span>
-        </div>
+    .partido:last-child {
+        border-bottom: none;
+    }
 
-        <div class="navbar-links">
-            <a href="/">Inicio</a>
+    .equipo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 45%;
+        text-align: center;
+    }
 
-            <div class="dropdown">
-                <button class="dropbtn">Fixture Mayores</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
-                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
-                    <a href="{{ url_for('views.fixture', bloque='mayores') }}">Todas</a>
-                </div>
-            </div>
+    .equipo img {
+        width: 50px;
+        height: auto;
+        margin-bottom: 5px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
 
-            <div class="dropdown">
-                <button class="dropbtn">Fixture Inferiores</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
-                </div>
-            </div>
+    .vs {
+        font-weight: bold;
+        color: #3a6ea5;
+        font-size: 1rem;
+        white-space: nowrap;
+    }
 
-            <div class="dropdown">
-                <button class="dropbtn">Goleadores</button>
-                <div class="dropdown-content">
-                    <a href="/goleadores/primera">Primera</a>
-                    <a href="/goleadores/reserva">Reserva</a>
-                    <a href="/goleadores/quinta">Quinta</a>
-                    <a href="/goleadores/sexta">Sexta</a>
-                    <a href="/goleadores/septima">Séptima</a>
-                </div>
-            </div>
+</style>
+{% endblock %}
 
-            <div class="dropdown">
-                <button class="dropbtn">Tabla de Posiciones</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
-                </div>
-            </div>
-        </div>
-    </div>
+{% block content %}
 
-    <h1>{{ titulo }}</h1>
+<h1>{{ titulo }}</h1>
 
-    <div class="cards-container">
-        {% if fechas_partidos %}
-            {% for jornada, partidos in fechas_partidos.items() %}
-                <div class="card">
-                    <h2>{{ jornada }}</h2>
+<div class="cards-container">
+    {% if fechas_partidos %}
+        {% for jornada, partidos in fechas_partidos.items() %}
+            <div class="card">
+                <h2>{{ jornada }}</h2>
+
+                <div class="partidos-lista">
                     {% for partido in partidos %}
                         <div class="partido">
                             <div class="equipo">
-                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre + '.jpg') }}" alt="{{ partido.equipo_local.club.nombre }}">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}">
                                 <span>{{ partido.equipo_local.club.nombre }}</span>
                             </div>
 
@@ -311,23 +161,21 @@
                             {% endif %}
 
                             <div class="equipo">
-                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre + '.jpg') }}" alt="{{ partido.equipo_visitante.club.nombre }}">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}">
                                 <span>{{ partido.equipo_visitante.club.nombre }}</span>
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-            {% endfor %}
-        {% else %}
-            <p class="text-center">Todavía no hay partidos cargados para esta categoría.</p>
-        {% endif %}
-    </div>
+            </div>
 
-    <footer>
-        &copy; 2025 Liga Interprovincial de Fútbol - Todos los derechos reservados
-    </footer>
-</body>
-</html>
+        {% endfor %}
+    {% else %}
+        <p class="text-center">Todavía no hay partidos cargados.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
 
 
 

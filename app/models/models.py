@@ -129,7 +129,12 @@ class Usuario(db.Model):
         self.contraseña = generate_password_hash(password)
 
     def check_password(self, password: str) -> bool:
+        if not self.contraseña:
+            return False  
+        if not password:
+            return False
         return check_password_hash(self.contraseña, password)
+
 
     @property
     def is_active(self):
@@ -187,24 +192,27 @@ class Video(db.Model):
 class TablaPosiciones(db.Model):
     __tablename__ = 'tabla_posiciones'
     __table_args__ = {'extend_existing': True}
-    # No definimos columnas rígidas aquí porque idealmente es una VIEW que
-    # vas a crear con una query POSTGRES que calcule posiciones.
-    # Si querés mapear columnas manualmente, podés hacerlo listando los campos.
-    id_posicion = db.Column(db.Integer, primary_key=True)
-    id_equipo = db.Column(db.Integer)
+
+    # clave primaria REAL de la vista
+    id_equipo = db.Column(db.Integer, primary_key=True)
+
     nombre_equipo = db.Column(db.String)
     categoria = db.Column(db.String(50))
+
     partidos_jugados = db.Column(db.Integer)
     partidos_ganados = db.Column(db.Integer)
     partidos_empatados = db.Column(db.Integer)
     partidos_perdidos = db.Column(db.Integer)
+
     goles_a_favor = db.Column(db.Integer)
     goles_en_contra = db.Column(db.Integer)
+
     cantidad_puntos = db.Column(db.Integer)
     diferencia_gol = db.Column(db.Integer)
 
     def __repr__(self):
         return f"<TablaPosiciones Equipo:{self.nombre_equipo} Pts:{self.cantidad_puntos}>"
+
 
 # ---------------------------
 # INDEXES UTILES

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Todas las Noticias{% endblock %}
+
+{% block content %}
+<style>
+    /* Grid de noticias: 3 columnas con margen lateral */
+    .noticias-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin: 0 20px;
+    }
+
+    @media (max-width: 1200px) {
+        .noticias-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .noticias-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Card de noticia estilo revista */
+    .noticia-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        border: 1px solid #e3e7ee;
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 35% 65%;
+        gap: 15px;
+        position: relative; /* para colocar la fecha */
+    }
+
+    @media (max-width: 768px) {
+        .noticia-card {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Imagen a la izquierda, altura limitada */
+    .noticia-card img {
+        width: 100%;
+        border-radius: 12px;
+        object-fit: cover;
+        max-height: 180px;
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+    }
+
+    /* Contenido junto a la imagen */
+    .noticia-card .contenido {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+    }
+
+    @media (max-width: 768px) {
+        .noticia-card .contenido {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            margin-top: 15px;
+        }
+    }
+
+    .noticia-card h2 {
+        font-size: 1.4rem;
+        margin: 0 0 10px 0;
+        color: #1f2d3d;
+    }
+
+    .noticia-card p {
+        font-size: 0.95rem;
+        color: #2c3e50;
+        line-height: 1.5;
+        margin: 0 0 10px 0;
+    }
+
+    /* Fecha debajo de la card, alineada a la derecha */
+    .noticia-card .fecha {
+        font-size: 0.85rem;
+        color: #777;
+        text-align: right;
+        margin-top: 10px;
+        grid-column: 1 / 3;
+        grid-row: 2 / 3;
+    }
+
+    /* Título principal de la página */
+    h1 {
+        font-size: 2rem;
+        margin: 40px 0 30px 0;
+        text-align: center;
+        color: #1f2d3d;
+    }
+</style>
+
+<div class="left">
+    <h1>Todas las Noticias</h1>
+
+    <div class="row g-4">
+        {% for noticia in noticias %}
+        <div class="col-md-4">
+            <div class="noticia-card card shadow-sm">
+
+                {% if noticia.imagen_url %}
+                    <img src="{{ noticia.imagen_url }}" class="img-fluid">
+                {% endif %}
+
+                <div class="p-3">
+                    <h5 class="fw-bold">{{ noticia.titulo }}</h5>
+
+                    <p style="font-size: 0.9rem; height: 70px; overflow: hidden;">
+                        {{ noticia.contenido[:150] }}...
+                    </p>
+
+                    <p class="text-muted" style="font-size: 0.8rem;">
+                        {{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

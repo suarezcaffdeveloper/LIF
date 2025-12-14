@@ -1,109 +1,181 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cargar Video</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #f8f9fa, #e3e6f0);
-            font-family: 'Poppins', sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 50px;
-        }
-        .form-container {
-            background: white;
-            padding: 30px 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            max-width: 700px;
-            width: 100%;
-            margin-bottom: 50px;
-        }
-        h2 {
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 25px;
-            color: #343a40;
-            letter-spacing: 0.5px;
-        }
-        label {
-            font-weight: 500;
-            color: #495057;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>Cargar Video</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+  <style>
+    body {
+      background-color: #1f1f1f;
+      color: #f5f6fa;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 40px;
+      margin-bottom: 40px;
+      color: #5dade2;
+      font-weight: 700;
+    }
+
+    .form-control {
+      background-color: #2c2c2c;
+      border: 1px solid #5dade2;
+      color: white;
+    }
+
+    .btn-primary {
+      background-color: #5dade2;
+      border: none;
+      font-weight: bold;
+    }
+
+    .btn-primary:hover {
+      background-color: #3498db;
+    }
+
+    /* =========================
+       FLASHES FLOTANTES
+    ========================= */
+    #flash-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      pointer-events: none;
+    }
+
+    .flash-message {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      margin-bottom: 0.5rem;
+      pointer-events: auto;
+    }
+
+    .flash-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .flash-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      color: #ccc;
+    }
+
+    .back-link:hover {
+      color: #00bfff;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="form-container">
-    <h2>CARGAR VIDEO</h2>
-
-    <form action="{{ url_for('views.cargar_video') }}" method="POST">
-
-        <!-- Título -->
-        <div class="mb-3">
-            <label for="titulo_video" class="form-label">Título del video</label>
-            <input type="text" id="titulo_video" name="titulo_video" class="form-control" placeholder="Ejemplo: Goles de la Fecha 3" required>
+<!-- =========================
+     FLASH CONTAINER
+========================= -->
+<div id="flash-container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          {{ message }}
         </div>
-
-        <!-- URL -->
-        <div class="mb-3">
-            <label for="url" class="form-label">URL del video (YouTube o similar)</label>
-            <input type="url" id="url" name="url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." required>
-        </div>
-
-        <!-- Descripción -->
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea id="descripcion" name="descripcion" class="form-control" rows="4" placeholder="Breve descripción del contenido del video" required></textarea>
-        </div>
-
-        <!-- Fecha de subida -->
-        <div class="mb-3">
-            <label for="fecha_subida" class="form-label">Fecha de subida</label>
-            <input type="date" id="fecha_subida" name="fecha_subida" class="form-control" required>
-        </div>
-
-        <!-- Autor -->
-        <div class="mb-3">
-            <label for="id_autor" class="form-label">Autor / Publicado por</label>
-            <select id="id_autor" name="id_autor" class="form-select" required>
-                <option value="" selected disabled>Seleccionar autor</option>
-                {% for usuario in usuarios %}
-                    <option value="{{ usuario.id }}">{{ usuario.nombre }} {{ usuario.apellido }}</option>
-                    <option value="4">4</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Jornada -->
-        <div class="mb-3">
-            <label for="jornada_jugada" class="form-label">Jornada / Fecha jugada</label>
-            <select id="jornada_jugada" name="jornada_jugada" class="form-select" required>
-                <option value="" selected disabled>Seleccionar jornada</option>
-                {% for i in range(1, 12) %}
-                    <option value="{{ i }}">Fecha {{ i }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100">Guardar Video</button>
-    </form>
-    <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 </div>
+
+<div class="container">
+
+  <h2>Cargar Video</h2>
+
+  <form action="{{ url_for('views.cargar_video') }}" method="POST">
+
+    <div class="mb-3">
+      <label class="form-label">Título del video</label>
+      <input type="text" class="form-control" name="titulo_video" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">URL del video (YouTube)</label>
+      <input type="text" class="form-control" name="url" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Descripción</label>
+      <textarea class="form-control" rows="3" name="descripcion"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Jornada / Fecha jugada</label>
+      <input type="number" class="form-control" name="jornada_jugada">
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">🎥 Subir Video</button>
+
+    <div class="text-center mt-4">
+      {% if current_user.rol == 'administrador' %}
+        <a href="{{ url_for('views.adminview') }}" class="back-link">
+          ← Volver al panel de administrador
+        </a>
+      {% elif current_user.rol == 'periodista' %}
+        <a href="{{ url_for('views.panel_periodista') }}" class="back-link">
+          ← Volver al panel de periodista
+        </a>
+      {% endif %}
+    </div>
+
+
+  </form>
+
+</div>
+
+<!-- =========================
+     JS FLASH SLIDE
+========================= -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const flashes = document.querySelectorAll(".flash-message");
+
+    flashes.forEach(flash => {
+      // Slide + fade in
+      setTimeout(() => {
+        flash.style.opacity = "1";
+        flash.style.transform = "translateY(0)";
+      }, 100);
+
+      // Desaparece a los 3 segundos
+      setTimeout(() => {
+        flash.style.opacity = "0";
+        flash.style.transform = "translateY(-20px)";
+        setTimeout(() => flash.remove(), 500);
+      }, 3000);
+    });
+  });
+</script>
 
 </body>
 </html>
+
+

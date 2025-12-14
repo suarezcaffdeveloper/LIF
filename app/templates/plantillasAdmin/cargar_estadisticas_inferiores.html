@@ -1,62 +1,901 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="es">
 <head>
-    <title>Cargar estadísticas - Inferiores</title>
+  <meta charset="utf-8">
+  <title>Cargar Estadísticas — Inferiores</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* -------------------------
+       Estilos mantenidos y limpios
+       ------------------------- */
+    body {
+      background-color: #1f1f1f;
+      color: #f5f6fa;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 40px;
+      margin-bottom: 40px;
+      font-weight: 700;
+      color: #5dade2;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .card {
+      background-color: #2c2c2c;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+      color: #f5f6fa;
+      padding: 25px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #5dade2;
+    }
+
+    select, input {
+      background-color: #1f1f1f !important;
+      color: #fff !important;
+      border: 1px solid #5dade2 !important;
+    }
+
+    .btn-primary {
+      background-color: #5dade2;
+      border-color: #5dade2;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background-color: #3498db;
+    }
+
+    .subtitulo {
+      color: #5dade2;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .side-box {
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 12px;
+    }
+
+    .list-row {
+      margin-bottom: 8px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .remove-row {
+      background: transparent;
+      border: 1px solid #aa3333;
+      color: #ffaaaa;
+      border-radius: 6px;
+    }
+
+    /* layouts pequeños */
+    .small-input { max-width: 90px; }
+    .muted { color: #bfc9d9; font-size: 0.9rem; }
+  </style>
 </head>
+
 <body>
 
-<h2>Cargar estadísticas – {{ partido.equipo_local.nombre }} vs {{ partido.equipo_visitante.nombre }}</h2>
+<div class="container">
+  <h1>Cargar Estadísticas — Inferiores</h1>
 
-<form method="POST">
+  <!-- FLASH MESSAGES -->
+  <div class="container mt-3" id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 
+            'success' if category=='success' else 
+            'danger' if category=='error' else 
+            'warning' if category=='warning' else 
+            'info' }}" 
+            role="alert"
+            style="border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
 
-    <h3>Resultado del partido</h3>
-    <label>Goles {{ partido.equipo_local.nombre }}:</label>
-    <input type="number" name="goles_local" required><br>
+            <div class="d-flex justify-content-between align-items-center">
+              <span>{{ message }}</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
 
-    <label>Goles {{ partido.equipo_visitante.nombre }}:</label>
-    <input type="number" name="goles_visitante" required><br><br>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
-    <hr><h3>Jugadores del equipo local</h3>
-    {% for jugador in jugadores_local %}
-        <div class="jugador-box">
-            <strong>{{ jugador.nombre }}</strong>
-            <input type="hidden" name="jugador_id" value="{{ jugador.id }}">
+  <div class="card">
 
-            <label>Goles:</label>
-            <input type="number" name="goles_{{ jugador.id }}" min="0" value="0">
+    <!-- JORNADAS -->
+    <div class="mb-3">
+      <label class="form-label">Seleccionar Jornada</label>
+      <select id="select-jornada" class="form-select">
+        <option value="">Seleccionar...</option>
+        {% for j in jornadas %}
+          <option value=" {{ j }}">Jornada {{ j }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
-            <label>Amarilla:</label>
-            <input type="checkbox" name="amarilla_{{ jugador.id }}" value="1">
+    <!-- PARTIDOS -->
+    <div id="partidos-container" style="display:none;">
+      <div class="mb-3">
+        <label class="form-label">Cruces de la jornada</label>
+        <select id="select-partido" class="form-select">
+          <option value="">Seleccione un cruce...</option>
+        </select>
+      </div>
+    </div>
 
-            <label>Roja:</label>
-            <input type="checkbox" name="roja_{{ jugador.id }}" value="1">
+    <hr>
+
+    <!-- FORMULARIOS -->
+    <div id="formularios-estadisticas" style="display:none;">
+
+      <!-- BLOQUE plantilla para cada categoría (se repite 3 veces con ids) -->
+      <!-- QUINTA -->
+      <div id="bloque-quinta" style="display:none;">
+        <h3 class="subtitulo">Quinta</h3>
+
+        <div class="row">
+          <!-- LOCAL -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="quinta_local_nombre">Local</h5>
+
+              <label class="form-label">Goles Local</label>
+              <input type="number" id="quinta_goles_local" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Local</label>
+              <div id="quinta_goleadores_local_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('quinta','local')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Local</label>
+              <div id="quinta_tarjetas_local_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('quinta','local')">+ Agregar</button>
+            </div>
+          </div>
+
+          <!-- VISITANTE -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="quinta_visitante_nombre">Visitante</h5>
+
+              <label class="form-label">Goles Visitante</label>
+              <input type="number" id="quinta_goles_visitante" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Visitante</label>
+              <div id="quinta_goleadores_visitante_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('quinta','visitante')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Visitante</label>
+              <div id="quinta_tarjetas_visitante_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('quinta','visitante')">+ Agregar</button>
+            </div>
+          </div>
         </div>
-    {% endfor %}
 
-    <hr><h3>Jugadores del equipo visitante</h3>
-    {% for jugador in jugadores_visitante %}
-        <div class="jugador-box">
-            <strong>{{ jugador.nombre }}</strong>
-            <input type="hidden" name="jugador_id" value="{{ jugador.id }}">
+        <button id="btn_guardar_quinta" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('quinta')">Guardar Quinta</button>
+      </div>
 
-            <label>Goles:</label>
-            <input type="number" name="goles_{{ jugador.id }}" min="0" value="0">
+      <!-- SEXTA -->
+      <div id="bloque-sexta" style="display:none;">
+        <h3 class="subtitulo">Sexta</h3>
 
-            <label>Amarilla:</label>
-            <input type="checkbox" name="amarilla_{{ jugador.id }}" value="1">
+        <div class="row">
+          <!-- LOCAL -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="sexta_local_nombre">Local</h5>
 
-            <label>Roja:</label>
-            <input type="checkbox" name="roja_{{ jugador.id }}" value="1">
+              <label class="form-label">Goles Local</label>
+              <input type="number" id="sexta_goles_local" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Local</label>
+              <div id="sexta_goleadores_local_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('sexta','local')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Local</label>
+              <div id="sexta_tarjetas_local_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('sexta','local')">+ Agregar</button>
+            </div>
+          </div>
+
+          <!-- VISITANTE -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="sexta_visitante_nombre">Visitante</h5>
+
+              <label class="form-label">Goles Visitante</label>
+              <input type="number" id="sexta_goles_visitante" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Visitante</label>
+              <div id="sexta_goleadores_visitante_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('sexta','visitante')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Visitante</label>
+              <div id="sexta_tarjetas_visitante_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('sexta','visitante')">+ Agregar</button>
+            </div>
+          </div>
         </div>
-    {% endfor %}
 
-    <br>
-    <button type="submit">Guardar estadísticas</button>
+        <button id="btn_guardar_sexta" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('sexta')">Guardar Sexta</button>
+      </div>
 
-</form>
+      <!-- SEPTIMA -->
+      <div id="bloque-septima" style="display:none;">
+        <h3 class="subtitulo">Séptima</h3>
 
-{% include "partials/form_estadisticas.html" %}
+        <div class="row">
+          <!-- LOCAL -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="septima_local_nombre">Local</h5>
+
+              <label class="form-label">Goles Local</label>
+              <input type="number" id="septima_goles_local" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Local</label>
+              <div id="septima_goleadores_local_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('septima','local')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Local</label>
+              <div id="septima_tarjetas_local_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('septima','local')">+ Agregar</button>
+            </div>
+          </div>
+
+          <!-- VISITANTE -->
+          <div class="col-md-6">
+            <div class="side-box">
+              <h5 id="septima_visitante_nombre">Visitante</h5>
+
+              <label class="form-label">Goles Visitante</label>
+              <input type="number" id="septima_goles_visitante" class="form-control" min="0" value="0">
+
+              <label class="form-label mt-2">Goleadores Visitante</label>
+              <div id="septima_goleadores_visitante_list"></div>
+              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('septima','visitante')">+ Agregar</button>
+
+              <label class="form-label mt-2">Tarjetas Visitante</label>
+              <div id="septima_tarjetas_visitante_list"></div>
+              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('septima','visitante')">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn_guardar_septima" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('septima')">Guardar Séptima</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+/* ====================================================
+   Estado global y utilidades
+   ==================================================== */
+const CATS = ["quinta","sexta","septima"];
+const estadoCruces = {};
+
+let current = {
+  jornada: null,
+  local_club_id: null,
+  visitante_club_id: null,
+  equipos_por_categoria: {},
+
+  jugadores_quinta_local: [],
+  jugadores_quinta_visitante: [],
+  jugadores_sexta_local: [],
+  jugadores_sexta_visitante: [],
+  jugadores_septima_local: [],
+  jugadores_septima_visitante: [],
+
+  id_quinta: null,
+  id_sexta: null,
+  id_septima: null,
+};
+
+function $id(id){ return document.getElementById(id); }
+
+function safeParseInt(v, fallback=0){
+  const n = parseInt(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function disableButtonAfterSubmit(btnId){
+  const btn = $id(btnId);
+  if(!btn) return;
+  btn.disabled = true;
+  btn.classList.remove("btn-primary");
+  btn.classList.add("btn-success");
+  btn.textContent = "Guardado ✔";
+}
+
+function limpiarFormularioCategoria(cat){
+  $id(`${cat}_goles_local`).value = 0;
+  $id(`${cat}_goles_visitante`).value = 0;
+
+  [
+    `${cat}_goleadores_local_list`,
+    `${cat}_goleadores_visitante_list`,
+    `${cat}_tarjetas_local_list`,
+    `${cat}_tarjetas_visitante_list`
+  ].forEach(id => { const el = $id(id); if(el) el.innerHTML = ""; });
+}
+
+function buildPlayerOptions(players){
+  if(!Array.isArray(players) || players.length===0) return `<option value="">-- Sin jugadores --</option>`;
+  return players.map(p => `<option value="${p.id}">${escapeHtml(p.nombre)}</option>`).join("");
+}
+
+/* small helper to avoid XSS if alguna vez usás nombres con chars raros */
+function escapeHtml(str){
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/* ====================================================
+   Validación goles vs goleadores
+   ==================================================== */
+function validarGolesVsGoleadores(cat){
+  const golesLocal = safeParseInt($id(`${cat}_goles_local`).value, 0);
+  const golesVisitante = safeParseInt($id(`${cat}_goles_visitante`).value, 0);
+
+  const sumLocal = [...document.querySelectorAll(`#${cat}_goleadores_local_list [data-goles]`)]
+    .reduce((a,b) => a + safeParseInt(b.value,0), 0);
+
+  const sumVisitante = [...document.querySelectorAll(`#${cat}_goleadores_visitante_list [data-goles]`)]
+    .reduce((a,b) => a + safeParseInt(b.value,0), 0);
+
+  if (sumLocal !== golesLocal) {
+    Swal.fire("Inconsistencia", `El total de goles locales (${sumLocal}) no coincide con el resultado (${golesLocal})`, "warning");
+    return false;
+  }
+  if (sumVisitante !== golesVisitante) {
+    Swal.fire("Inconsistencia", `El total de goles visitantes (${sumVisitante}) no coincide con el resultado (${golesVisitante})`, "warning");
+    return false;
+  } 
+  return true;
+}
+
+function validarGoleadores(cat) {
+  const bloques = [
+    { list: `${cat}_goleadores_local_list`, equipo: "local" },
+    { list: `${cat}_goleadores_visitante_list`, equipo: "visitante" }
+  ];
+
+  for (const bloque of bloques) {
+    const selects = document.querySelectorAll(
+      `#${bloque.list} select[data-player]`
+    );
+
+    for (const select of selects) {
+      if (!select.value) {
+        Swal.fire(
+          "Inconsistencia",
+          `Hay un goleador ${bloque.equipo} sin jugador seleccionado`,
+          "warning"
+        );
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+
+/* ====================================================
+   Validación tarjetas vs jugadores
+   ==================================================== */
+function validarTarjetasVsJugadores(cat) {
+  const tarjetasAmarillasLocal = [...document.querySelectorAll(`#${cat}_tarjetas_local_list select`)];
+  const tarjetasRojasLocal = [...document.querySelectorAll(`#${cat}_tarjetas_local_list select`)];
+  const tarjetasAmarillasVisitante = [...document.querySelectorAll(`#${cat}_tarjetas_visitante_list select`)];
+  const tarjetasRojasVisitante = [...document.querySelectorAll(`#${cat}_tarjetas_visitante_list select`)];
+
+  // Verificar si algún jugador seleccionado es el placeholder (jugador sin ID)
+  const verificarTarjeta = (tarjetas, equipo) => {
+    for (let tarjeta of tarjetas) {
+      if (tarjeta.value === "" || tarjeta.value === "jugador") {
+        Swal.fire("Inconsistencia", `El jugador seleccionado para las tarjetas de ${equipo} no es válido. Por favor, selecciona un jugador real.`, "warning");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Validar tarjetas locales y visitantes
+  if (!verificarTarjeta(tarjetasAmarillasLocal, "local") || 
+      !verificarTarjeta(tarjetasRojasLocal, "local") ||
+      !verificarTarjeta(tarjetasAmarillasVisitante, "visitante") ||
+      !verificarTarjeta(tarjetasRojasVisitante, "visitante")) {
+    return false;
+  }
+
+  return true;
+}
+
+/* ====================================================
+   Eventos: selección de jornada -> cruces
+   ==================================================== */
+/* ================================
+   SELECT JORNADA → CARGA CRUCES
+================================ */
+const selectJornada = $id("select-jornada");
+const selectPartido = $id("select-partido");
+
+if (selectJornada) {
+  selectJornada.addEventListener("change", async function () {
+    const id_jornada = this.value;
+    current.jornada = id_jornada || null;
+
+    resetAfterJornada();
+
+    if (!id_jornada) return;
+
+    await cargarCrucesPendientes(id_jornada);
+
+    $id("partidos-container").style.display = "block";
+  });
+}
+
+
+
+/* ================================
+   CARGAR SOLO CRUCES PENDIENTES
+================================ */
+async function cargarCrucesPendientes(id_jornada) {
+    try {
+        id_jornada = String(id_jornada).trim(); 
+        
+        const r = await fetch(`/api/cruces_pendientes/${id_jornada}`);
+        console.log("📡 Status HTTP:", r.status);
+
+        if (!r.ok) throw new Error(`Error HTTP ${r.status}`);
+
+        const data = await r.json();
+        console.log("📦 Respuesta JSON:", data);
+
+        // Reset del select
+        selectPartido.innerHTML = `<option value="">Seleccionar cruce...</option>`;
+
+        // Si no hay cruces → todo cargado
+        if (!Array.isArray(data) || data.length === 0) {
+            Swal.fire("Información", "Todos los partidos de esta jornada ya fueron cargados", "info");
+            return;
+        }
+
+        // Cargar opciones
+        for (const c of data) {
+            const opt = document.createElement("option");
+            opt.value = c.id;
+            opt.textContent = c.texto;
+            selectPartido.appendChild(opt);
+        }
+
+        console.log("✅ Cruces cargados en el select");
+
+    } catch (e) {
+        console.error("❌ ERROR DETALLADO:", e);
+        Swal.fire("Error", "No se pudieron cargar los cruces pendientes", "error");
+    }
+}
+
+
+
+
+
+/* ==========================================
+   SELECT CRUCE → CARGA PARTIDOS + JUGADORES
+========================================== */
+if (selectPartido) {
+  selectPartido.addEventListener("change", async function () {
+    const partidoId = this.value;
+    resetAfterCruce();
+
+    if (!partidoId) return;
+
+    if (!estadoCruces[partidoId]) {
+      estadoCruces[partidoId] = {
+        quinta: false,
+        sexta: false,
+        septima: false
+      };
+    }
+
+    try {
+      // 1️⃣ INFO GENERAL DEL CRUCE
+      const infoResp = await fetch(`/api/info_cruce_inferiores/${partidoId}`);
+      if (!infoResp.ok) throw new Error("Error info cruce");
+
+      const info = await infoResp.json();
+
+      current.local_club_id = info.local_id;
+      current.visitante_club_id = info.visitante_id;
+
+      CATS.forEach(cat => {
+        $id(`${cat}_local_nombre`).innerText = info.local_nombre;
+        $id(`${cat}_visitante_nombre`).innerText = info.visitante_nombre;
+      });
+
+
+      // 2️⃣ PARTIDOS DEL CRUCE
+      const cruceResp = await fetch("/get_partidos_cruce_inferiores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jornada: current.jornada,
+          local: current.local_club_id,
+          visitante: current.visitante_club_id
+        })
+      });
+
+      if (!cruceResp.ok) throw new Error("Error partidos cruce");
+
+      const cruceData = await cruceResp.json();
+
+      CATS.forEach(cat => {
+        const key = cat === "quinta" ? "Quinta" : cat === "sexta" ? "Sexta" : "Septima";
+        const d = cruceData[key] || null;
+
+        if (d) {
+          current[`id_${cat}`] = d.partido_id;
+          current.equipos_por_categoria[cat] = {
+            local: d.id_equipo_local,
+            visitante: d.id_equipo_visitante
+          };
+        } else {
+          current[`id_${cat}`] = null;
+          current.equipos_por_categoria[cat] = null;
+        }
+      });
+
+      // 🧠 Inicializar estado del cruce SOLO con categorías existentes
+      estadoCruces[partidoId] = {};
+
+      CATS.forEach(cat => {
+        if (current[`id_${cat}`]) {
+          estadoCruces[partidoId][cat] = false;
+        }
+      });
+
+
+      // 3️⃣ JUGADORES POR EQUIPO
+      async function cargarJugadores(cat, ids) {
+        if (!ids?.local || !ids?.visitante) return;
+
+        const [locales, visitantes] = await Promise.all([
+          fetch(`/api/jugadores_por_equipo/${ids.local}`).then(r => r.json()),
+          fetch(`/api/jugadores_por_equipo/${ids.visitante}`).then(r => r.json())
+        ]);
+
+        current[`jugadores_${cat}_local`] = locales;
+        current[`jugadores_${cat}_visitante`] = visitantes;
+      }
+
+      await Promise.all(CATS.map(cat => cargarJugadores(cat, current.equipos_por_categoria[cat])));
+
+
+      // 4️⃣ MOSTRAR SOLO BLOQUES EXISTENTES
+      CATS.forEach(cat => {
+        limpiarFormularioCategoria(cat);
+        const bloque = $id(`bloque-${cat}`);
+        if (current[`id_${cat}`]) {
+          bloque.style.display = "block";
+        } else {
+          bloque.style.display = "none";
+        }
+      });
+
+      $id("formularios-estadisticas").style.display = "block";
+
+    } catch (err) {
+      console.error("Error cargando datos del cruce:", err);
+      Swal.fire("Error", "No se pudieron cargar los datos del cruce.", "error");
+    }
+  });
+}
+
+
+/* ====================================================
+   Dinámicos: agregar goleadores y tarjetas
+   ==================================================== */
+function addGoleador(cat, side){
+  const cont = $id(`${cat}_goleadores_${side}_list`);
+  if(!cont) return;
+
+  const players = current[`jugadores_${cat}_${side}`] ?? [];
+
+  const row = document.createElement("div");
+  row.className = "list-row";
+
+  row.innerHTML = `
+    <select class="form-select" data-player> <!-- ✅ FIX -->
+      <option value="">Jugador</option>
+      ${buildPlayerOptions(players)}
+    </select>
+    <input type="number" class="form-control" data-goles min="1" value="1" style="max-width:90px;">
+    <button class="remove-row btn btn-sm" title="Eliminar" onclick="this.parentElement.remove()">✕</button>
+  `;
+  cont.appendChild(row);
+}
+
+function addTarjeta(cat, side){
+  const cont = $id(`${cat}_tarjetas_${side}_list`);
+  if(!cont) return;
+
+  const players = current[`jugadores_${cat}_${side}`] ?? [];
+
+  const row = document.createElement("div");
+  row.className = `${cat}_${side}_tarjeta_item list-row`;
+
+  row.innerHTML = `
+    <select class="form-select tarjeta-player">
+      <option value="">Jugador</option>
+      ${buildPlayerOptions(players)}
+    </select>
+    <select class="form-select tarjeta-tipo">
+      <option value="amarilla">Amarilla</option>
+      <option value="roja">Roja</option>
+    </select>
+    <button class="remove-row btn btn-sm" title="Eliminar" onclick="this.parentElement.remove()">✕</button>
+  `;
+  cont.appendChild(row);
+}
+
+/* ====================================================
+   Recolección de datos para enviar
+   ==================================================== */
+function collectGoleadores(cat, side){
+  return [...document.querySelectorAll(`#${cat}_goleadores_${side}_list .list-row`)]
+    .map(r => ({
+      jugador_id: safeParseInt(r.querySelector("[data-player]").value || 0, 0),
+      goles: safeParseInt(r.querySelector("[data-goles]").value || 0, 0)
+    }))
+    .filter(x => x.jugador_id > 0 && x.goles > 0);
+}
+
+function collectTarjetasAsObj(cat, side){
+  const amarillas = [], rojas = [];
+  document.querySelectorAll(`.${cat}_${side}_tarjeta_item`).forEach(el => {
+    const jug = safeParseInt(el.querySelector(".tarjeta-player").value || 0, 0);
+    const tipo = el.querySelector(".tarjeta-tipo").value;
+    if (!jug) return;
+    if (tipo === "amarilla") amarillas.push(jug); else rojas.push(jug);
+  });
+  return { amarillas, rojas };
+}
+
+function validarTarjetasVsJugadores(cat) {
+
+  const validar = (selector, equipo) => {
+    const selects = document.querySelectorAll(selector);
+    for (const s of selects) {
+      if (!s.value) {
+        Swal.fire(
+          "Inconsistencia",
+          `Hay una tarjeta ${equipo} sin jugador seleccionado`,
+          "warning"
+        );
+        return false;
+      }
+    }
+    return true;
+  };
+
+  if (
+    !validar(`#${cat}_tarjetas_local_list .tarjeta-player`, "local") ||
+    !validar(`#${cat}_tarjetas_visitante_list .tarjeta-player`, "visitante")
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+
+/* ====================================================
+   Construcción del payload
+   ==================================================== */
+function construirPayload(cat) {
+  const partidMap = {
+    quinta: current.id_quinta,
+    sexta: current.id_sexta,
+    septima: current.id_septima
+  };
+
+  const pid = partidMap[cat];
+  if (!pid) {
+    throw new Error("Partido inexistente para la categoría");
+  }
+
+  const goles_local = safeParseInt($id(`${cat}_goles_local`).value, 0);
+  const goles_visitante = safeParseInt($id(`${cat}_goles_visitante`).value, 0);
+
+  const tarjetasLocal = collectTarjetasAsObj(cat, "local");
+  const tarjetasVisita = collectTarjetasAsObj(cat, "visitante");
+
+  return {
+    partido_id: pid,
+    categoria: cat,
+    goles_local,
+    goles_visitante,
+    goleadores_local: collectGoleadores(cat, "local"),
+    goleadores_visitante: collectGoleadores(cat, "visitante"),
+    amarillas_local: tarjetasLocal.amarillas,
+    rojas_local: tarjetasLocal.rojas,
+    amarillas_visitante: tarjetasVisita.amarillas,
+    rojas_visitante: tarjetasVisita.rojas
+  };
+}
+
+/* ====================================================
+   Guardar categoría (se llama por cada botón)
+   ==================================================== */
+async function guardarCategoria(cat) {
+  const cruceId = selectPartido.value;
+  if (!cruceId) return;
+
+  // 🚫 Si ya fue guardada, no permitir
+  if (estadoCruces[cruceId]?.[cat]) {
+    Swal.fire("Atención", "Esta categoría ya fue cargada", "warning");
+    return;
+  }
+
+    if (
+      !validarGolesVsGoleadores(cat) ||
+      !validarGoleadores(cat) ||
+      !validarTarjetasVsJugadores(cat)
+    ) {
+      return;
+    }
+
+  const payload = construirPayload(cat);
+  console.log("PAYLOAD ENVIADO =>", payload);
+
+  try {
+    const res = await fetch("/api/guardar_inferiores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      Swal.fire("Error", data.message || "Error al guardar", "error");
+      return;
+    }
+
+    // ✅ Marcar categoría como guardada
+    estadoCruces[cruceId][cat] = true;
+
+    // 🔒 Bloquear botón
+    $id(`btn_guardar_${cat}`).disabled = true;
+
+    Swal.fire("Guardado", `${cat.toUpperCase()} guardada correctamente`, "success");
+
+    // ✅ Verificar si el cruce está completo
+    const completo = Object.values(estadoCruces[cruceId]).every(v => v);
+
+    if (completo) {
+      eliminarCruceDelSelect(cruceId);
+    }
+
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "No se pudo guardar la categoría", "error");
+  }
+}
+
+
+function eliminarCruceDelSelect(cruceId) {
+  const opt = selectPartido.querySelector(`option[value="${cruceId}"]`);
+  if (opt) opt.remove();
+
+  selectPartido.value = "";
+  $id("formularios-estadisticas").style.display = "none";
+
+  delete estadoCruces[cruceId];
+
+  CATS.forEach(cat => {
+    limpiarFormularioCategoria(cat);
+    const bloque = $id(`bloque-${cat}`);
+    if (bloque) bloque.style.display = "none";
+
+    const btn = $id(`btn_guardar_${cat}`);
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove("btn-success");
+      btn.classList.add("btn-primary");
+      btn.textContent =
+        cat === "quinta" ? "Guardar Quinta" :
+        cat === "sexta"  ? "Guardar Sexta"  :
+                           "Guardar Séptima";
+    }
+  });
+
+  Swal.fire({
+    icon: "success",
+    title: "Cruce completo",
+    text: "Todos los partidos disponibles fueron cargados",
+    timer: 1400,
+    showConfirmButton: false
+  });
+
+  if (selectPartido.options.length === 1) {
+    Swal.fire(
+      "Jornada completa",
+      "No quedan cruces pendientes para esta jornada",
+      "info"
+    );
+  }
+}
+
+
+/* ====================================================
+   Helpers para reset visual/estado
+   ==================================================== */
+function resetAfterJornada(){
+  $id("partidos-container").style.display = "none";
+  $id("select-partido").innerHTML = `<option value="">Seleccione un cruce...</option>`;
+  resetAfterCruce();
+}
+
+function resetAfterCruce(){
+  $id("formularios-estadisticas").style.display = "none";
+  CATS.forEach(cat => {
+    const b = $id(`bloque-${cat}`);
+    if (b) b.style.display = "none";
+    limpiarFormularioCategoria(cat);
+    current[`id_${cat}`] = null;
+    current.equipos_por_categoria[cat] = null;
+    current[`jugadores_${cat}_local`] = [];
+    current[`jugadores_${cat}_visitante`] = [];
+    const btn = $id(`btn_guardar_${cat}`);
+    if (btn) { btn.disabled = false; btn.classList.add("btn-primary"); btn.classList.remove("btn-success"); btn.textContent = btn.id.includes("quinta") ? "Guardar Quinta" : (btn.id.includes("sexta") ? "Guardar Sexta" : "Guardar Séptima"); }
+  });
+}
+
+/* ====================================================
+   Autoocultar alertas iniciales
+   ==================================================== */
+setTimeout(() => {
+  document.querySelectorAll("#flash-container .alert").forEach(a => {
+    a.style.transition = "opacity 0.8s";
+    a.style.opacity = "0";
+    setTimeout(() => a.remove(), 800);
+  });
+}, 3500);
+</script>
 
 </body>
 </html>
-

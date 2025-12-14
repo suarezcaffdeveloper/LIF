@@ -1,308 +1,176 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Tabla de posiciones</title>
-    <style>
-        /* ======== ESTILO GLOBAL ======== */
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-            color: #333;
+{% extends "base.html" %}
+
+{% block title %}Tabla de Posiciones - {{ categoria }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+
+    body {
+        background: #f2f4f7;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 40px 0 30px;
+        color: #2c3e50;
+        font-weight: 700;
+    }
+
+    /* ======== LAYOUT PRINCIPAL ======== */
+    .tabla-layout {
+        max-width: 1300px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 3fr 1.2fr;
+        gap: 25px;
+    }
+
+    @media (max-width: 992px) {
+        .tabla-layout {
+            grid-template-columns: 1fr;
         }
+    }
 
-        h1 {
-            text-align: center;
-            margin: 40px 0 20px;
-            color: #2c3e50;
-        }
+    /* ======== TABLA ======== */
+    .table-container {
+        background: white;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
 
-        /* ======== NAVBAR MODERNO ======== */
-        .navbar {
-            background: linear-gradient(90deg, #4b89dc, #3a6ea5);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.8rem 2rem;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
 
-        .navbar-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    thead th {
+        background: #1a1a1a;
+        color: white;
+        padding: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+    }
 
-        .navbar-logo img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-        }
+    tbody tr {
+        background: #ffffff;
+        transition: 0.2s ease;
+    }
 
-        .navbar-logo span {
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
+    tbody tr:hover {
+        background: #f1f1f1;
+    }
 
-        .navbar-links {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+    td {
+        padding: 12px 10px;
+        font-size: 0.95rem;
+    }
 
-        .navbar a, .dropbtn {
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 8px 12px;
-            border-radius: 8px;
-        }
+    /* Clasificados (top 8) */
+    .fila-clasificado {
+        box-shadow: 0 0 0 2px #c9f2c9 inset;
+    }
 
-        .navbar a:hover, .dropdown:hover .dropbtn {
-            background: rgba(255, 255, 255, 0.15);
-            color: #f0f4fa;
-        }
+    /* Eliminados */
+    .fila-eliminado {
+        box-shadow: 0 0 0 2px #f5d0d0 inset;
+    }
 
-        /* Contenedor de la tabla */
-        .table-container {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+    /* Escudo + Nombre */
+    td:first-child {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 8px;  /* Espacio vertical entre filas */
-        }
+    td:first-child img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+    }
+
+    /* ======== ICONOS DE RACHA (G/E/P) ======== */
+    .racha {
+        display: flex;
+        gap: 4px;
+    }
+
+    .circulo {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .G { background: #18c964; }  /* verde */
+    .E { background: #f5a623; }  /* amarillo */
+    .P { background: #d63031; }  /* rojo */
+
+    /* ======== PANEL LATERAL ======== */
+    .side-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .panel-box {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    .panel-box h3 {
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1f2d3d;
+    }
+
+    .stat-item {
+        margin-bottom: 12px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+
+    .stat-item strong {
+        color: #333;
+    }
+
+    /* ======== CRUCES ======== */
+    .cruce {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 8px;
+        border-bottom: 1px solid #ededed;
+        font-size: 0.95rem;
+    }
+
+    .cruce:last-child {
+        border-bottom: none;
+    }
+
+    .cruce strong {
+        color: #1f2d3d;
+    }
+
+</style>
+{% endblock %}
 
 
-        thead {
-            background: #111;                          /* Negro más profundo */
-        }
+{% block content %}
 
-        thead th {
-            color: #fff;
-            font-weight: 600;
-            font-family: "Inter", "Segoe UI", Arial, sans-serif;  /* Tipografía más moderna */
-            letter-spacing: 0.3px;                     /* Pequeño espaciado elegante */
-            font-size: 0.95rem;                        /* Un poquito más compacto */
-            padding: 14px 10px;
-            text-transform: uppercase;                 /* Le da estilo moderno */
-            border-bottom: 2px solid #222;             /* Línea sutil para separar */
-        }
+<h1>Tabla de Posiciones - {{ categoria }}</h1>
 
-        /* Efecto visual moderno: leve brillo al mover el mouse */
-        thead th:hover {
-            background: #1a1a1a;
-            transition: background 0.2s ease-in-out;
-        }
+<div class="tabla-layout">
 
-
-        th, td {
-            padding: 12px 10px;
-        }
-
-        tbody tr:nth-child(even) {
-            background: #f8f8f8;
-        }
-
-        tbody tr {
-            border-radius: 10px;
-            overflow: hidden;  /* Fuerza que el redondeo recorte el fondo */
-        }
-
-        .top-8 { 
-            background: #d9f7d9 !important;  /* Verde muy claro */
-        }
-
-        .rest { 
-            background: #f9d6d6 !important;  /* Rojo muy claro */
-        }
-
-        tbody tr:hover {
-            background: #e8e8e8;
-        }
-
-        td {
-            background: transparent;
-        }
-
-
-        /* Ajuste del primer td con escudo */
-        td:first-child {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        td:first-child img {
-            width: 30px;
-            height: auto;
-            border-radius: 4px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            font-size: 0.9em;
-        }
-
-        /* ======== COLORES CLASIFICADOS Y ELIMINADOS ======== */
-        .fila-clasificado {
-            background-color: #d8f5d0 !important; /* verde muy clarito */
-        }
-
-        .fila-eliminado {
-            background-color: #f9d6d6 !important; /* rojo clarito */
-        }
-
-        /* ======== DROPDOWN ======== */
-        .dropdown {
-            position: relative;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background: #ffffff;
-            min-width: 180px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border-radius: 10px;
-            top: 110%;
-            left: 0;
-            overflow: hidden;
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        .dropdown-content a {
-            color: #2c3e50;
-            padding: 12px 16px;
-            display: block;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .dropdown-content a:hover {
-            background: #f2f6fb;
-            color: #3a6ea5;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {opacity: 0; transform: translateY(-8px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-
-        /* ======== RESPONSIVE ======== */
-        @media (max-width: 900px) {
-            .navbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .navbar-links {
-                flex-direction: column;
-                width: 100%;
-                margin-top: 10px;
-            }
-
-            .dropdown-content {
-                position: static;
-                box-shadow: none;
-                border-radius: 0;
-                background: #4b89dc;
-            }
-
-            .dropdown-content a {
-                color: #fff;
-            }
-
-            .dropdown-content a:hover {
-                background: rgba(255,255,255,0.15);
-                color: #fff;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- ======== NAVBAR ======== -->
-    <div class="navbar">
-        <div class="navbar-logo">
-            <img src="{{ url_for('static', filename='escudos/logolif.png') }}" alt="Logo LIF">
-            <span>LIF</span>
-        </div>
-
-        <div class="navbar-links">
-            <a href="/">Inicio</a>
-
-            <div class="dropdown">
-                <button class="dropbtn">Fixture Mayores</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
-                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
-                    <a href="{{ url_for('views.fixture', bloque='mayores') }}">Todas</a>
-                </div>
-            </div>
-
-            <div class="dropdown">
-                <button class="dropbtn">Fixture Inferiores</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
-                    <a href="{{ url_for('views.fixture', bloque='inferiores') }}">Todas</a>
-                </div>
-            </div>
-
-            <div class="dropdown">
-                <button class="dropbtn">Goleadores</button>
-                <div class="dropdown-content">
-                    <a href="/goleadores/primera">Primera</a>
-                    <a href="/goleadores/reserva">Reserva</a>
-                    <a href="/goleadores/quinta">Quinta</a>
-                    <a href="/goleadores/sexta">Sexta</a>
-                    <a href="/goleadores/septima">Séptima</a>
-                </div>
-            </div>
-
-            <div class="dropdown">
-                <button class="dropbtn">Tabla de Posiciones</button>
-                <div class="dropdown-content">
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
-                    <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <h1>Tabla de Posiciones - Primera División</h1>
-
+    <!-- ================= TABLA PRINCIPAL ================= -->
     <div class="table-container">
         <table>
             <thead>
@@ -315,16 +183,20 @@
                     <th>GF</th>
                     <th>GC</th>
                     <th>DIF</th>
-                    <th>Pts</th>
+                    <th>PTS</th>
+                    <th>Racha</th>
                 </tr>
             </thead>
+
             <tbody>
                 {% for fila in tabla %}
                 <tr class="{% if loop.index <= 8 %}fila-clasificado{% else %}fila-eliminado{% endif %}">
+
                     <td>
-                        <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo + '.jpg') }}" alt="{{ fila.nombre_equipo }}">
+                        <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo|replace(' ', '_') + '.jpg') }}">
                         {{ fila.nombre_equipo }}
                     </td>
+
                     <td>{{ fila.partidos_jugados }}</td>
                     <td>{{ fila.partidos_ganados }}</td>
                     <td>{{ fila.partidos_empatados }}</td>
@@ -332,15 +204,69 @@
                     <td>{{ fila.goles_a_favor }}</td>
                     <td>{{ fila.goles_en_contra }}</td>
                     <td>{{ fila.diferencia_gol }}</td>
-                    <td>{{ fila.cantidad_puntos }}</td>
+                    <td><strong>{{ fila.cantidad_puntos }}</strong></td>
+
+                    <!-- Racha -->
+                    <td>
+                        <div class="racha">
+                            {% for r in rachas[fila.nombre_equipo] %}
+                                <div class="circulo {{ r }}"></div>
+                            {% endfor %}
+                        </div>
+                    </td>
+
                 </tr>
                 {% endfor %}
             </tbody>
+
         </table>
     </div>
 
-    <footer>
-        &copy; 2025 Liga Interprovincial de Fútbol - Todos los derechos reservados
-    </footer>
-</body>
-</html>
+
+    <!-- ================= PANEL LATERAL ================= -->
+    <div class="side-panel">
+
+        <!-- ======== ESTADÍSTICAS ======== -->
+        <div class="panel-box">
+            <h3>Estadísticas destacadas</h3>
+
+            <div class="stat-item">
+                <strong>Equipo más goleador:</strong><br>
+                {{ stats.mas_goleador.nombre_equipo }} ({{ stats.mas_goleador.goles_a_favor }} GF)
+            </div>
+
+            <div class="stat-item">
+                <strong>Equipo menos goleado:</strong><br>
+                {{ stats.menos_goleado.nombre_equipo }} ({{ stats.menos_goleado.goles_en_contra }} GC)
+            </div>
+
+            <div class="stat-item">
+                <strong>Mejor diferencia de gol:</strong><br>
+                {{ stats.mejor_diferencia.nombre_equipo }} (+{{ stats.mejor_diferencia.diferencia_gol }})
+            </div>
+        </div>
+
+        <!-- ======== CRUCES TEÓRICOS ======== -->
+        <div class="panel-box">
+            <h3>Cuartos de final (si terminara hoy)</h3>
+
+            {% if cruces %}
+                {% for a, b in cruces %}
+                <div class="cruce">
+                    <strong>{{ a.nombre_equipo }}</strong>
+                    vs
+                    <strong>{{ b.nombre_equipo }}</strong>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No hay suficientes equipos para definir cruces.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+

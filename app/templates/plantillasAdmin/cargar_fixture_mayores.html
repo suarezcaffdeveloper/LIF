@@ -5,182 +5,459 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cargar Fixture Mayores</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
-            background-color: #1e1e1e;
-            color: #f1f1f1;
+            background-color: #1e1e2f;
+            color: #fff;
             min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            padding: 40px;
+        }
+
+        .wrapper {
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding: 2rem;
+            gap: 40px;
+            flex-wrap: wrap;
         }
 
-        .form-container {
-            background-color: #2b2b2b;
-            padding: 2.5rem;
+        /* FORMULARIO */
+        .container-form {
+            background-color: #2a2a3d;
+            padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3);
             width: 100%;
-            max-width: 700px;
+            max-width: 520px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
         }
 
-        h2 {
+        .container-form h2 {
             text-align: center;
-            margin-bottom: 2rem;
-            color: #00bfff;
-            font-weight: bold;
+            margin-bottom: 25px;
+            color: #4fc3f7;
+            font-weight: 700;
+            font-size: 1.6rem;
         }
 
-        .form-control, .form-select {
-            background-color: #1e1e1e;
-            border: 1px solid #00bfff;
-            color: #f1f1f1;
+        .form-control,
+        .form-select {
+            background-color: #1e1e2f;
+            border: 1px solid #4fc3f7;
+            color: #fff;
         }
 
-        .form-control:focus, .form-select:focus {
-            border-color: #00bfff;
-            box-shadow: 0 0 6px #00bfff;
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 8px rgba(79, 195, 247, 0.6);
         }
 
         .btn-primary {
-            background-color: #00bfff;
+            background-color: #4fc3f7 !important;
             border: none;
+            transition: 0.3s;
             font-weight: 600;
-            width: 100%;
-            margin-top: 1.4rem;
+            margin-top: 20px;
         }
 
         .btn-primary:hover {
-            background-color: #0099cc;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 1rem;
-            color: #ccc;
+            background-color: #39b0e0 !important;
         }
 
+        /* PANEL PARTIDOS */
+        .card-custom {
+            background-color: #2a2a3d;
+            padding: 25px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-self: center; /* 👈 centrado vertical */
+        }
+
+        .card-custom h5 {
+            text-align: center;
+            color: #4fc3f7;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        /* LISTA */
+        #partidos-list {
+            min-height: 400px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* CARD */
+        .cruce-card {
+            background-color: #ffffff;
+            border: 2px solid #4fc3f7;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 12px;
+            color: #000;
+            opacity: 0;
+            transform: translateX(-12px);
+            animation: slideIn 0.25s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-12px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .cruce-flex {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .cruce-team {
+            flex: 1;
+            text-align: center;
+        }
+
+        .cruce-vs {
+            flex: 0;
+            font-weight: 800;
+            color: #39b0e0;
+        }
+
+        .muted {
+            color: #aaa;
+            text-align: center;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 30px;
+            text-align: center;
+            color: #ccc;
+        }
         .back-link:hover {
             color: #4fc3f7;
+        }
+
+        /* FLASH */
+        #flash-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .flash-message {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            font-weight: bold;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            margin-bottom: 0.5rem;
+            pointer-events: auto;
+        }
+
+        .flash-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
 
 <body>
 
-<div class="form-container">
+<!-- FLASH -->
+<div id="flash-container"></div>
 
-    <h2>Cargar Fixture Mayores</h2>
+<div class="wrapper">
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% set last = messages[-1] %}
-            <div class="alert alert-{{ 'danger' if last[0]=='error' else last[0] }}">
-                {{ last[1] }}
+    <!-- FORM -->
+    <div class="container-form">
+        <h2>Cargar Fixture Mayores</h2>
+
+        <form>
+
+            <label class="mt-2">Jornada:</label>
+            <select id="jornada" class="form-select" required>
+                <option value="">Seleccionar jornada...</option>
+                {% for j in range(1, total_jornadas + 1) %}
+                    <option value="{{ j }}">{{ j }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="mt-3">Fecha (opcional):</label>
+            <input type="date" id="fecha" class="form-control">
+
+            <label class="mt-3">Hora (opcional):</label>
+            <input type="time" id="hora" class="form-control">
+
+            <label class="mt-3">Club Local:</label>
+            <select id="club_local" class="form-select" required>
+                <option value="">Seleccionar club...</option>
+                {% for club in clubes %}
+                    <option value="{{ club.id }}">{{ club.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <label class="mt-3">Club Visitante:</label>
+            <select id="club_visitante" class="form-select" required>
+                <option value="">Seleccionar club...</option>
+                {% for club in clubes %}
+                    <option value="{{ club.id }}">{{ club.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <div class="d-flex justify-content-center mt-4">
+                <button type="button" id="btn-guardar" class="btn btn-primary px-4">
+                    Crear partido
+                </button>
             </div>
-        {% endif %}
-    {% endwith %}
 
-    <form method="POST" action="{{ url_for('views.cargar_fixture_mayores') }}">
+        </form>
 
-        <!-- Jornada -->
-        <label class="mt-2">Jornada:</label>
-        <select name="jornada" id="jornada" class="form-select" required>
-            <option value="">Seleccionar jornada</option>
-            {% for j in range(1, total_jornadas + 1) %}
-            <option value="{{ j }}">{{ j }}</option>
-            {% endfor %}
-        </select>
+        <!-- 👇 ESTE LINK VA DENTRO DEL FORMULARIO -->
+        <a href="{{ url_for('views.adminview') }}" class="back-link">
+            ← Volver al panel de administrador
+        </a>
+    </div>
 
+    <!-- PANEL PARTIDOS -->
+    <div class="card-custom" style="align-self: center;">
+        <h5>Partidos cargados – Jornada <span id="jornada-seleccionada">-</span></h5>
 
-        <!-- Club Local -->
-        <label class="mt-3">Club Local:</label>
-        <select name="club_local" id="club_local" class="form-select" required onchange="actualizarEquipoLocal()">
-            <option value="">Seleccionar club</option>
-            {% for club in clubes %}
-            <option value="{{ club.id }}">{{ club.nombre }}</option>
-            {% endfor %}
-        </select>
-
-        <input type="hidden" name="equipo_local" id="equipo_local">
-
-        <!-- Club Visitante -->
-        <label class="mt-3">Club Visitante:</label>
-        <select name="club_visitante" id="club_visitante" class="form-select" required onchange="actualizarEquipoVisitante()">
-            <option value="">Seleccionar club</option>
-            {% for club in clubes %}
-            <option value="{{ club.id }}">{{ club.nombre }}</option>
-            {% endfor %}
-        </select>
-
-        <input type="hidden" name="equipo_visitante" id="equipo_visitante">
-
-        <button type="submit" class="btn btn-primary mt-4">Crear partido</button>
-
-    </form>
-    <a href="{{ url_for('views.adminview') }}" class="back-link text-align-center">← Volver al panel del administrador</a>
+        <div id="partidos-list">
+            <p class="muted">Seleccione una jornada.</p>
+        </div>
+    </div>
 
 </div>
 
 <script>
-    // Guardamos una copia original de los clubes para poder reconstruir las listas
-    const clubesOriginales = [
-        {% for club in clubes %}
-            { id: "{{ club.id }}", nombre: "{{ club.nombre }}" }{% if not loop.last %},{% endif %}
-        {% endfor %}
-    ];
+/* ============================
+   DATA INICIAL
+============================ */
+const clubesOriginales = [
+    {% for club in clubes %}
+        { id: {{ club.id }}, nombre: "{{ club.nombre }}" }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
 
+const jornadaSelect   = document.getElementById("jornada");
+const localSelect     = document.getElementById("club_local");
+const visitanteSelect = document.getElementById("club_visitante");
+const listDiv         = document.getElementById("partidos-list");
+const jornadaLabel    = document.getElementById("jornada-seleccionada");
 
-    function actualizarOpciones() {
-        const localSelect = document.getElementById("club_local");
-        const visitanteSelect = document.getElementById("club_visitante");
+let ocupados = [];
 
-        const localSeleccionado = localSelect.value;
-        const visitanteSeleccionado = visitanteSelect.value;
+/* ============================
+   RECONSTRUIR SELECTS
+============================ */
+function reconstruirSelects() {
+    const localSel = localSelect.value;
+    const visSel   = visitanteSelect.value;
 
-        // Limpiar selects
-        localSelect.innerHTML = '<option value="">Seleccionar club</option>';
-        visitanteSelect.innerHTML = '<option value="">Seleccionar club</option>';
+    localSelect.innerHTML     = '<option value="">Seleccionar club</option>';
+    visitanteSelect.innerHTML = '<option value="">Seleccionar club</option>';
 
-        clubesOriginales.forEach(club => {
+    clubesOriginales.forEach(club => {
+        if (ocupados.includes(club.id)) return;
 
-            // Para el select Local → NO mostrar el visitante elegido
-            if (club.id !== visitanteSeleccionado) {
-                let optLocal = document.createElement("option");
-                optLocal.value = club.id;
-                optLocal.textContent = club.nombre;
+        if (club.id != visSel) {
+            const op = document.createElement("option");
+            op.value = club.id;
+            op.textContent = club.nombre;
+            if (club.id == localSel) op.selected = true;
+            localSelect.appendChild(op);
+        }
 
-                if (club.id === localSeleccionado) optLocal.selected = true;
-                localSelect.appendChild(optLocal);
-            }
+        if (club.id != localSel) {
+            const op2 = document.createElement("option");
+            op2.value = club.id;
+            op2.textContent = club.nombre;
+            if (club.id == visSel) op2.selected = true;
+            visitanteSelect.appendChild(op2);
+        }
+    });
+}
 
-            // Para el select Visitante → NO mostrar el local elegido
-            if (club.id !== localSeleccionado) {
-                let optVisit = document.createElement("option");
-                optVisit.value = club.id;
-                optVisit.textContent = club.nombre;
+localSelect.addEventListener("change", reconstruirSelects);
+visitanteSelect.addEventListener("change", reconstruirSelects);
 
-                if (club.id === visitanteSeleccionado) optVisit.selected = true;
-                visitanteSelect.appendChild(optVisit);
-            }
-        });
+/* ============================
+   CARGAR PARTIDOS
+============================ */
+async function cargarPartidos(jornada) {
+    if (!jornada) {
+        listDiv.innerHTML = '<p class="muted">Seleccione una jornada.</p>';
+        return;
     }
 
-    // Cuando elige local o visitante → se actualizan los selects
-    document.getElementById("club_local").addEventListener("change", actualizarOpciones);
-    document.getElementById("club_visitante").addEventListener("change", actualizarOpciones);
+    jornadaLabel.textContent = jornada;
 
-    // Cargar listas iniciales
-    actualizarOpciones();
+    try {
+        const res = await fetch(
+            `{{ url_for('views.fixture_ocupados', jornada=0) }}`.replace("/0", `/${jornada}`)
+        );
+
+        const data = await res.json();
+
+        ocupados = (data.ocupados || []).map(n => Number(n));
+        reconstruirSelects();
+
+        const partidos = data.partidos || [];
+        listDiv.innerHTML = "";
+
+        if (partidos.length === 0) {
+            listDiv.innerHTML = '<p class="muted">No hay partidos cargados para esta jornada.</p>';
+            return;
+        }
+
+        partidos.forEach((p, idx) => {
+            const card = document.createElement("div");
+            card.classList.add("cruce-card");
+            card.style.opacity = 0;
+            card.style.transform = "translateY(20px)";
+
+            card.innerHTML = `
+                <div class="cruce-flex">
+                    <div class="cruce-team">${p.local}</div>
+                    <div class="cruce-vs">VS</div>
+                    <div class="cruce-team">${p.visitante}</div>
+                </div>
+            `;
+
+            listDiv.appendChild(card);
+
+            setTimeout(() => {
+                card.style.transition = "all 0.35s ease";
+                card.style.opacity = 1;
+                card.style.transform = "translateY(0)";
+            }, idx * 50);
+        });
+
+    } catch (err) {
+        console.error("❌ Error cargando partidos:", err);
+        listDiv.innerHTML = '<p class="text-danger">Error del servidor.</p>';
+    }
+}
+
+/* ============================
+   GUARDAR PARTIDO MAYORES
+============================ */
+async function guardarPartidoMayores() {
+    const jornada = jornadaSelect.value;
+
+    if (!jornada) {
+        mostrarFlash("Seleccione una jornada.", "danger");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("jornada", jornada);
+    formData.append("club_local", localSelect.value);
+    formData.append("club_visitante", visitanteSelect.value);
+    formData.append("fecha", document.getElementById("fecha").value);
+    formData.append("hora", document.getElementById("hora").value);
+
+    try {
+        const res = await fetch("/cargar_fixture_mayores", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        const data = await res.json();
+
+        if (!data.ok) {
+            mostrarFlash(data.msg || "No se pudo cargar el partido.", "danger");
+            return;
+        }
+
+        mostrarFlash("Partidos cargados correctamente.", "success");
+
+        await cargarPartidos(jornada);
+
+        localSelect.value = "";
+        visitanteSelect.value = "";
+        reconstruirSelects();
+
+        const cards = listDiv.querySelectorAll(".cruce-card");
+        const last = cards[cards.length - 1];
+        if (last) {
+            last.style.backgroundColor = "#e0f7ff";
+            setTimeout(() => last.style.backgroundColor = "#ffffff", 500);
+        }
+
+    } catch (err) {
+        console.error("❌ Error guardando partido:", err);
+        mostrarFlash("Error del servidor.", "danger");
+    }
+}
+
+/* ============================
+   EVENTOS
+============================ */
+jornadaSelect.addEventListener("change", () => {
+    cargarPartidos(jornadaSelect.value);
+});
+
+document.getElementById("btn-guardar").addEventListener("click", e => {
+    e.preventDefault();
+    guardarPartidoMayores();
+});
+
+/* ============================
+   FLASH
+============================ */
+function mostrarFlash(mensaje, tipo = "success") {
+    const container = document.getElementById("flash-container");
+
+    const flash = document.createElement("div");
+    flash.className = `flash-message flash-${tipo}`;
+    flash.textContent = mensaje;
+
+    container.appendChild(flash);
+
+    setTimeout(() => {
+        flash.style.opacity = 1;
+        flash.style.transform = "translateY(0)";
+    }, 100);
+
+    setTimeout(() => {
+        flash.style.opacity = 0;
+        flash.style.transform = "translateY(-20px)";
+        setTimeout(() => flash.remove(), 500);
+    }, 3000);
+}
 </script>
-
-
-
 </body>
 </html>
-
-
 
