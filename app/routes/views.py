@@ -119,8 +119,7 @@ def crear_temporada():
 @views.route('/fixture/<bloque>')
 @views.route('/fixture/<bloque>/<categoria>')
 def fixture(bloque, categoria=None):
-
-    TORNEO_APERTURA_ID = 9  # 👈 CLAVE
+    TORNEO_APERTURA_ID = 9  # 👈 Reemplazar si cambia el torneo
 
     bloques = {
         "mayores": ["Primera", "Reserva"],
@@ -133,7 +132,7 @@ def fixture(bloque, categoria=None):
 
     # Categorías del bloque (normalizadas)
     categorias_bloque_raw = bloques[bloque]
-    categorias_bloque = [c.lower() for c in categorias_bloque_raw]
+    categorias_bloque = [c.strip().lower() for c in categorias_bloque_raw]
 
     partidos = []
 
@@ -145,12 +144,11 @@ def fixture(bloque, categoria=None):
             flash("Categoría inválida", "danger")
             return redirect(url_for("views.index"))
 
-        categoria_db = categoria.lower()
-
+        categoria_db = categoria.strip().lower()
         partidos = (
             Partido.query
             .filter(
-                func.lower(Partido.categoria) == categoria_db,
+                func.lower(func.trim(Partido.categoria)) == categoria_db,
                 Partido.torneo_id == TORNEO_APERTURA_ID
             )
             .order_by(Partido.jornada, Partido.fecha_partido)
@@ -167,7 +165,7 @@ def fixture(bloque, categoria=None):
         sub = (
             db.session.query(func.min(Partido.id).label("pid"))
             .filter(
-                func.lower(Partido.categoria).in_(categorias_bloque),
+                func.lower(func.trim(Partido.categoria)).in_(categorias_bloque),
                 Partido.torneo_id == TORNEO_APERTURA_ID
             )
             .group_by(
