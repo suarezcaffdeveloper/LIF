@@ -3,18 +3,48 @@
 
 {% block content %}
 <style>
-    /* Contenedor de las cards: 3 columnas */
+    /* Fondo general */
+    body {
+        background-color: #f4f6f9;
+    }
 
-    h1 {
-        font-size: 2rem;
-        margin: 40px 0 30px 0;
+    /* Wrapper general para márgenes laterales */
+    .videos-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px 60px;
+    }
+
+    /* Título principal */
+    .videos-title {
+        font-size: 1.9rem;
+        font-weight: 500;
+        margin: 40px 0 10px;
         text-align: center;
         color: #1f2d3d;
+        letter-spacing: 0.3px;
     }
+
+    /* Botón volver */
+    .volver-link {
+        display: inline-block;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .volver-link:hover {
+        color: #1f2d3d;
+        text-decoration: underline;
+    }
+
+    /* Grid de videos */
     .videos-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 25px;
+        gap: 28px;
         width: 100%;
     }
 
@@ -30,64 +60,91 @@
         }
     }
 
+    /* Card de video */
     .video-card {
         background: #fff;
         border-radius: 14px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
         border: 1px solid #e3e7ee;
-        padding: 20px;
+        padding: 18px;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .video-card h2 {
-        font-size: 1.2rem;
-        margin: 0;
-        color: #1f2d3d;
+    .video-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 26px rgba(0,0,0,0.08);
     }
 
-    .video-card p {
-        font-size: 0.95rem;
-        color: #2c3e50;
-        margin: 0;
-    }
-
+    /* Video responsive */
     .video-wrap {
         position: relative;
         width: 100%;
-        padding-top: 56.25%; /* 16:9 */
+        padding-top: 56.25%;
         overflow: hidden;
         border-radius: 12px;
     }
 
     .video-wrap iframe {
         position: absolute;
-        top: 0; left: 0;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         border: 0;
     }
 
+    /* Título del video */
+    .video-card h2 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 0;
+        color: #1f2d3d;
+    }
+
+    /* Descripción */
+    .video-card p {
+        font-size: 0.92rem;
+        color: #2c3e50;
+        margin: 0;
+        line-height: 1.45;
+    }
+
+    /* Fecha */
     .video-card .fecha {
-        font-size: 0.85rem;
-        color: #777;
-        margin-top: 5px;
+        font-size: 0.8rem;
+        color: #8a8a8a;
+        margin-top: auto;
+        text-align: right;
     }
 </style>
 
-<div class="left">
-    <h1>Todos los Videos</h1>
+<div class="videos-wrapper">
+    <h1 class="videos-title">Todos los Videos</h1>
+
+    <a href="{{ url_for('views.index') }}" class="volver-link">
+        ← Volver al inicio
+    </a>
 
     <div class="videos-grid">
         {% for video in videos %}
         <div class="video-card">
             <div class="video-wrap">
-                <iframe src="{{ video.url | replace('watch?v=', 'embed/') }}" allowfullscreen></iframe>
+                <iframe
+                    src="{{ video.url | replace('watch?v=', 'embed/') }}"
+                    allowfullscreen>
+                </iframe>
             </div>
+
             <h2>{{ video.titulo_video }}</h2>
+
             <p>{{ video.descripcion }}</p>
-            <p class="fecha">{{ video.fecha_subida.strftime('%d/%m/%Y') }}</p>
+
+            <p class="fecha">
+                {{ video.fecha_subida.strftime('%d/%m/%Y') }}
+            </p>
         </div>
         {% endfor %}
     </div>

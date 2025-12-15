@@ -24,17 +24,69 @@ class Equipo(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     club_id = db.Column(db.Integer, db.ForeignKey('club.id'), nullable=False)
-    categoria = db.Column(db.String(50), nullable=False) 
+    categoria = db.Column(db.String(50), nullable=False)
 
     club = db.relationship('Club', back_populates='equipos', lazy='joined')
-    jugadores = db.relationship('JugadorEquipo', back_populates='equipo', lazy='select', cascade='all, delete-orphan')
+    jugadores = db.relationship(
+        'JugadorEquipo',
+        back_populates='equipo',
+        cascade='all, delete-orphan'
+    )
 
-    partidos_local = db.relationship('Partido', foreign_keys='Partido.equipo_local_id', back_populates='equipo_local', lazy='select')
-    partidos_visitante = db.relationship('Partido', foreign_keys='Partido.equipo_visitante_id', back_populates='equipo_visitante', lazy='select')
+    partidos_local = db.relationship(
+        'Partido',
+        foreign_keys='Partido.equipo_local_id',
+        back_populates='equipo_local'
+    )
+    partidos_visitante = db.relationship(
+        'Partido',
+        foreign_keys='Partido.equipo_visitante_id',
+        back_populates='equipo_visitante'
+    )
 
     def __repr__(self):
-        return f"<Equipo #{self.id} {self.club.nombre} - {self.categoria}>"
+        return f"<Equipo {self.club.nombre} - {self.categoria}>"
 
+class Temporada(db.Model):
+    __tablename__ = 'temporada'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(20), nullable=False, unique=True)  # ej: "2025"
+    activa = db.Column(db.Boolean, default=False)
+
+    torneos = db.relationship(
+        'Torneo',
+        back_populates='temporada',
+        cascade='all, delete-orphan'
+    )
+
+    def __repr__(self):
+        return f"<Temporada {self.nombre}>"
+
+class Torneo(db.Model):
+    __tablename__ = 'torneo'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50), nullable=False)  # Apertura / Clausura
+
+    temporada_id = db.Column(db.Integer, db.ForeignKey('temporada.id'), nullable=False)
+    temporada = db.relationship('Temporada', back_populates='torneos')
+
+    partidos = db.relationship('Partido', back_populates='torneo')
+
+    def __repr__(self):
+        return f"<Torneo {self.nombre} - {self.temporada.nombre}>"
+    
+class Fase(db.Model):
+    __tablename__ = 'fase'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(50), nullable=False)
+    orden = db.Column(db.Integer, nullable=False, default=0)  # si no definiste, poner default
+    torneo_id = db.Column(db.Integer, db.ForeignKey('torneo.id'), nullable=False)
+    ida_vuelta = db.Column(db.Boolean, default=False, nullable=False)
+
+    partidos = db.relationship('Partido', back_populates='fase')
 
 class Jugador(db.Model):
     __tablename__ = 'jugador'
@@ -81,6 +133,9 @@ class Partido(db.Model):
     jornada = db.Column(db.Integer, nullable=False)
     categoria = db.Column(db.String(20), nullable=False)
 
+    torneo_id = db.Column(db.Integer, db.ForeignKey('torneo.id'), nullable=True)
+    fase_id = db.Column(db.Integer, db.ForeignKey('fase.id'), nullable=True)
+
     equipo_local_id = db.Column(db.Integer, db.ForeignKey('equipo.id'), nullable=False)
     equipo_visitante_id = db.Column(db.Integer, db.ForeignKey('equipo.id'), nullable=False)
 
@@ -88,13 +143,31 @@ class Partido(db.Model):
     goles_visitante = db.Column(db.Integer, default=0, nullable=False)
     jugado = db.Column(db.Boolean, default=False, nullable=False)
 
-    equipo_local = db.relationship('Equipo', foreign_keys=[equipo_local_id], back_populates='partidos_local', lazy='joined')
-    equipo_visitante = db.relationship('Equipo', foreign_keys=[equipo_visitante_id], back_populates='partidos_visitante', lazy='joined')
+    equipo_local = db.relationship(
+        'Equipo',
+        foreign_keys=[equipo_local_id],
+        back_populates='partidos_local'
+    )
+    equipo_visitante = db.relationship(
+        'Equipo',
+        foreign_keys=[equipo_visitante_id],
+        back_populates='partidos_visitante'
+    )
 
-    estadisticas_jugadores = db.relationship('EstadoJugadorPartido', back_populates='partido', lazy='select', cascade='all, delete-orphan')
+    torneo = db.relationship('Torneo', back_populates='partidos')
+    fase = db.relationship('Fase', back_populates='partidos')
+
+    estadisticas_jugadores = db.relationship(
+        'EstadoJugadorPartido',
+        back_populates='partido',
+        lazy='select',
+        cascade='all, delete-orphan'
+    )
 
     def __repr__(self):
-        return f"<Partido {self.id} {self.equipo_local.club.nombre} vs {self.equipo_visitante.club.nombre} ({self.fecha_partido})>"
+        return f"<Partido {self.id} J{self.jornada}>"
+
+
 
 class EstadoJugadorPartido(db.Model):
     __tablename__ = 'estado_jugador_partido'

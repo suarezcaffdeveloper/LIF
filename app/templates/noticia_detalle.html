@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ noticia.titulo }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Fondo general */
+    .detalle-wrapper {
+        background-color: #f4f6f9;
+        padding: 60px 20px;
+        min-height: 100vh;
+    }
+
+    /* Card principal */
+    .detalle-card {
+        background: #ffffff;
+        border-radius: 18px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Imagen principal */
+    .detalle-imagen {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Contenido */
+    .detalle-contenido {
+        padding: 40px;
+    }
+
+    .detalle-contenido h1 {
+        font-size: 2rem;
+        color: #1f2d3d;
+        margin-bottom: 15px;
+    }
+
+    .detalle-fecha {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 30px;
+    }
+
+    .detalle-texto {
+        font-size: 1.05rem;
+        line-height: 1.75;
+        color: #2c3e50;
+    }
+
+    /* Botón volver */
+    .volver-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+    .volver-link:hover {
+        color: #1f2d3d;
+        text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .detalle-imagen {
+            height: 220px;
+        }
+
+        .detalle-contenido {
+            padding: 25px;
+        }
+
+        .detalle-contenido h1 {
+            font-size: 1.6rem;
+        }
+    }
+    /* Autor de la noticia */
+    .noticia-autor {
+        margin-top: auto;
+        font-size: 0.8rem;
+        color: #8a8a8a;
+        text-align: right;
+        font-style: italic;
+    }
+</style>
+
+<div class="detalle-wrapper">
+
+    <a href="{{ url_for('views.todas_noticias') }}" class="volver-link">
+        ← Volver a noticias
+    </a>
+
+    <div class="detalle-card">
+
+        {% if noticia.imagen_url %}
+            <img
+                src="{{ noticia.imagen_url }}"
+                class="detalle-imagen"
+                alt="{{ noticia.titulo }}">
+        {% endif %}
+
+        <div class="detalle-contenido">
+            <h1 class="fw-bold">{{ noticia.titulo }}</h1>
+
+            <div class="detalle-fecha">
+                {{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}
+            </div>
+
+            <div class="detalle-texto">
+                {{ noticia.contenido | safe }}
+            </div>
+            <div class="noticia-autor">
+                por {{ noticia.autor.nombre_completo }} 
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,172 +1,166 @@
 {% extends "base.html" %}
 
-{% block title %}Tabla de Posiciones - {{ categoria }}{% endblock %}
+{% block title %}Tabla de Posiciones - {{ categoria|capitalize }}{% endblock %}
 
 {% block extra_styles %}
 <style>
+body {
+    background: #f2f4f7;
+}
 
-    body {
-        background: #f2f4f7;
-    }
+h1 {
+    text-align: center;
+    margin: 40px 0 30px;
+    color: #2c3e50;
+    font-weight: 700;
+}
 
-    h1 {
-        text-align: center;
-        margin: 40px 0 30px;
-        color: #2c3e50;
-        font-weight: 700;
-    }
+/* ======== LAYOUT PRINCIPAL ======== */
+.tabla-layout {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 3fr 1.2fr;
+    gap: 25px;
+}
 
-    /* ======== LAYOUT PRINCIPAL ======== */
+@media (max-width: 992px) {
     .tabla-layout {
-        max-width: 1300px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: 3fr 1.2fr;
-        gap: 25px;
+        grid-template-columns: 1fr;
     }
+}
 
-    @media (max-width: 992px) {
-        .tabla-layout {
-            grid-template-columns: 1fr;
-        }
-    }
+/* ======== TABLA ======== */
+.table-container {
+    background: white;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
 
-    /* ======== TABLA ======== */
-    .table-container {
-        background: white;
-        border-radius: 14px;
-        padding: 25px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    }
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
 
-    table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 10px;
-    }
+thead th {
+    background: #1a1a1a;
+    color: white;
+    padding: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+}
 
-    thead th {
-        background: #1a1a1a;
-        color: white;
-        padding: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.85rem;
-    }
+tbody tr {
+    background: #ffffff;
+    transition: 0.2s ease;
+}
 
-    tbody tr {
-        background: #ffffff;
-        transition: 0.2s ease;
-    }
+tbody tr:hover {
+    background: #f1f1f1;
+}
 
-    tbody tr:hover {
-        background: #f1f1f1;
-    }
+td {
+    padding: 12px 10px;
+    font-size: 0.95rem;
+}
 
-    td {
-        padding: 12px 10px;
-        font-size: 0.95rem;
-    }
+.fila-clasificado {
+    box-shadow: 0 0 0 2px #c9f2c9 inset;
+}
 
-    /* Clasificados (top 8) */
-    .fila-clasificado {
-        box-shadow: 0 0 0 2px #c9f2c9 inset;
-    }
+.fila-eliminado {
+    box-shadow: 0 0 0 2px #f5d0d0 inset;
+}
 
-    /* Eliminados */
-    .fila-eliminado {
-        box-shadow: 0 0 0 2px #f5d0d0 inset;
-    }
+/* Escudo + Nombre */
+td:first-child {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
 
-    /* Escudo + Nombre */
-    td:first-child {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-    }
+td:first-child img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
 
-    td:first-child img {
-        width: 32px;
-        height: 32px;
-        object-fit: contain;
-    }
+/* ======== ICONOS DE RACHA (G/E/P) ======== */
+.racha {
+    display: flex;
+    gap: 4px;
+}
 
-    /* ======== ICONOS DE RACHA (G/E/P) ======== */
-    .racha {
-        display: flex;
-        gap: 4px;
-    }
+.circulo {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
 
-    .circulo {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-    }
+.G { background: #18c964; }
+.E { background: #f5a623; }
+.P { background: #d63031; }
 
-    .G { background: #18c964; }  /* verde */
-    .E { background: #f5a623; }  /* amarillo */
-    .P { background: #d63031; }  /* rojo */
+/* ======== PANEL LATERAL ======== */
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
 
-    /* ======== PANEL LATERAL ======== */
-    .side-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-    }
+.panel-box {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
 
-    .panel-box {
-        background: white;
-        border-radius: 14px;
-        padding: 20px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    }
+.panel-box h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1f2d3d;
+}
 
-    .panel-box h3 {
-        margin-bottom: 15px;
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #1f2d3d;
-    }
+.stat-item {
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
 
-    .stat-item {
-        margin-bottom: 12px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-    }
+.stat-item:last-child {
+    border-bottom: none;
+}
 
-    .stat-item:last-child {
-        border-bottom: none;
-    }
+.stat-item strong {
+    color: #333;
+}
 
-    .stat-item strong {
-        color: #333;
-    }
+.cruce {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 8px;
+    border-bottom: 1px solid #ededed;
+    font-size: 0.95rem;
+}
 
-    /* ======== CRUCES ======== */
-    .cruce {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 8px;
-        border-bottom: 1px solid #ededed;
-        font-size: 0.95rem;
-    }
+.cruce:last-child {
+    border-bottom: none;
+}
 
-    .cruce:last-child {
-        border-bottom: none;
-    }
-
-    .cruce strong {
-        color: #1f2d3d;
-    }
-
+.cruce strong {
+    color: #1f2d3d;
+}
 </style>
 {% endblock %}
 
-
 {% block content %}
 
-<h1>Tabla de Posiciones - {{ categoria }}</h1>
+<h1>Tabla de Posiciones - {{ categoria|capitalize }}</h1>
 
 <div class="tabla-layout">
 
@@ -191,12 +185,10 @@
             <tbody>
                 {% for fila in tabla %}
                 <tr class="{% if loop.index <= 8 %}fila-clasificado{% else %}fila-eliminado{% endif %}">
-
                     <td>
                         <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo|replace(' ', '_') + '.jpg') }}">
                         {{ fila.nombre_equipo }}
                     </td>
-
                     <td>{{ fila.partidos_jugados }}</td>
                     <td>{{ fila.partidos_ganados }}</td>
                     <td>{{ fila.partidos_empatados }}</td>
@@ -205,57 +197,54 @@
                     <td>{{ fila.goles_en_contra }}</td>
                     <td>{{ fila.diferencia_gol }}</td>
                     <td><strong>{{ fila.cantidad_puntos }}</strong></td>
-
-                    <!-- Racha -->
                     <td>
                         <div class="racha">
-                            {% for r in rachas[fila.nombre_equipo] %}
-                                <div class="circulo {{ r }}"></div>
-                            {% endfor %}
+                            {% if rachas[fila.nombre_equipo] %}
+                                {% for r in rachas[fila.nombre_equipo] %}
+                                    <div class="circulo {{ r }}"></div>
+                                {% endfor %}
+                            {% else %}
+                                <span style="color:#999; font-size:0.8rem;">—</span>
+                            {% endif %}
                         </div>
                     </td>
-
                 </tr>
                 {% endfor %}
             </tbody>
-
         </table>
     </div>
-
 
     <!-- ================= PANEL LATERAL ================= -->
     <div class="side-panel">
 
-        <!-- ======== ESTADÍSTICAS ======== -->
+        <!-- Estadísticas destacadas -->
         <div class="panel-box">
             <h3>Estadísticas destacadas</h3>
-
+            {% if stats %}
             <div class="stat-item">
                 <strong>Equipo más goleador:</strong><br>
                 {{ stats.mas_goleador.nombre_equipo }} ({{ stats.mas_goleador.goles_a_favor }} GF)
             </div>
-
             <div class="stat-item">
                 <strong>Equipo menos goleado:</strong><br>
                 {{ stats.menos_goleado.nombre_equipo }} ({{ stats.menos_goleado.goles_en_contra }} GC)
             </div>
-
             <div class="stat-item">
                 <strong>Mejor diferencia de gol:</strong><br>
                 {{ stats.mejor_diferencia.nombre_equipo }} (+{{ stats.mejor_diferencia.diferencia_gol }})
             </div>
+            {% else %}
+            <p>No hay estadísticas disponibles.</p>
+            {% endif %}
         </div>
 
-        <!-- ======== CRUCES TEÓRICOS ======== -->
+        <!-- Cruces teóricos -->
         <div class="panel-box">
             <h3>Cuartos de final (si terminara hoy)</h3>
-
             {% if cruces %}
                 {% for a, b in cruces %}
                 <div class="cruce">
-                    <strong>{{ a.nombre_equipo }}</strong>
-                    vs
-                    <strong>{{ b.nombre_equipo }}</strong>
+                    <strong>{{ a.nombre_equipo }}</strong> vs <strong>{{ b.nombre_equipo }}</strong>
                 </div>
                 {% endfor %}
             {% else %}
@@ -264,7 +253,6 @@
         </div>
 
     </div>
-
 </div>
 
 {% endblock %}

@@ -19,9 +19,9 @@
 }
 
 @media (max-width: 900px) {
-    .main-grid { 
-        grid-template-columns: 1fr; 
-        padding: 0 12px; 
+    .main-grid {
+        grid-template-columns: 1fr;
+        padding: 0 12px;
     }
 }
 
@@ -29,119 +29,88 @@
    LEFT CARD (GOLEADORES)
    ============================================================ */
 .left-card {
-    background: #fff;
-    border-radius: 16px;
+    background: #ffffff;
+    border-radius: 18px;
     padding: 22px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     border: 1px solid #e6ebf2;
     min-height: 520px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    height: 100%;
 }
 
 .left-card h2 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     font-weight: 700;
     color: #1f2d3d;
     text-align: center;
 }
 
 /* ============================================================
-   TABLA DE GOLEADORES
+   TABLA DE GOLEADORES (ESTILO NUEVO + ALINEADA)
    ============================================================ */
 .table-goleadores-wrapper {
     flex: 1;
-    min-height: 0;
-    display: flex;
 }
 
 .table-goleadores {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.92rem;
-
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+    table-layout: fixed;
+    font-size: 0.9rem;
 }
 
 /* ENCABEZADO */
-.table-goleadores thead {
-    flex-shrink: 0;
-}
-
 .table-goleadores thead th {
-    background: #1a1a1a;
-    color: white;
-    padding: 10px 8px;
-    font-size: 0.8rem;
+    background: linear-gradient(135deg, #1f2937, #111827);
+    color: #ffffff;
+    padding: 12px 10px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     text-align: left;
 }
 
-/* CELDAS */
-.table-goleadores td, 
-.table-goleadores th {
-    padding-left: 6px !important;
-    padding-right: 6px !important;
-}
-
-/* ALINEACIÓN PRIMERA COLUMNA */
-.table-goleadores th:first-child,
-.table-goleadores td:first-child {
-    text-align: left !important;
-}
-
-/* BODY: FILAS SOLO SE DISTRIBUYEN SI HAY MUCHAS */
-.table-goleadores tbody {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-
-    /* MAGIA: solo expande filas si hay demasiadas */
-    justify-content: flex-start;
-}
-
-/* TR estilo compacto */
+/* BODY */
 .table-goleadores tbody tr {
-    display: flex;
-    width: 100%;
-    padding: 4px 0;
+    transition: background 0.2s ease;
 }
 
-.table-goleadores tbody td {
-    display: flex;
-    align-items: center;
+.table-goleadores tbody tr:nth-child(even) {
+    background: #f9fafb;
 }
 
-/* LÍNEA SEPARADORA (85%) */
-.table-goleadores tbody tr:not(:last-child) td {
-    border-bottom: none;
-    position: relative;
-}
-
-.table-goleadores tbody tr:not(:last-child) td::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 7.5%;
-    width: 85%;
-    height: 1px;
-    background: #e0e0e0;
-}
-
-/* HOVER */
 .table-goleadores tbody tr:hover {
-    background: #f1f1f1;
+    background: #eef2f7;
 }
 
-/* NOMBRES LARGOS */
-.player-name { 
-    white-space: nowrap; 
-    overflow: hidden; 
+.table-goleadores td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+/* TEXTO */
+.player-name {
+    white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 500;
+    color: #111827;
+}
+
+/* GOLES */
+.badge-goals {
+    display: inline-block;
+    background: #e5e7eb;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #111827;
+    text-align: center;
 }
 
 /* ============================================================
@@ -151,24 +120,22 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
-    height: 100%;
 }
 
 .card-panel {
-    background: #fff;
-    border-radius: 14px;
+    background: #ffffff;
+    border-radius: 16px;
     padding: 16px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     border: 1px solid #e6ebf2;
-    text-align: center;
-    flex: 1;
     display: flex;
     flex-direction: column;
+    text-align: center;
 }
 
 .card-panel h3 {
     margin-bottom: 12px;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: #1f2d3d;
 }
@@ -181,31 +148,39 @@
     flex: 1;
 }
 
-/* SCROLLBAR */
 .panel-scroll::-webkit-scrollbar { width: 8px; }
-.panel-scroll::-webkit-scrollbar-thumb { background: #d0d7e9; border-radius: 8px; }
+.panel-scroll::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 8px;
+}
 
 /* TABLAS INTERNAS */
 .panel-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
 }
 
 .panel-table thead th {
-    background: #1a1a1a;
-    color: white;
+    background: linear-gradient(135deg, #1f2937, #111827);
+    color: #ffffff;
     padding: 10px 8px;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
-.panel-table td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #f0f0f0;
+.panel-table tbody tr:nth-child(even) {
+    background: #f9fafb;
 }
 
 .panel-table tbody tr:hover {
-    background: #f1f1f1;
+    background: #eef2f7;
+}
+
+.panel-table td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .count {
@@ -213,15 +188,8 @@
     text-align: right;
 }
 
-.badge-goals { 
-    background: none !important;
-    padding: 0 !important;
-    font-weight: 700;
-    color: #000;
-}
-
 /* ============================================================
-   CARDS DE ESTADÍSTICAS GENERALES
+   ESTADÍSTICAS GENERALES
    ============================================================ */
 .stats-wrapper {
     display: flex;
@@ -236,14 +204,14 @@
     background: #ffffff;
     border-radius: 18px;
     padding: 22px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    box-shadow: 0 10px 22px rgba(0,0,0,0.12);
 }
 
 .stat-icon {
@@ -253,24 +221,23 @@
 
 .stat-title {
     font-weight: 700;
-    font-size: 17px;
+    font-size: 16px;
     text-transform: uppercase;
-    margin-bottom: 8px;
-    color: #333;
+    margin-bottom: 6px;
+    color: #111827;
 }
 
 .stat-team {
-    font-size: 15px;
-    color: #555;
+    font-size: 14px;
+    color: #4b5563;
     font-weight: 600;
-    margin-bottom: 4px;
 }
 
 .stat-value {
     font-size: 22px;
     font-weight: 800;
-    color: #222;
-    margin-top: 5px;
+    color: #111827;
+    margin-top: 6px;
 }
 
 .stat-desc {
@@ -281,8 +248,6 @@
 
 </style>
 {% endblock %}
-
-
 
 {% block content %}
 
@@ -301,7 +266,6 @@
                         <th style="width:10%;">Goles</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     {% for carnet, nombre, apellido, club_nombre, total in goles %}
                     <tr>
@@ -311,7 +275,6 @@
                     </tr>
                     {% endfor %}
                 </tbody>
-
             </table>
         </div>
     </div>
@@ -319,10 +282,8 @@
     <!-- DERECHA: TARJETAS -->
     <div class="right-column">
 
-        <!-- AMARILLAS -->
         <div class="card-panel">
             <h3>Tarjetas Amarillas — {{ categoria.capitalize() }}</h3>
-
             <div class="panel-scroll">
                 <table class="panel-table">
                     <thead>
@@ -345,10 +306,8 @@
             </div>
         </div>
 
-        <!-- ROJAS -->
         <div class="card-panel">
             <h3>Tarjetas Rojas — {{ categoria.capitalize() }}</h3>
-
             <div class="panel-scroll">
                 <table class="panel-table">
                     <thead>
@@ -369,14 +328,12 @@
                     </tbody>
                 </table>
             </div>
-
         </div>
 
     </div>
-
 </div>
 
-<!-- ESTADÍSTICAS GENERALES -->
+<!-- ESTADÍSTICAS -->
 <div class="stats-wrapper">
     {% for key, stat in stats.items() %}
     <div class="stat-card">

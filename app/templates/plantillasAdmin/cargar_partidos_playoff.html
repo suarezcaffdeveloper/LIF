@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cargar Partido Playoff</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+body {
+  background:#1f1f1f;
+  color:#f5f6fa;
+}
+.card {
+  background:#2c2c2c;
+  border-radius:15px;
+  padding:25px;
+}
+.form-label {
+  color:#5dade2;
+  font-weight:600;
+}
+select, input {
+  background:#1f1f1f !important;
+  color:#fff !important;
+  border:1px solid #5dade2 !important;
+}
+select option {
+  color:#000 !important;
+  background:#fff !important;
+}
+</style>
+</head>
+
+<body>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Carga de Partido — Playoffs</h2>
+  <div class="card p-4">
+
+    <!-- TORNEO -->
+    <div class="mb-3">
+      <label class="form-label">Torneo</label>
+      <select id="torneo_id" class="form-select">
+        <option value="">Seleccionar torneo</option>
+        {% for t in torneos %}
+          <option value="{{ t.id }}">{{ t.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- FASE -->
+    <div class="mb-3">
+      <label class="form-label">Fase</label>
+      <select id="fase_id" class="form-select">
+        <option value="">Seleccionar fase</option>
+        {% for fase in fases %}
+          <option value="{{ fase.id }}" data-ida="{{ 1 if fase.ida_vuelta else 0 }}">
+            {{ fase.nombre }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- JORNADA (IDA/VUELTA) -->
+    <div class="mb-3" id="bloque-ida-vuelta" style="display:none;">
+      <label class="form-label">Partido</label>
+      <select id="jornada" class="form-select">
+        <option value="1">Ida</option>
+        <option value="2">Vuelta</option>
+      </select>
+    </div>
+
+    <!-- CATEGORÍA -->
+    <div class="mb-3">
+      <label class="form-label">Categoría</label>
+      <select id="categoria" class="form-select">
+        <option value="">Seleccionar categoría</option>
+        {% for c in categorias %}
+          <option value="{{ c }}">{{ c|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- CLUB LOCAL -->
+    <div class="mb-3">
+      <label class="form-label">Club Local</label>
+      <select id="club_local_id" class="form-select">
+        <option value="">Seleccionar club local</option>
+        {% for club in clubes %}
+          <option value="{{ club.id }}">{{ club.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- CLUB VISITANTE -->
+    <div class="mb-3">
+      <label class="form-label">Club Visitante</label>
+      <select id="club_visitante_id" class="form-select">
+        <option value="">Seleccionar club visitante</option>
+        {% for club in clubes %}
+          <option value="{{ club.id }}">{{ club.nombre }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- FECHA Y HORA -->
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Fecha</label>
+        <input type="date" id="fecha_partido" class="form-control">
+      </div>
+      <div class="col-md-6 mb-3">
+        <label class="form-label">Hora</label>
+        <input type="time" id="hora_partido" class="form-control">
+      </div>
+    </div>
+
+    <button type="button" onclick="guardarPartido()" class="btn btn-primary w-100">
+      Guardar Partido
+    </button>
+  </div>
+</div>
+
+<script>
+const $id = id => document.getElementById(id);
+
+/* ===== Mostrar bloque ida/vuelta si la fase es ida y vuelta ===== */
+$id("fase_id").addEventListener("change", e => {
+  const opt = e.target.selectedOptions[0];
+  if (!opt) return;
+  const idaVuelta = opt.dataset.ida === "1";
+  $id("bloque-ida-vuelta").style.display = idaVuelta ? "block" : "none";
+  if (!idaVuelta) $id("jornada").value = "1";
+});
+
+/* ===== Evitar que se seleccione el mismo club ===== */
+$id("club_local_id").addEventListener("change", e => {
+  const local = e.target.value;
+  const visitante = $id("club_visitante_id");
+  Array.from(visitante.options).forEach(opt => opt.disabled = opt.value === local);
+});
+
+/* ===== Guardar partido ===== */
+async function guardarPartido() {
+  const torneo = $id("torneo_id").value;
+  const fase = $id("fase_id").value;
+  const categoria = $id("categoria").value;
+  const clubLocal = $id("club_local_id").value;
+  const clubVisitante = $id("club_visitante_id").value;
+  const jornada = parseInt($id("jornada").value);
+
+  if (!torneo || !fase || !categoria || !clubLocal || !clubVisitante) {
+    Swal.fire("Error", "Completá todos los campos obligatorios", "error");
+    return;
+  }
+
+  const payload = {
+    torneo_id: torneo,
+    fase_id: fase,
+    categoria: categoria,
+    club_local_id: clubLocal,
+    club_visitante_id: clubVisitante,
+    jornada: jornada,
+    fecha_partido: $id("fecha_partido").value || null,
+    hora_partido: $id("hora_partido").value || null
+  };
+
+  try {
+    const res = await fetch("/api/playoff/crear_partido", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      Swal.fire("Error", data?.message || "Error al guardar", "error");
+      return;
+    }
+
+    Swal.fire("Guardado", "Partido creado correctamente", "success");
+
+    // Reset campos
+    ["club_local_id","club_visitante_id","fecha_partido","hora_partido"].forEach(id=>$id(id).value="");
+  } catch(err) {
+    console.error(err);
+    Swal.fire("Error", "No se pudo conectar con el servidor", "error");
+  }
+}
+</script>
+</body>
+</html>

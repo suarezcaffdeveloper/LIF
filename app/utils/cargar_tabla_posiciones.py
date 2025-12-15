@@ -1,4 +1,4 @@
-import json
+"""import json
 from app.database.db import db
 from app.models.models import TablaPosiciones
 
@@ -26,5 +26,5 @@ def cargar_datos_tabla_posiciones(ruta_json="app/data/datos_tabla_posiciones.jso
         db.session.add(fila)
 
     db.session.commit()
-    print("✅ Datos de prueba cargados correctamente en tabla_posiciones (reemplazando anteriores)")
+    print("✅ Datos de prueba cargados correctamente en tabla_posiciones (reemplazando anteriores)")"""
 

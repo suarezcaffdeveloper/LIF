@@ -1,456 +1,377 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Cargar Estadísticas — Mayores</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<title>Cargar Estadísticas — Mayores</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <style>
-    /* -------------------------
-       Estilos unificados (igual a Inferiores)
-       ------------------------- */
-    body {
-      background-color: #1f1f1f;
-      color: #f5f6fa;
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 40px;
-      margin-bottom: 40px;
-      font-weight: 700;
-      color: #5dade2;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-
-    .card {
-      background-color: #2c2c2c;
-      border: none;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-      color: #f5f6fa;
-      padding: 25px;
-    }
-
-    .form-label {
-      font-weight: 600;
-      color: #5dade2;
-    }
-
-    select, input {
-      background-color: #1f1f1f !important;
-      color: #fff !important;
-      border: 1px solid #5dade2 !important;
-    }
-
-    .btn-primary {
-      background-color: #5dade2;
-      border-color: #5dade2;
-      font-weight: 600;
-    }
-
-    .btn-primary:hover {
-      background-color: #3498db;
-    }
-
-    .subtitulo {
-      color: #5dade2;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-top: 20px;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-    }
-
-    .side-box {
-      border-radius: 10px;
-      padding: 12px;
-      background: rgba(255,255,255,0.04);
-      margin-bottom: 12px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 1rem;
-      color: #ccc;
-    }
-
-    .back-link:hover {
-      color: #00bfff;
-    }
-  </style>
+<style>
+body { background:#1f1f1f; color:#f5f6fa; }
+.card { background:#2c2c2c; border-radius:15px; padding:25px; }
+.form-label { color:#5dade2; font-weight:600; }
+select,input { background:#1f1f1f !important; color:#fff !important; border:1px solid #5dade2 !important; }
+.subtitulo { color:#5dade2; margin:20px 0 10px; font-weight:600; text-transform:uppercase; }
+.side-box { background:rgba(255,255,255,0.04); border-radius:10px; padding:12px; }
+.list-row { display:flex; gap:8px; margin-bottom:6px; align-items:center; }
+.remove-row { background:transparent; border:1px solid #aa3333; color:#ffaaaa; border-radius:6px; }
+.small-input { max-width:90px; }
+</style>
 </head>
 
 <body>
+<div class="container mt-5">
+<h2 class="text-center mb-4">Cargar Estadísticas — Mayores</h2>
 
-<div class="container">
-  <h1>Cargar Estadísticas — Mayores</h1>
+<div class="card">
 
-  <div class="card">
-
-    <!-- JORNADAS -->
-    <div class="mb-3">
-      <label class="form-label">Seleccionar Jornada</label>
-      <select id="select-jornada" class="form-select">
-        <option value="">Seleccionar...</option>
-        {% for j in jornadas %}
-          <option value="{{ j }}">Jornada {{ j }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <!-- PARTIDOS -->
-    <div id="partidos-container" class="hidden">
-      <div class="mb-3">
-        <label class="form-label">Cruces de la jornada</label>
-        <select id="select-partido" class="form-select">
-          <option value="">Seleccione un cruce...</option>
-        </select>
-      </div>
-    </div>
-
-    <div id="slot-volver-selects" class="text-center mt-3"></div>
-
-    <hr>
-
-    <!-- FORMULARIOS -->
-    <div id="formularios-estadisticas" class="hidden">
-
-      <!-- RESERVA -->
-      <div id="bloque-reserva" class="hidden">
-        <h3 class="subtitulo">Reserva</h3>
-
-        <div class="row">
-          <!-- LOCAL -->
-          <div class="col-md-6">
-            <div class="side-box">
-              <h5 id="reserva_local_nombre">Local</h5>
-
-              <label class="form-label">Goles Local</label>
-              <input type="number" id="reserva_goles_local" class="form-control" min="0" value="0">
-
-              <label class="form-label mt-2">Goleadores Local</label>
-              <div id="reserva_goleadores_local_list"></div>
-              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('reserva','local')">+ Agregar</button>
-
-              <label class="form-label mt-2">Tarjetas Local</label>
-              <div id="reserva_tarjetas_local_list"></div>
-              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('reserva','local')">+ Agregar</button>
-            </div>
-          </div>
-
-          <!-- VISITANTE -->
-          <div class="col-md-6">
-            <div class="side-box">
-              <h5 id="reserva_visitante_nombre">Visitante</h5>
-
-              <label class="form-label">Goles Visitante</label>
-              <input type="number" id="reserva_goles_visitante" class="form-control" min="0" value="0">
-
-              <label class="form-label mt-2">Goleadores Visitante</label>
-              <div id="reserva_goleadores_visitante_list"></div>
-              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('reserva','visitante')">+ Agregar</button>
-
-              <label class="form-label mt-2">Tarjetas Visitante</label>
-              <div id="reserva_tarjetas_visitante_list"></div>
-              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('reserva','visitante')">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('reserva')">
-          Guardar Reserva
-        </button>
-      </div>
-
-      <!-- PRIMERA -->
-      <div id="bloque-primera" class="hidden">
-        <h3 class="subtitulo">Primera</h3>
-
-        <div class="row">
-          <!-- LOCAL -->
-          <div class="col-md-6">
-            <div class="side-box">
-              <h5 id="primera_local_nombre">Local</h5>
-
-              <label class="form-label">Goles Local</label>
-              <input type="number" id="primera_goles_local" class="form-control" min="0" value="0">
-
-              <label class="form-label mt-2">Goleadores Local</label>
-              <div id="primera_goleadores_local_list"></div>
-              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('primera','local')">+ Agregar</button>
-
-              <label class="form-label mt-2">Tarjetas Local</label>
-              <div id="primera_tarjetas_local_list"></div>
-              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('primera','local')">+ Agregar</button>
-            </div>
-          </div>
-
-          <!-- VISITANTE -->
-          <div class="col-md-6">
-            <div class="side-box">
-              <h5 id="primera_visitante_nombre">Visitante</h5>
-
-              <label class="form-label">Goles Visitante</label>
-              <input type="number" id="primera_goles_visitante" class="form-control" min="0" value="0">
-
-              <label class="form-label mt-2">Goleadores Visitante</label>
-              <div id="primera_goleadores_visitante_list"></div>
-              <button class="btn btn-primary btn-sm mt-2" onclick="addGoleador('primera','visitante')">+ Agregar</button>
-
-              <label class="form-label mt-2">Tarjetas Visitante</label>
-              <div id="primera_tarjetas_visitante_list"></div>
-              <button class="btn btn-warning btn-sm mt-2" onclick="addTarjeta('primera','visitante')">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('primera')">
-          Guardar Primera
-        </button>
-      </div>
-
-      <div id="slot-volver-formularios" class="text-center mt-3"></div>
-    </div>
-
-    <!-- LINK VOLVER -->
-    <div id="volver-container" class="text-center mt-4">
-      <hr>
-      <a href="{{ url_for('views.adminview') }}">← Volver al panel de administracion</a>
-    </div>
-
-  </div>
+<!-- JORNADA -->
+<div class="mb-3">
+<label class="form-label">Jornada</label>
+<select id="select-jornada" class="form-select">
+<option value="">Seleccionar...</option>
+{% for j in jornadas %}
+<option value="{{ j }}">Jornada {{ j }}</option>
+{% endfor %}
+</select>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- CRUCES -->
+<div id="cruces-container" style="display:none;">
+<label class="form-label">Cruces pendientes</label>
+<select id="select-cruce" class="form-select">
+<option value="">Seleccionar...</option>
+</select>
+</div>
+
+<hr>
+
+<div id="formularios-estadisticas" style="display:none;">
+
+<input type="hidden" id="primera_partido_id">
+<input type="hidden" id="reserva_partido_id">
+
+<!-- ================= PRIMERA ================= -->
+<div id="bloque-primera" style="display:none;">
+<h3 class="subtitulo">Primera</h3>
+{% for side in ["local","visitante"] %}
+<div class="col-md-6 d-inline-block align-top" style="width:49%;">
+<div class="side-box">
+<h5 id="primera_{{side}}_nombre">{{ side|capitalize }}</h5>
+
+<label class="form-label">Goles</label>
+<input type="number" id="primera_goles_{{side}}" class="form-control" min="0" value="0">
+
+<label class="form-label mt-2">Goleadores</label>
+<div id="primera_goleadores_{{side}}_list"></div>
+<button class="btn btn-sm btn-primary mt-1" onclick="addGoleador('primera','{{side}}')">+ Agregar</button>
+
+<label class="form-label mt-2">Tarjetas</label>
+<div id="primera_tarjetas_{{side}}_list"></div>
+<button class="btn btn-sm btn-warning mt-1" onclick="addTarjeta('primera','{{side}}')">+ Agregar</button>
+</div>
+</div>
+{% endfor %}
+<button id="btn_guardar_primera" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('primera')">Guardar Primera</button>
+</div>
+
+<!-- ================= RESERVA ================= -->
+<div id="bloque-reserva" style="display:none;">
+<h3 class="subtitulo">Reserva</h3>
+{% for side in ["local","visitante"] %}
+<div class="col-md-6 d-inline-block align-top" style="width:49%;">
+<div class="side-box">
+<h5 id="reserva_{{side}}_nombre">{{ side|capitalize }}</h5>
+
+<label class="form-label">Goles</label>
+<input type="number" id="reserva_goles_{{side}}" class="form-control" min="0" value="0">
+
+<label class="form-label mt-2">Goleadores</label>
+<div id="reserva_goleadores_{{side}}_list"></div>
+<button class="btn btn-sm btn-primary mt-1" onclick="addGoleador('reserva','{{side}}')">+ Agregar</button>
+
+<label class="form-label mt-2">Tarjetas</label>
+<div id="reserva_tarjetas_{{side}}_list"></div>
+<button class="btn btn-sm btn-warning mt-1" onclick="addTarjeta('reserva','{{side}}')">+ Agregar</button>
+</div>
+</div>
+{% endfor %}
+<button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
+</div>
+
+</div>
+</div>
+</div>
 
 <script>
-/* ===============================
-   Helpers
-================================ */
-const $ = id => document.getElementById(id);
+const CATS = ["primera", "reserva"];
+const estadoCruces = {};
 
 let current = {
-  cruce_id: null,
-  primera: null,
-  reserva: null,
-  local_club_id: null,
-  visitante_club_id: null
+  jornada: null,
+  local_id: null,
+  visitante_id: null,
+  id_primera: null,
+  id_reserva: null,
+  equipos_por_categoria: {},
+  jugadores_primera_local: [],
+  jugadores_primera_visitante: [],
+  jugadores_reserva_local: [],
+  jugadores_reserva_visitante: []
 };
 
-const CATS = ["reserva", "primera"];
+const $id = id => document.getElementById(id);
+const safeInt = v => parseInt(v)||0;
 
-/* ===============================
-   JORNADA -> CRUCES PENDIENTES
-================================ */
-$("select-jornada").addEventListener("change", async e => {
-  const jornada = e.target.value;
+/* ================= RESET ================= */
+function resetBloque(cat) {
+  $id(`${cat}_goles_local`).value = 0;
+  $id(`${cat}_goles_visitante`).value = 0;
 
-  $("partidos-container").style.display = "none";
-  $("formularios-estadisticas").style.display = "none";
-  $("select-partido").innerHTML = `<option value="">Seleccione un cruce...</option>`;
+  $id(`${cat}_goleadores_local_list`).innerHTML = "";
+  $id(`${cat}_goleadores_visitante_list`).innerHTML = "";
+  $id(`${cat}_tarjetas_local_list`).innerHTML = "";
+  $id(`${cat}_tarjetas_visitante_list`).innerHTML = "";
 
-  if (!jornada) return;
+  const btn = $id(`btn_guardar_${cat}`);
+  btn.disabled = false;
+  btn.classList.remove("btn-secondary");
+  btn.classList.add("btn-primary");
+  btn.innerText = `Guardar ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
+}
 
-  try {
-    const r = await fetch(`/api/cruces_pendientes_mayores/${jornada}`);
-    if (!r.ok) throw new Error("Error cruces");
+function resetFormularioCompleto(resetJornada=false) {
+  CATS.forEach(cat=>{
+    resetBloque(cat);
+    $id(`bloque-${cat}`).style.display="none";
+  });
+  $id("formularios-estadisticas").style.display="none";
 
-    const cruces = await r.json();
+  current = {
+    jornada: resetJornada?null:current.jornada,
+    local_id:null,
+    visitante_id:null,
+    id_primera:null,
+    id_reserva:null,
+    equipos_por_categoria:{},
+    jugadores_primera_local:[],
+    jugadores_primera_visitante:[],
+    jugadores_reserva_local:[],
+    jugadores_reserva_visitante:[]
+  };
+}
 
-    cruces.forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.id;
-      opt.textContent = c.texto;
-      $("select-partido").appendChild(opt);
-    });
+/* ================= JORNADA ================= */
+$id("select-jornada").addEventListener("change", async e=>{
+  const j = e.target.value;
+  if(!j) return;
 
-    $("partidos-container").style.display = "block";
+  current.jornada = j;
+  resetFormularioCompleto();
 
-  } catch (err) {
-    console.error(err);
-    Swal.fire("Error", "No se pudieron cargar los cruces", "error");
-  }
-});
-
-/* ===============================
-   CRUCE -> INFO + PARTIDOS
-================================ */
-$("select-partido").addEventListener("change", async e => {
-  const cruceId = e.target.value;
-  if (!cruceId) return;
-
-  try {
-    /* -------- INFO DEL CRUCE -------- */
-    const infoResp = await fetch(`/api/info_cruce/${cruceId}`);
-    if (!infoResp.ok) throw new Error("Error info_cruce");
-
-    const info = await infoResp.json();
-
-    current.cruce_id = cruceId;
-    current.local_club_id = info.local_id;
-    current.visitante_club_id = info.visitante_id;
-
-    /* -------- PARTIDOS PRIMERA / RESERVA -------- */
-    const r = await fetch("/get_partidos_cruce", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ representative_id: cruceId })
-    });
-
-    if (!r.ok) throw new Error("Error get_partidos_cruce");
-
+  try{
+    const r = await fetch(`/api/cruces_pendientes_mayores/${j}`);
     const data = await r.json();
 
-    current.primera = data.primera || null;
-    current.reserva = data.reserva || null;
+    const sel = $id("select-cruce");
+    sel.innerHTML='<option value="">Seleccionar...</option>';
 
-    /* -------- MOSTRAR FORMULARIOS -------- */
-    $("formularios-estadisticas").style.display = "block";
+    if(!data.length){
+      $id("cruces-container").style.display="none";
+      Swal.fire("Info","No hay cruces pendientes","info");
+      return;
+    }
 
-    CATS.forEach(cat => {
-      const bloque = $(`bloque-${cat}`);
-      if (current[cat]) {
-        bloque.style.display = "block";
-
-        $(`${cat}_local_nombre`).innerText = info.local_nombre;
-        $(`${cat}_visitante_nombre`).innerText = info.visitante_nombre;
-
-      } else {
-        bloque.style.display = "none";
-      }
+    data.forEach(c=>{
+      const o = document.createElement("option");
+      o.value=c.id;
+      o.textContent=c.texto;
+      sel.appendChild(o);
     });
 
-  } catch (err) {
+    $id("cruces-container").style.display="block";
+  }catch(err){
     console.error(err);
-    Swal.fire("Error", "No se pudieron cargar los datos del cruce", "error");
+    Swal.fire("Error","No se pudieron cargar los cruces","error");
   }
 });
 
-/* ===============================
-   GOLEADORES
-================================ */
-function addGoleador(cat, lado) {
-  const cont = $(`${cat}_goleadores_${lado}_list`);
+/* ================= CRUCE ================= */
+$id("select-cruce").addEventListener("change", async e=>{
+  const id = e.target.value;
+  if(!id) return;
 
-  const row = document.createElement("div");
-  row.className = "list-row";
+  resetFormularioCompleto(false); // no resetear jornada
+  estadoCruces[id] = {};
 
-  row.innerHTML = `
-    <input type="number" placeholder="ID Jugador" class="form-control small-input">
-    <input type="number" placeholder="Goles" class="form-control small-input" value="1" min="1">
-    <button type="button" class="remove-row" onclick="this.parentElement.remove()">✕</button>
-  `;
+  try{
+    const info = await fetch(`/api/info_cruce/${id}`).then(r=>r.json());
+    current.local_id = info.local_id;
+    current.visitante_id = info.visitante_id;
 
-  cont.appendChild(row);
-}
+    let hayPendiente=false;
 
-/* ===============================
-   TARJETAS
-================================ */
-function addTarjeta(cat, lado) {
-  const cont = $(`${cat}_tarjetas_${lado}_list`);
+    CATS.forEach(cat=>{
+      const data = info[cat];
+      if(!data || data.jugado || !data.id) return;
 
-  const row = document.createElement("div");
-  row.className = "list-row";
+      hayPendiente=true;
+      current[`id_${cat}`] = data.id;
+      current.equipos_por_categoria[cat] = {local:data.local, visitante:data.visitante};
+      estadoCruces[id][cat]=false;
 
-  row.innerHTML = `
-    <input type="number" placeholder="ID Jugador" class="form-control small-input">
-    <select class="form-select small-input">
-      <option value="amarilla">Amarilla</option>
-      <option value="roja">Roja</option>
-    </select>
-    <button type="button" class="remove-row" onclick="this.parentElement.remove()">✕</button>
-  `;
+      $id(`bloque-${cat}`).style.display="block";
+      $id(`${cat}_local_nombre`).innerText=info.local_nombre;
+      $id(`${cat}_visitante_nombre`).innerText=info.visitante_nombre;
 
-  cont.appendChild(row);
-}
-
-/* ===============================
-   GUARDAR CATEGORÍA
-================================ */
-async function guardarCategoria(cat) {
-  const partido = current[cat];
-  if (!partido) return;
-
-  const goles_local = parseInt($(`${cat}_goles_local`).value || 0);
-  const goles_visitante = parseInt($(`${cat}_goles_visitante`).value || 0);
-
-  const goleadores_local = [];
-  const goleadores_visitante = [];
-  const amarillas_local = [];
-  const amarillas_visitante = [];
-  const rojas_local = [];
-  const rojas_visitante = [];
-
-  function procesarGoles(cat, lado, arr) {
-    document.querySelectorAll(`#${cat}_goleadores_${lado}_list .list-row`)
-      .forEach(r => {
-        const [id, goles] = r.querySelectorAll("input");
-        if (id.value && goles.value) {
-          arr.push({ jugador_id: id.value, goles: goles.value });
-        }
-      });
-  }
-
-  function procesarTarjetas(cat, lado, amarillas, rojas) {
-    document.querySelectorAll(`#${cat}_tarjetas_${lado}_list .list-row`)
-      .forEach(r => {
-        const id = r.querySelector("input").value;
-        const tipo = r.querySelector("select").value;
-        if (!id) return;
-        if (tipo === "amarilla") amarillas.push(id);
-        else rojas.push(id);
-      });
-  }
-
-  procesarGoles(cat, "local", goleadores_local);
-  procesarGoles(cat, "visitante", goleadores_visitante);
-  procesarTarjetas(cat, "local", amarillas_local, rojas_local);
-  procesarTarjetas(cat, "visitante", amarillas_visitante, rojas_visitante);
-
-  const payload = {
-    partido_id: partido.id,
-    goles_local,
-    goles_visitante,
-    goleadores_local,
-    goleadores_visitante,
-    amarillas_local,
-    amarillas_visitante,
-    rojas_local,
-    rojas_visitante
-  };
-
-  try {
-    const r = await fetch(`/api/guardar_${cat}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      cargarJugadores(cat);
     });
 
-    const res = await r.json();
+    $id("formularios-estadisticas").style.display=hayPendiente?"block":"none";
 
-    if (!res.success) throw new Error(res.message);
-
-    Swal.fire("OK", `${cat.toUpperCase()} guardada correctamente`, "success");
-    $(`bloque-${cat}`).style.display = "none";
-
-  } catch (err) {
+    if(!hayPendiente) Swal.fire("Info","Este cruce no tiene categorías pendientes","info");
+  }catch(err){
     console.error(err);
-    Swal.fire("Error", err.message || "Error al guardar", "error");
+    Swal.fire("Error","No se pudo cargar la info del cruce","error");
   }
+});
+
+/* ================= JUGADORES ================= */
+async function cargarJugadores(cat){
+  const ids = current.equipos_por_categoria[cat];
+  if(!ids?.local || !ids?.visitante) return;
+
+  const [locales,visitantes] = await Promise.all([
+    fetch(`/api/jugadores_por_equipo/${ids.local}`).then(r=>r.json()),
+    fetch(`/api/jugadores_por_equipo/${ids.visitante}`).then(r=>r.json())
+  ]);
+
+  current[`jugadores_${cat}_local`] = locales;
+  current[`jugadores_${cat}_visitante`] = visitantes;
+}
+
+/* ================= DINÁMICOS ================= */
+function buildOptions(players){
+  return players.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join("");
+}
+
+function addGoleador(cat,side){
+  const cont = $id(`${cat}_goleadores_${side}_list`);
+  const players = current[`jugadores_${cat}_${side}`];
+
+  cont.insertAdjacentHTML("beforeend",`
+    <div class="list-row">
+      <select class="form-select" data-player>
+        <option value="">Jugador</option>${buildOptions(players)}
+      </select>
+      <input type="number" class="form-control small-input" data-goles min="1" value="1">
+      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  `);
+}
+
+function addTarjeta(cat,side){
+  const cont = $id(`${cat}_tarjetas_${side}_list`);
+  const players = current[`jugadores_${cat}_${side}`];
+
+  cont.insertAdjacentHTML("beforeend",`
+    <div class="list-row">
+      <select class="form-select tarjeta-player">
+        <option value="">Jugador</option>${buildOptions(players)}
+      </select>
+      <select class="form-select tarjeta-tipo">
+        <option value="amarilla">Amarilla</option>
+        <option value="roja">Roja</option>
+      </select>
+      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()">✕</button>
+    </div>
+  `);
+}
+
+/* ================= GUARDADO ================= */
+function construirPayload(cat){
+  const partidoId = current[`id_${cat}`];
+  if(!partidoId) throw new Error("ID de partido inexistente");
+
+  const golesLocal = safeInt($id(`${cat}_goles_local`).value);
+  const golesVisitante = safeInt($id(`${cat}_goles_visitante`).value);
+
+  const leerGoleadores = side => Array.from(
+    $id(`${cat}_goleadores_${side}_list`).querySelectorAll(".list-row")
+  ).map(row=>({jugador_id:row.querySelector("[data-player]").value,goles:safeInt(row.querySelector("[data-goles]").value)}))
+    .filter(g=>g.jugador_id);
+
+  const leerTarjetas = (side,tipo)=>Array.from(
+    $id(`${cat}_tarjetas_${side}_list`).querySelectorAll(".list-row")
+  ).filter(r=>r.querySelector(".tarjeta-tipo").value===tipo)
+   .map(r=>safeInt(r.querySelector(".tarjeta-player").value))
+   .filter(id=>id);
+
+  return {
+    partido_id:partidoId,
+    goles_local:golesLocal,
+    goles_visitante:golesVisitante,
+    goleadores_local:leerGoleadores("local"),
+    goleadores_visitante:leerGoleadores("visitante"),
+    amarillas_local:leerTarjetas("local","amarilla"),
+    amarillas_visitante:leerTarjetas("visitante","amarilla"),
+    rojas_local:leerTarjetas("local","roja"),
+    rojas_visitante:leerTarjetas("visitante","roja")
+  };
+}
+
+function validarFormulario(cat){
+  const validarFilas=(selector,mensaje)=>{
+    const filas=Array.from(document.querySelectorAll(selector));
+    for(const fila of filas){
+      const jugador=fila.querySelector("select")?.value;
+      if(!jugador){Swal.fire("Error",mensaje,"error");return false;}
+    }
+    return true;
+  };
+
+  if(!validarFilas(`#${cat}_goleadores_local_list .list-row,#${cat}_goleadores_visitante_list .list-row`,"Hay goleadores sin jugador seleccionado")) return false;
+  if(!validarFilas(`#${cat}_tarjetas_local_list .list-row,#${cat}_tarjetas_visitante_list .list-row`,"Hay tarjetas cargadas sin jugador seleccionado")) return false;
+
+  const golesLocal=safeInt($id(`${cat}_goles_local`).value);
+  const golesVisitante=safeInt($id(`${cat}_goles_visitante`).value);
+  const suma=side=>Array.from($id(`${cat}_goleadores_${side}_list`).querySelectorAll(".list-row")).reduce((acc,row)=>acc+safeInt(row.querySelector("[data-goles]").value),0);
+
+  if(golesLocal!==suma("local")){Swal.fire("Error","Los goles del local no coinciden con los goleadores","error");return false;}
+  if(golesVisitante!==suma("visitante")){Swal.fire("Error","Los goles del visitante no coinciden con los goleadores","error");return false;}
+
+  return true;
+}
+
+async function guardarCategoria(cat){
+  if(!validarFormulario(cat)) return;
+  const payload = construirPayload(cat);
+  const endpoint = cat==="primera"?"/api/guardar_primera":"/api/guardar_reserva";
+
+  try{
+    const res = await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const data = await res.json();
+    if(!res.ok || !data.success){Swal.fire("Error",data.message||"Error al guardar","error");return;}
+    Swal.fire("Guardado",`${cat.toUpperCase()} guardado correctamente`,"success");
+    marcarCategoriaGuardada(cat);
+  }catch(err){console.error(err);Swal.fire("Error","No se pudo guardar","error");}
+}
+
+function marcarCategoriaGuardada(cat){
+  const cruceId=$id("select-cruce").value;
+  estadoCruces[cruceId][cat]=true;
+  if(Object.values(estadoCruces[cruceId]).every(v=>v)) finalizarCruce(cruceId);
+}
+
+function finalizarCruce(cruceId){
+  resetFormularioCompleto(false);
+  const sel=$id("select-cruce");
+  sel.querySelector(`option[value="${cruceId}"]`)?.remove();
+  sel.value="";
+  Swal.fire("Cruce completo","Primera y Reserva cargadas","success");
 }
 </script>
-
-
 </body>
 </html>

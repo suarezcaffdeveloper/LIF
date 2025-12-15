@@ -17,101 +17,123 @@
     h1 {
       text-align: center;
       margin-top: 40px;
-      margin-bottom: 50px;
+      margin-bottom: 40px;
       font-weight: 700;
       color: #5dade2;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
+    }
+
+    .top-buttons {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .top-buttons a {
+      background-color: #2c2c2c;
+      color: #5dade2;
+      border: 2px solid #5dade2;
+      border-radius: 8px;
+      padding: 8px 15px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: .3s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .top-buttons a:hover {
+      background-color: #5dade2;
+      color: #1f1f1f;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
     }
 
     .panel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 25px;
-      padding-bottom: 60px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 60px 20px 40px 20px;
     }
 
     .admin-card {
       background-color: #2c2c2c;
-      border-radius: 16px;
+      border-radius: 14px;
       cursor: pointer;
-      transition: .3s ease;
+      transition: transform .3s ease, box-shadow .3s ease;
       display: flex;
-      align-items: flex-end;
-      padding: 20px;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px solid #3a3a3a;
       height: 160px;
-    }
-
-    .admin-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
     .admin-card h5 {
       margin: 0;
       color: #5dade2;
       font-weight: 700;
+      font-size: 1rem;
     }
 
-    .logout-btn {
-      background-color: #2c2c2c;
+    .admin-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+      border-color: #5dade2;
+    }
+
+    .section-title {
       color: #5dade2;
-      border: 2px solid #5dade2;
-      border-radius: 10px;
-      padding: 10px 18px;
-      text-decoration: none;
+      text-transform: uppercase;
       font-weight: 600;
-      transition: .3s ease;
+      font-size: 1.1rem;
+      margin: 15px 0 10px 0;
+      border-bottom: 1px solid #5dade2;
+      padding-bottom: 5px;
+      text-align: center;
     }
 
-    .logout-btn:hover {
-      background-color: #5dade2;
-      color: #1f1f1f;
-    }
+    /* Tamaños variados */
+    .tall { height: 200px; }
+    .wide { grid-column: span 2; height: 160px; }
+    .medium { height: 180px; }
+    .square { height: 140px; }
   </style>
 </head>
 
 <body>
+  <div class="container position-relative">
 
-<div class="container">
+    <h1>PANEL DEL PERIODISTA</h1>
 
-  <h1>PANEL DEL PERIODISTA</h1>
+    <!-- BOTONES SUPERIORES -->
+    <div class="top-buttons">
+      <a href="{{ url_for('views.index') }}">🏠 Inicio</a>
+      <a href="{{ url_for('views.logout') }}">🔒 Cerrar Sesión</a>
+    </div>
 
-  <div style="position:absolute; top:20px; right:20px;">
-    <a href="{{ url_for('views.logout') }}" class="logout-btn">🔒 Cerrar Sesión</a>
-  </div>
+    <!-- SECCIÓN: Contenido del Periodista -->
+    <div class="section-title">Gestión de Contenido</div>
+    <div class="panel-grid">
+      <a href="{{ url_for('views.cargar_noticia') }}" class="text-decoration-none">
+        <div class="admin-card wide">
+          <h5>Cargar Noticias</h5>
+        </div>
+      </a>
 
-  {# ===== FLASHES FILTRADOS Y LIMPIOS ===== #}
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        {% if category in ['success', 'info'] %}
-          <div class="alert alert-{{ category }} text-center mt-3">
-            {{ message }}
-          </div>
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <div class="panel-grid mt-4">
-
-    <a href="{{ url_for('views.cargar_noticia') }}" class="text-decoration-none">
-      <div class="admin-card">
-        <h5>Cargar Noticias</h5>
-      </div>
-    </a>
-
-    <a href="{{ url_for('views.cargar_video') }}" class="text-decoration-none">
-      <div class="admin-card">
-        <h5>Cargar Videos</h5>
-      </div>
-    </a>
+      <a href="{{ url_for('views.cargar_video') }}" class="text-decoration-none">
+        <div class="admin-card tall">
+          <h5>Cargar Videos</h5>
+        </div>
+      </a>
+    </div>
 
   </div>
-
-</div>
-
 </body>
 </html>
+
 

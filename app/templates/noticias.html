@@ -3,128 +3,182 @@
 
 {% block content %}
 <style>
-    /* Grid de noticias: 3 columnas con margen lateral */
-    .noticias-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 30px;
-        margin: 0 20px;
+    /* Fondo general */
+    .noticias-wrapper {
+        background-color: #f4f6f9;
+        padding: 40px 20px;
+        min-height: 100vh;
     }
 
-    @media (max-width: 1200px) {
-        .noticias-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+    /* Título (idéntico a Videos) */
+    .noticias-wrapper h1 {
+        font-size: 2rem;
+        font-weight: 500;
+        margin-bottom: 40px;
+        text-align: center;
+        color: #1f2d3d;
+        letter-spacing: 0.3px;
     }
 
-    @media (max-width: 768px) {
-        .noticias-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* Card de noticia estilo revista */
+    /* Card de noticia (idéntica a video-card) */
     .noticia-card {
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-        border: 1px solid #e3e7ee;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 35% 65%;
-        gap: 15px;
-        position: relative; /* para colocar la fecha */
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e6ef;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
 
-    @media (max-width: 768px) {
-        .noticia-card {
-            grid-template-columns: 1fr;
-        }
+    /* Hover sutil */
+    .noticia-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.10);
     }
 
-    /* Imagen a la izquierda, altura limitada */
+    /* Imagen (misma altura que video) */
     .noticia-card img {
         width: 100%;
-        border-radius: 12px;
+        height: 190px;
         object-fit: cover;
-        max-height: 180px;
-        grid-column: 1 / 2;
-        grid-row: 1 / 2;
     }
 
-    /* Contenido junto a la imagen */
-    .noticia-card .contenido {
-        grid-column: 2 / 3;
-        grid-row: 1 / 2;
+    /* Contenido */
+    .noticia-card .card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
     }
 
-    @media (max-width: 768px) {
-        .noticia-card .contenido {
-            grid-column: 1 / 2;
-            grid-row: 2 / 3;
-            margin-top: 15px;
-        }
-    }
-
-    .noticia-card h2 {
-        font-size: 1.4rem;
-        margin: 0 0 10px 0;
+    /* Título noticia */
+    .noticia-card h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
         color: #1f2d3d;
+        margin-bottom: 10px;
     }
 
-    .noticia-card p {
+    /* Extracto */
+    .noticia-card p.texto {
         font-size: 0.95rem;
         color: #2c3e50;
         line-height: 1.5;
-        margin: 0 0 10px 0;
+        margin-bottom: 15px;
+        flex-grow: 1;
     }
 
-    /* Fecha debajo de la card, alineada a la derecha */
+    /* Botón Leer más – editorial (idéntico a Ver video) */
+    .noticia-card .btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #3b82f6;
+        position: relative;
+        transition: color 0.2s ease;
+        align-self: flex-start;
+    }
+
+    .noticia-card .btn::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -2px;
+        width: 100%;
+        height: 1px;
+        background-color: currentColor;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.25s ease;
+    }
+
+    .noticia-card .btn:hover {
+        color: #1e40af;
+        background: transparent;
+    }
+
+    .noticia-card .btn:hover::after {
+        transform: scaleX(1);
+    }
+
+    .noticia-card .btn:focus {
+        outline: none;
+        box-shadow: none;
+    }
+
+    /* Fecha (alineada igual que en videos) */
     .noticia-card .fecha {
-        font-size: 0.85rem;
-        color: #777;
+        font-size: 0.8rem;
+        color: #7a7a7a;
+        margin-top: 12px;
         text-align: right;
-        margin-top: 10px;
-        grid-column: 1 / 3;
-        grid-row: 2 / 3;
+    }
+    /* Botón volver */
+    .volver-link {
+        display: inline-block;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.2s ease;
     }
 
-    /* Título principal de la página */
-    h1 {
-        font-size: 2rem;
-        margin: 40px 0 30px 0;
-        text-align: center;
+    .volver-link:hover {
         color: #1f2d3d;
+        text-decoration: underline;
     }
 </style>
 
-<div class="left">
-    <h1>Todas las Noticias</h1>
+<div class="noticias-wrapper">
+    <div class="noticias-header">
+        <a href="{{ url_for('views.index') }}" class="volver-link">
+            ← Volver al inicio
+        </a>
 
-    <div class="row g-4">
-        {% for noticia in noticias %}
-        <div class="col-md-4">
-            <div class="noticia-card card shadow-sm">
+        <h1>Todas las Noticias</h1>
+    </div>
 
-                {% if noticia.imagen_url %}
-                    <img src="{{ noticia.imagen_url }}" class="img-fluid">
-                {% endif %}
+    <div class="container">
+        <div class="row g-4">
+            {% for noticia in noticias %}
+            <div class="col-lg-4 col-md-6">
+                <div class="noticia-card">
 
-                <div class="p-3">
-                    <h5 class="fw-bold">{{ noticia.titulo }}</h5>
+                    {% if noticia.imagen_url %}
+                        <img src="{{ noticia.imagen_url }}" alt="{{ noticia.titulo }}">
+                    {% endif %}
 
-                    <p style="font-size: 0.9rem; height: 70px; overflow: hidden;">
-                        {{ noticia.contenido[:150] }}...
-                    </p>
+                    <div class="card-body">
+                        <h5>
+                            <a href="{{ url_for('views.noticia_detalle', noticia_id=noticia.id_noticia) }}"
+                               class="text-decoration-none text-dark">
+                                {{ noticia.titulo }}
+                            </a>
+                        </h5>
 
-                    <p class="text-muted" style="font-size: 0.8rem;">
-                        {{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}
-                    </p>
+                        <p class="texto">
+                            {{ noticia.contenido[:150] }}...
+                        </p>
+
+                        <a href="{{ url_for('views.noticia_detalle', noticia_id=noticia.id_noticia) }}"
+                           class="btn">
+                            Leer más
+                        </a>
+
+                        <div class="fecha">
+                            {{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}
+                        </div>
+                    </div>
+
                 </div>
-
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}
