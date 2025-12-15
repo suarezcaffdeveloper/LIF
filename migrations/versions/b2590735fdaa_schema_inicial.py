@@ -1,8 +1,8 @@
-"""Modelo inicial completo
+"""schema inicial
 
-Revision ID: 6e78f9475670
+Revision ID: b2590735fdaa
 Revises: 
-Create Date: 2025-11-25 10:41:30.441559
+Create Date: 2025-12-15 18:03:16.679962
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6e78f9475670'
+revision = 'b2590735fdaa'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -27,8 +27,7 @@ def upgrade():
     sa.UniqueConstraint('nombre')
     )
     op.create_table('tabla_posiciones',
-    sa.Column('id_posicion', sa.Integer(), nullable=False),
-    sa.Column('id_equipo', sa.Integer(), nullable=True),
+    sa.Column('id_equipo', sa.Integer(), nullable=False),
     sa.Column('nombre_equipo', sa.String(), nullable=True),
     sa.Column('categoria', sa.String(length=50), nullable=True),
     sa.Column('partidos_jugados', sa.Integer(), nullable=True),
@@ -39,7 +38,14 @@ def upgrade():
     sa.Column('goles_en_contra', sa.Integer(), nullable=True),
     sa.Column('cantidad_puntos', sa.Integer(), nullable=True),
     sa.Column('diferencia_gol', sa.Integer(), nullable=True),
-    sa.PrimaryKeyConstraint('id_posicion')
+    sa.PrimaryKeyConstraint('id_equipo')
+    )
+    op.create_table('temporada',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('nombre', sa.String(length=20), nullable=False),
+    sa.Column('activa', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('nombre')
     )
     op.create_table('usuario',
     sa.Column('id_usuario', sa.Integer(), nullable=False),
@@ -87,6 +93,13 @@ def upgrade():
     sa.PrimaryKeyConstraint('id_noticia'),
     sa.UniqueConstraint('slug')
     )
+    op.create_table('torneo',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('nombre', sa.String(length=50), nullable=False),
+    sa.Column('temporada_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['temporada_id'], ['temporada.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('video',
     sa.Column('id_video', sa.Integer(), nullable=False),
     sa.Column('titulo_video', sa.String(length=300), nullable=False),
@@ -98,6 +111,15 @@ def upgrade():
     sa.ForeignKeyConstraint(['id_autor'], ['usuario.id_usuario'], ),
     sa.PrimaryKeyConstraint('id_video')
     )
+    op.create_table('fase',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('nombre', sa.String(length=50), nullable=False),
+    sa.Column('orden', sa.Integer(), nullable=False),
+    sa.Column('torneo_id', sa.Integer(), nullable=False),
+    sa.Column('ida_vuelta', sa.Boolean(), nullable=False),
+    sa.ForeignKeyConstraint(['torneo_id'], ['torneo.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('jugador_equipo',
     sa.Column('numero_carnet', sa.Integer(), nullable=False),
     sa.Column('equipo_id', sa.Integer(), nullable=False),
@@ -107,10 +129,12 @@ def upgrade():
     )
     op.create_table('partido',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('fecha_partido', sa.Date(), nullable=False),
+    sa.Column('fecha_partido', sa.Date(), nullable=True),
     sa.Column('hora_partido', sa.Time(), nullable=True),
     sa.Column('jornada', sa.Integer(), nullable=False),
     sa.Column('categoria', sa.String(length=20), nullable=False),
+    sa.Column('torneo_id', sa.Integer(), nullable=True),
+    sa.Column('fase_id', sa.Integer(), nullable=True),
     sa.Column('equipo_local_id', sa.Integer(), nullable=False),
     sa.Column('equipo_visitante_id', sa.Integer(), nullable=False),
     sa.Column('goles_local', sa.Integer(), nullable=False),
@@ -118,6 +142,8 @@ def upgrade():
     sa.Column('jugado', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['equipo_local_id'], ['equipo.id'], ),
     sa.ForeignKeyConstraint(['equipo_visitante_id'], ['equipo.id'], ),
+    sa.ForeignKeyConstraint(['fase_id'], ['fase.id'], ),
+    sa.ForeignKeyConstraint(['torneo_id'], ['torneo.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('estado_jugador_partido',
@@ -138,7 +164,9 @@ def downgrade():
     op.drop_table('estado_jugador_partido')
     op.drop_table('partido')
     op.drop_table('jugador_equipo')
+    op.drop_table('fase')
     op.drop_table('video')
+    op.drop_table('torneo')
     op.drop_table('noticia')
     op.drop_table('jugador')
     with op.batch_alter_table('equipo', schema=None) as batch_op:
@@ -146,6 +174,7 @@ def downgrade():
 
     op.drop_table('equipo')
     op.drop_table('usuario')
+    op.drop_table('temporada')
     op.drop_table('tabla_posiciones')
     op.drop_table('club')
     # ### end Alembic commands ###

@@ -1,6 +1,8 @@
 from flask import Flask
 import re
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
