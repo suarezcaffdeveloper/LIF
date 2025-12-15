@@ -213,6 +213,7 @@ function agregarPartidoSlide(p, idx=0){
 }
 
 // Cargar partidos según jornada
+// Cargar partidos según jornada
 async function cargarPartidos(jornada){
     if(!jornada){ 
         listDiv.innerHTML='<p class="muted">Seleccione jornada.</p>'; 
@@ -234,14 +235,7 @@ async function cargarPartidos(jornada){
             return; 
         }
 
-        const crucesMap = {};
-        partidos.forEach(p => {
-            const ids = [p.local_club_id, p.visitante_club_id].sort((a,b)=>a-b);
-            const key = `${ids[0]}-${ids[1]}`;
-            if(!crucesMap[key]) crucesMap[key] = p;
-        });
-
-        Object.values(crucesMap).forEach((p, idx) => agregarPartidoSlide(p, idx));
+        partidos.forEach((p, idx) => agregarPartidoSlide(p, idx));
 
     }catch(err){
         console.error(err);
