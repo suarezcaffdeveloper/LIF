@@ -2,16 +2,20 @@ from flask import Flask
 import re
 import os
 from dotenv import load_dotenv
-load_dotenv()
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
+from app.commands import create_admin
 
 from .database.db import db
 from .models.models import Usuario
 
 mail = Mail()
 
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL no está definida")
 
 def youtube_id(url):
     """
@@ -34,7 +38,7 @@ def youtube_id(url):
 
 def create_app():
     app = Flask(__name__)
-
+    app.cli.add_command(create_admin)
     # -----------------------
     # CONFIG GENERAL
     # -----------------------
