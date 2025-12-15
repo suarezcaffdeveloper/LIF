@@ -978,13 +978,17 @@ def cargar_fixture_mayores_view():
         flash("No hay temporada activa. Primero cree una temporada.", "danger")
         return redirect(url_for("views.administrar_temporadas_view"))
 
+    # Traer torneos de la temporada activa
     torneos = Torneo.query.filter_by(temporada_id=temporada_activa.id).order_by(Torneo.nombre).all()
+
+    # Traer fases ordenadas por torneo
     fases = Fase.query.join(Torneo)\
         .filter(Torneo.temporada_id == temporada_activa.id)\
         .with_entities(Fase.id, Fase.nombre, Fase.orden)\
-        .group_by(Fase.nombre, Fase.id, Fase.orden)\
+        .group_by(Fase.id, Fase.nombre, Fase.orden)\
         .order_by(Fase.orden).all()
 
+    # Traer clubes y equipos de mayores
     clubes = Club.query.order_by(Club.nombre).all()
     equipos = Equipo.query.filter(Equipo.categoria.in_(["primera", "reserva"])).order_by(Equipo.club_id).all()
 
@@ -993,10 +997,15 @@ def cargar_fixture_mayores_view():
     for e in equipos:
         equipos_por_club.setdefault(e.club_id, {})[e.categoria] = e.id
 
-    # Cantidad de equipos de Primera
+    # Calcular jornadas basadas en la cantidad de equipos de primera
     total_equipos = Equipo.query.filter_by(categoria="primera").count()
-    # Número de jornadas (ida y vuelta)
-    total_jornadas = max((total_equipos - 1) * 2, 0)
+    if total_equipos < 2:
+        total_jornadas = 0
+    else:
+        total_jornadas = (total_equipos - 1) * 2  # ida y vuelta
+
+    # Generar lista de jornadas para el select
+    jornadas = list(range(1, total_jornadas + 1)) if total_jornadas > 0 else []
 
     return render_template(
         "plantillasAdmin/cargar_fixture_mayores.html",
@@ -1005,30 +1014,9 @@ def cargar_fixture_mayores_view():
         clubes=clubes,
         equipos_por_club=equipos_por_club,
         total_jornadas=total_jornadas,
+        jornadas=jornadas,
         temporada_activa=temporada_activa
     )
-
-
-# =========================
-# VALIDAR FASE PARA CARGA
-# =========================
-def validar_fase_para_carga(torneo_id, fase_id):
-    fase = Fase.query.get(fase_id)
-    if not fase:
-        return False, "Fase inválida"
-
-    if fase.orden == 1:
-        return True, ""
-
-    # Validar fases anteriores
-    fases_previas = Fase.query.filter(Fase.torneo_id==torneo_id, Fase.orden < fase.orden).all()
-    for f in fases_previas:
-        partidos_fase = Partido.query.filter_by(fase_id=f.id).all()
-        if not partidos_fase:
-            return False, f"No se puede cargar {fase.nombre}. No hay partidos cargados de la fase {f.nombre}."
-        if any(not p.jugado for p in partidos_fase):
-            return False, f"No se puede cargar {fase.nombre}. Todos los partidos de la fase {f.nombre} deben estar jugados."
-    return True, ""
 
 
 # =========================
