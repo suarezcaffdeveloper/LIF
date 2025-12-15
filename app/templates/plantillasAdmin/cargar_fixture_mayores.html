@@ -167,12 +167,12 @@ const listDiv = document.getElementById("partidos-list");
 const jornadaLabel = document.getElementById("jornada-seleccionada");
 
 let ocupados = [];
-let clubesOriginales = [{% for club in clubes %}{id: {{ club.id }}, nombre: "{{ club.nombre }}"},{% endfor %}];
+let clubesOriginales = [{% for club in clubes %}{id: {{ club.id }}, nombre: "{{ club.nombre }}" }{% if not loop.last %},{% endif %}{% endfor %}];
 
 // Reconstruir selects evitando clubes ocupados
 function reconstruirSelects() {
-    const localSel = localSelect.value;
-    const visSel = visitanteSelect.value;
+    const localSel = parseInt(localSelect.value,10) || null;
+    const visSel = parseInt(visitanteSelect.value,10) || null;
 
     localSelect.innerHTML = '<option value="">Seleccionar club...</option>';
     visitanteSelect.innerHTML = '<option value="">Seleccionar club...</option>';
@@ -180,19 +180,19 @@ function reconstruirSelects() {
     clubesOriginales.forEach(club => {
         if (ocupados.includes(club.id)) return;
 
-        if (club.id != visSel) {
+        if (club.id !== visSel) {
             const op = document.createElement("option");
             op.value = club.id;
             op.textContent = club.nombre;
-            if (club.id == localSel) op.selected = true;
+            if (club.id === localSel) op.selected = true;
             localSelect.appendChild(op);
         }
 
-        if (club.id != localSel) {
+        if (club.id !== localSel) {
             const op2 = document.createElement("option");
             op2.value = club.id;
             op2.textContent = club.nombre;
-            if (club.id == visSel) op2.selected = true;
+            if (club.id === visSel) op2.selected = true;
             visitanteSelect.appendChild(op2);
         }
     });
@@ -202,6 +202,8 @@ function reconstruirSelects() {
 function agregarPartidoSlide(p, idx=0){
     const card = document.createElement("div");
     card.classList.add("cruce-card");
+    card.style.opacity = 0;
+    card.style.transform = "translateY(20px)";
     card.innerHTML = `
         <div class="cruce-flex">
             <div class="cruce-team">${p.local_club_nombre}</div>
@@ -213,19 +215,20 @@ function agregarPartidoSlide(p, idx=0){
 }
 
 // Cargar partidos según jornada
-// Cargar partidos según jornada
 async function cargarPartidos(jornada){
+    jornadaLabel.textContent = jornada || "-";
     if(!jornada){ 
         listDiv.innerHTML='<p class="muted">Seleccione jornada.</p>'; 
+        ocupados = [];
+        reconstruirSelects();
         return; 
     }
-    jornadaLabel.textContent = jornada;
 
     try{
         const res = await fetch(`/fixture/ocupados/${jornada}`);
         const data = await res.json();
 
-        ocupados = (data.ocupados || []).map(Number);
+        ocupados = (data.ocupados || []).map(v => parseInt(v,10)).filter(Boolean);
         reconstruirSelects();
 
         const partidos = data.partidos || [];
@@ -265,12 +268,7 @@ async function guardarPartidoMayores(){
         if(data.error){ mostrarFlash(data.error,"danger"); return; }
         mostrarFlash(data.msg || "Partido cargado.","success");
 
-        // Limpiar panel y reconstruir selects
-        listDiv.innerHTML = "";
-        ocupados = [];
-        reconstruirSelects();
-
-        // Volver a cargar los partidos de la jornada actual con slide
+        // Volver a cargar los partidos de la jornada actual
         await cargarPartidos(jornada);
 
         // Scroll hacia el último partido agregado
