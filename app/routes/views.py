@@ -1184,7 +1184,7 @@ def cargar_fixture_inferiores():
 # =========================
 # FIXTURE OCUPADOS INFERIORES
 # =========================
-CATEGORIAS_INFERIORES = ["Quinta", "Sexta", "Septima"]
+CATEGORIAS_INFERIORES = ["quinta", "sexta", "septima"]
 @views.route("/fixture_ocupados_inferiores/<int:jornada>")
 @login_required
 def fixture_ocupados_inferiores(jornada):
