@@ -119,7 +119,7 @@ def crear_temporada():
 @views.route('/fixture/<bloque>')
 @views.route('/fixture/<bloque>/<categoria>')
 def fixture(bloque, categoria=None):
-    TORNEO_APERTURA_ID = 9  # 👈 Reemplazar si cambia el torneo
+    TORNEO_APERTURA_ID = 9  # Reemplazar si cambia el torneo
 
     bloques = {
         "mayores": ["Primera", "Reserva"],
@@ -130,15 +130,13 @@ def fixture(bloque, categoria=None):
         flash("Bloque inválido", "danger")
         return redirect(url_for("views.index"))
 
-    # Categorías del bloque (normalizadas)
+    # Normalizamos categorías
     categorias_bloque_raw = bloques[bloque]
     categorias_bloque = [c.strip().lower() for c in categorias_bloque_raw]
 
     partidos = []
 
-    # ===============================
-    # ✅ SI SE PIDE UNA CATEGORÍA
-    # ===============================
+    # Si se pidió categoría específica
     if categoria:
         if categoria not in categorias_bloque_raw:
             flash("Categoría inválida", "danger")
@@ -154,14 +152,9 @@ def fixture(bloque, categoria=None):
             .order_by(Partido.jornada, Partido.fecha_partido)
             .all()
         )
-
         titulo = f"Fixture {categoria}"
-        mostrar_resultados = True
-
-    # ===============================
-    # ✅ SI SE PIDE EL BLOQUE COMPLETO
-    # ===============================
     else:
+        # Bloque completo
         sub = (
             db.session.query(func.min(Partido.id).label("pid"))
             .filter(
@@ -181,13 +174,9 @@ def fixture(bloque, categoria=None):
             .order_by(Partido.jornada, Partido.fecha_partido)
             .all()
         )
-
         titulo = f"Fixture {bloque.capitalize()}"
-        mostrar_resultados = True
 
-    # ===============================
-    # ✅ AGRUPAR POR JORNADA
-    # ===============================
+    # Agrupar partidos por jornada
     fechas_partidos = {}
     for partido in partidos:
         fecha_key = f"Jornada {partido.jornada}"
@@ -197,7 +186,7 @@ def fixture(bloque, categoria=None):
         "fixture_general.html",
         fechas_partidos=fechas_partidos,
         titulo=titulo,
-        mostrar_resultados=mostrar_resultados
+        mostrar_resultados=True
     )
 
 
