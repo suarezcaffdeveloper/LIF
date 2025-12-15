@@ -122,8 +122,8 @@ def fixture(bloque, categoria=None):
     TORNEO_APERTURA_ID = 9  # Reemplazar si cambia el torneo
 
     bloques = {
-        "mayores": ["Primera", "Reserva"],
-        "inferiores": ["Quinta", "Sexta", "Septima"]
+        "mayores": ["primera", "reserva"],
+        "inferiores": ["quinta", "sexta", "septima"]
     }
 
     if bloque not in bloques:
