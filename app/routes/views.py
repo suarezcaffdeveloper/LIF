@@ -1130,7 +1130,7 @@ def guardar_partido_mayores():
 @views.route('/fixture/ocupados/<int:jornada>', methods=['GET'])
 def fixture_ocupados(jornada):
     partidos = Partido.query.filter_by(jornada=jornada).filter(
-        Partido.categoria.in_(["primera", "reserva"])
+        func.lower(func.trim(Partido.categoria)).in_(["primera", "reserva"])
     ).all()
 
     ocupados_club_ids = set()
@@ -1148,19 +1148,6 @@ def fixture_ocupados(jornada):
         clave = (local_id, visita_id)
 
         if clave not in cruces:
-            # Preferir partido Apertura si existe
-            if p.torneo and p.torneo.nombre != "Apertura":
-                partido_apertura = Partido.query.filter_by(
-                    jornada=jornada,
-                    categoria=p.categoria,
-                    equipo_local_id=eq_local.id,
-                    equipo_visitante_id=eq_visita.id
-                ).filter(Partido.torneo.has(nombre="Apertura")).first()
-                if partido_apertura:
-                    p = partido_apertura
-                    eq_local = Equipo.query.get(p.equipo_local_id)
-                    eq_visita = Equipo.query.get(p.equipo_visitante_id)
-
             cruces[clave] = {
                 "local_club_id": eq_local.club.id,
                 "local_club_nombre": eq_local.club.nombre,
@@ -1174,7 +1161,7 @@ def fixture_ocupados(jornada):
                 "fase": p.fase.nombre if p.fase else ""
             }
 
-        cruces[clave]["categorias"].add(p.categoria)
+        cruces[clave]["categorias"].add(p.categoria.strip().lower())
         if p.jugado:
             cruces[clave]["jugado"] = True
 
