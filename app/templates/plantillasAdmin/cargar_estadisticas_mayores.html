@@ -150,7 +150,7 @@ function resetFormularioCompleto(resetJornada=false) {
   $id("formularios-estadisticas").style.display="none";
 
   current = {
-    jornada: resetJornada?null:current.jornada,
+    jornada: resetJornada ? null : current.jornada,
     local_id:null,
     visitante_id:null,
     id_primera:null,
@@ -178,7 +178,7 @@ $id("select-jornada").addEventListener("change", async e=>{
     const sel = $id("select-cruce");
     sel.innerHTML='<option value="">Seleccionar...</option>';
 
-    if(!data.length){
+    if(!Array.isArray(data) || data.length === 0){
       $id("cruces-container").style.display="none";
       Swal.fire("Info","No hay cruces pendientes","info");
       return;
@@ -204,7 +204,7 @@ $id("select-cruce").addEventListener("change", async e=>{
   if(!id) return;
 
   resetFormularioCompleto(false); // no resetear jornada
-  estadoCruces[id] = {};
+  estadoCruces[id] = estadoCruces[id] || {};
 
   try{
     const info = await fetch(`/api/info_cruce/${id}`).then(r=>r.json());
@@ -229,7 +229,7 @@ $id("select-cruce").addEventListener("change", async e=>{
       cargarJugadores(cat);
     });
 
-    $id("formularios-estadisticas").style.display=hayPendiente?"block":"none";
+    $id("formularios-estadisticas").style.display = hayPendiente ? "block" : "none";
 
     if(!hayPendiente) Swal.fire("Info","Este cruce no tiene categorías pendientes","info");
   }catch(err){
@@ -300,8 +300,10 @@ function construirPayload(cat){
 
   const leerGoleadores = side => Array.from(
     $id(`${cat}_goleadores_${side}_list`).querySelectorAll(".list-row")
-  ).map(row=>({jugador_id:row.querySelector("[data-player]").value,goles:safeInt(row.querySelector("[data-goles]").value)}))
-    .filter(g=>g.jugador_id);
+  ).map(row=>({
+    jugador_id: safeInt(row.querySelector("[data-player]").value),
+    goles: safeInt(row.querySelector("[data-goles]").value)
+  })).filter(g=>g.jugador_id);
 
   const leerTarjetas = (side,tipo)=>Array.from(
     $id(`${cat}_tarjetas_${side}_list`).querySelectorAll(".list-row")
@@ -361,6 +363,7 @@ async function guardarCategoria(cat){
 
 function marcarCategoriaGuardada(cat){
   const cruceId=$id("select-cruce").value;
+  estadoCruces[cruceId] = estadoCruces[cruceId] || {};
   estadoCruces[cruceId][cat]=true;
   if(Object.values(estadoCruces[cruceId]).every(v=>v)) finalizarCruce(cruceId);
 }
