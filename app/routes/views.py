@@ -1006,8 +1006,10 @@ def cargar_fixture_mayores_view():
     for e in equipos:
         equipos_por_club.setdefault(e.club_id, {})[e.categoria] = e.id
 
+    # Cantidad de equipos de Primera
     total_equipos = Equipo.query.filter_by(categoria="primera").count()
-    total_jornadas = max(total_equipos - 1, 0)  # nunca menor que 0
+    # Número de jornadas (ida y vuelta)
+    total_jornadas = max((total_equipos - 1) * 2, 0)
 
     return render_template(
         "plantillasAdmin/cargar_fixture_mayores.html",
