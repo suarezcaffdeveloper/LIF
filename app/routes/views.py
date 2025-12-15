@@ -1610,6 +1610,9 @@ def guardar_reserva():
 # ====================================================
 # CARGAR INTERFAZ
 # ====================================================
+# ====================================================
+# CARGAR ESTADÍSTICAS INFERIORES
+# ====================================================
 @views.route('/cargar_estadisticas_inferiores')
 def cargar_estadisticas_inferiores():
     categorias_inferiores = ["quinta", "sexta", "septima"]
@@ -1629,7 +1632,6 @@ def cargar_estadisticas_inferiores():
         jornadas=jornadas
     )
 
-
 # ====================================================
 # CRUCES POR JORNADA
 # ====================================================
@@ -1642,11 +1644,14 @@ def cruces_por_jornada_inferiores(jornada):
         db.func.lower(Partido.categoria).in_(categorias)
     ).all()
 
+    print("Jornada seleccionada:", jornada)
+    print("Partidos encontrados:", partidos)
+
     cruces = {}
 
     for p in partidos:
-        local = p.equipo_local.club.nombre
-        visitante = p.equipo_visitante.club.nombre
+        local = p.equipo_local.club.nombre if p.equipo_local and p.equipo_local.club else "Desconocido"
+        visitante = p.equipo_visitante.club.nombre if p.equipo_visitante and p.equipo_visitante.club else "Desconocido"
         key = f"{local} vs {visitante}"
 
         if key not in cruces:
@@ -1658,11 +1663,12 @@ def cruces_por_jornada_inferiores(jornada):
                 "id_septima": None
             }
 
-        if p.categoria == "quinta":
+        cat = p.categoria.lower()
+        if cat == "quinta":
             cruces[key]["id_quinta"] = p.id
-        elif p.categoria == "sexta":
+        elif cat == "sexta":
             cruces[key]["id_sexta"] = p.id
-        elif p.categoria == "septima":
+        elif cat == "septima":
             cruces[key]["id_septima"] = p.id
 
     respuesta = []
@@ -1679,7 +1685,6 @@ def cruces_por_jornada_inferiores(jornada):
 
     return jsonify(respuesta)
 
-
 # ====================================================
 # INFO CRUCE
 # ====================================================
@@ -1689,10 +1694,10 @@ def info_cruce_inferiores(id_representativo):
 
     return jsonify({
         "jornada": p.jornada,
-        "local_id": p.equipo_local.club.id,
-        "visitante_id": p.equipo_visitante.club.id,
-        "local_nombre": p.equipo_local.club.nombre,
-        "visitante_nombre": p.equipo_visitante.club.nombre
+        "local_id": p.equipo_local.club.id if p.equipo_local and p.equipo_local.club else None,
+        "visitante_id": p.equipo_visitante.club.id if p.equipo_visitante and p.equipo_visitante.club else None,
+        "local_nombre": p.equipo_local.club.nombre if p.equipo_local and p.equipo_local.club else "Desconocido",
+        "visitante_nombre": p.equipo_visitante.club.nombre if p.equipo_visitante and p.equipo_visitante.club else "Desconocido"
     })
 
 # ====================================================
@@ -1701,11 +1706,9 @@ def info_cruce_inferiores(id_representativo):
 @views.route('/get_partidos_cruce_inferiores', methods=['POST'])
 def get_partidos_cruce_inferiores():
     data = request.get_json()
-
     jornada = data.get("jornada")
     local_club_id = data.get("local")
     visitante_club_id = data.get("visitante")
-
     categorias = ["quinta", "sexta", "septima"]
 
     try:
@@ -1713,40 +1716,32 @@ def get_partidos_cruce_inferiores():
             Partido.jornada == jornada,
             Partido.equipo_local.has(club_id=local_club_id),
             Partido.equipo_visitante.has(club_id=visitante_club_id),
-            Partido.categoria.in_(categorias)
+            db.func.lower(Partido.categoria).in_(categorias)
         ).all()
 
         respuesta = {}
 
         for p in partidos:
-            categoria = p.categoria  # ya viene en minúscula
+            categoria = p.categoria.lower()
 
             jugadores_local = [
-                {
-                    "id": je.jugador.numero_carnet,
-                    "nombre": f"{je.jugador.nombre} {je.jugador.apellido}"
-                }
-                for je in JugadorEquipo.query.filter_by(
-                    equipo_id=p.equipo_local_id
-                ).all()
+                {"id": je.jugador.numero_carnet,
+                 "nombre": f"{je.jugador.nombre} {je.jugador.apellido}"}
+                for je in JugadorEquipo.query.filter_by(equipo_id=p.equipo_local_id).all()
             ]
 
             jugadores_visitante = [
-                {
-                    "id": je.jugador.numero_carnet,
-                    "nombre": f"{je.jugador.nombre} {je.jugador.apellido}"
-                }
-                for je in JugadorEquipo.query.filter_by(
-                    equipo_id=p.equipo_visitante_id
-                ).all()
+                {"id": je.jugador.numero_carnet,
+                 "nombre": f"{je.jugador.nombre} {je.jugador.apellido}"}
+                for je in JugadorEquipo.query.filter_by(equipo_id=p.equipo_visitante_id).all()
             ]
 
             respuesta[categoria.capitalize()] = {
                 "partido_id": p.id,
                 "id_equipo_local": p.equipo_local_id,
                 "id_equipo_visitante": p.equipo_visitante_id,
-                "equipo_local": p.equipo_local.club.nombre,
-                "equipo_visitante": p.equipo_visitante.club.nombre,
+                "equipo_local": p.equipo_local.club.nombre if p.equipo_local and p.equipo_local.club else "Desconocido",
+                "equipo_visitante": p.equipo_visitante.club.nombre if p.equipo_visitante and p.equipo_visitante.club else "Desconocido",
                 "jugadores_local": jugadores_local,
                 "jugadores_visitante": jugadores_visitante,
                 "goles_local": p.goles_local,
@@ -1759,7 +1754,6 @@ def get_partidos_cruce_inferiores():
         db.session.rollback()
         print("❌ ERROR get_partidos_cruce_inferiores:", e)
         return jsonify({"success": False, "message": "Error interno"}), 500
-
 
 # ====================================================
 # CRUCES PENDIENTES
@@ -1776,17 +1770,16 @@ def cruces_pendientes(jornada):
             Partido.jornada == jornada,
             Partido.jugado == False,
             Torneo.nombre == torneo_nombre,
-            Partido.categoria.in_(categorias)
+            db.func.lower(Partido.categoria).in_(categorias)
         )
         .all()
     )
 
     cruces = {}
-
     for p in partidos:
         key = tuple(sorted([
-            p.equipo_local.club.nombre,
-            p.equipo_visitante.club.nombre
+            p.equipo_local.club.nombre if p.equipo_local and p.equipo_local.club else "Desconocido",
+            p.equipo_visitante.club.nombre if p.equipo_visitante and p.equipo_visitante.club else "Desconocido"
         ]))
 
         if key not in cruces:
@@ -1796,135 +1789,6 @@ def cruces_pendientes(jornada):
             }
 
     return jsonify(list(cruces.values()))
-
-# ====================================================
-# GUARDAR ESTADÍSTICAS
-# ====================================================
-@views.route('/api/guardar_inferiores', methods=['POST'])
-def guardar_inferiores():
-    data = request.get_json()
-    print("DATA RECIBIDA =>", data)
-
-    try:
-        partido_id = int(data["partido_id"])
-        goles_local = int(data.get("goles_local", 0))
-        goles_visitante = int(data.get("goles_visitante", 0))
-
-        goleadores_local = data.get("goleadores_local", [])
-        goleadores_visitante = data.get("goleadores_visitante", [])
-
-        amarillas_local = data.get("amarillas_local", [])
-        rojas_local = data.get("rojas_local", [])
-        amarillas_visitante = data.get("amarillas_visitante", [])
-        rojas_visitante = data.get("rojas_visitante", [])
-
-        # -------------------- HELPERS --------------------
-        def validar_tarjetas(datos, label=""):
-            if not datos:
-                return
-            if isinstance(datos, list):
-                for item in datos:
-                    if not item or item in ("", "0", 0):
-                        raise Exception(f"Tarjeta sin jugador seleccionado ({label})")
-            elif isinstance(datos, dict):
-                for jugador_id in datos.keys():
-                    if not jugador_id or jugador_id in ("", "0", 0):
-                        raise Exception(f"Tarjeta sin jugador seleccionado ({label})")
-
-        def normalizar_tarjetas(datos):
-            resultado = {}
-            if isinstance(datos, dict):
-                for k, v in datos.items():
-                    resultado[str(k)] = int(v)
-            elif isinstance(datos, list):
-                for item in datos:
-                    if isinstance(item, int):
-                        resultado[str(item)] = resultado.get(str(item), 0) + 1
-            return resultado
-
-        # -------------------- VALIDACIONES --------------------
-        validar_tarjetas(amarillas_local, "amarillas local")
-        validar_tarjetas(rojas_local, "rojas local")
-        validar_tarjetas(amarillas_visitante, "amarillas visitante")
-        validar_tarjetas(rojas_visitante, "rojas visitante")
-
-        amarillas_local = normalizar_tarjetas(amarillas_local)
-        rojas_local = normalizar_tarjetas(rojas_local)
-        amarillas_visitante = normalizar_tarjetas(amarillas_visitante)
-        rojas_visitante = normalizar_tarjetas(rojas_visitante)
-
-        total_gl = sum(int(j.get("goles", 0)) for j in goleadores_local)
-        total_gv = sum(int(j.get("goles", 0)) for j in goleadores_visitante)
-
-        if total_gl != goles_local:
-            return jsonify({"success": False, "message": "Los goles del local no coinciden"}), 400
-        if total_gv != goles_visitante:
-            return jsonify({"success": False, "message": "Los goles del visitante no coinciden"}), 400
-
-        # -------------------- UNIFICAR JUGADORES --------------------
-        jugadores_local = set(j.get("id") or j.get("jugador_id") or j.get("numero_carnet") 
-                              for j in goleadores_local if j.get("id") or j.get("jugador_id") or j.get("numero_carnet"))
-        jugadores_local.update(map(int, amarillas_local.keys()))
-        jugadores_local.update(map(int, rojas_local.keys()))
-
-        jugadores_visitante = set(j.get("id") or j.get("jugador_id") or j.get("numero_carnet") 
-                                  for j in goleadores_visitante if j.get("id") or j.get("jugador_id") or j.get("numero_carnet"))
-        jugadores_visitante.update(map(int, amarillas_visitante.keys()))
-        jugadores_visitante.update(map(int, rojas_visitante.keys()))
-
-        # -------------------- GUARDAR ESTADO --------------------
-        for jugador_id in jugadores_local:
-            goles = next((int(j.get("goles", 0)) for j in goleadores_local
-                         if int(j.get("id") or j.get("jugador_id") or j.get("numero_carnet")) == jugador_id), 0)
-            estado = EstadoJugadorPartido(
-                id_jugador=jugador_id,
-                id_partido=partido_id,
-                cant_goles=goles,
-                tarjetas_amarillas=int(amarillas_local.get(str(jugador_id), 0)),
-                tarjetas_rojas=int(rojas_local.get(str(jugador_id), 0))
-            )
-            db.session.add(estado)
-
-        for jugador_id in jugadores_visitante:
-            goles = next((int(j.get("goles", 0)) for j in goleadores_visitante
-                         if int(j.get("id") or j.get("jugador_id") or j.get("numero_carnet")) == jugador_id), 0)
-            estado = EstadoJugadorPartido(
-                id_jugador=jugador_id,
-                id_partido=partido_id,
-                cant_goles=goles,
-                tarjetas_amarillas=int(amarillas_visitante.get(str(jugador_id), 0)),
-                tarjetas_rojas=int(rojas_visitante.get(str(jugador_id), 0))
-            )
-            db.session.add(estado)
-
-        # -------------------- MARCAR PARTIDO JUGADO --------------------
-        partido = Partido.query.get_or_404(partido_id)
-        partido.goles_local = goles_local
-        partido.goles_visitante = goles_visitante
-        partido.jugado = True
-
-        db.session.flush()  # 🔥 hace visibles los cambios para jornada_completa antes de commit
-        db.session.commit()
-
-        # -------------------- ENVÍO AUTOMÁTICO DE MAIL --------------------
-        if jornada_completa(partido.jornada, categoria="Inferiores"):
-            usuarios = Usuario.query.filter_by(rol="usuario").all()
-            enviar_mail_jornada(usuarios, partido.jornada, categoria="Inferiores")
-            return jsonify({"success": True, "message": "Jornada completa. Estadísticas actualizadas y mails enviados"})
-
-        return jsonify({"success": True, "message": "Partido guardado correctamente"})
-
-    except IntegrityError as e:
-        db.session.rollback()
-        if "estado_jugador_partido_pkey" in str(e.orig):
-            return jsonify({"success": False, "message": "Este partido ya fue cargado"}), 400
-        return jsonify({"success": False, "message": "Error de integridad en la base de datos"}), 500
-
-    except Exception as e:
-        db.session.rollback()
-        print("ERROR REAL:", e)
-        return jsonify({"success": False, "message": "Error interno del servidor"}), 500
-        
 
 #-----------------------------------------
 # CARGAR PARTIDOS PLAYOFF
