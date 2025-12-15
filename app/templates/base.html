@@ -155,7 +155,7 @@
                     <a href="{{ url_for('views.logout') }}">Log-Out</a>
                     <span style="color: white; margin-left: 10px;">{{ current_user.nombre_completo }}</span>
 
-                    {% if current_user.rol == 'admin' %}
+                    {% if current_user.rol == 'administrador' %}
                         <a href="{{ url_for('views.adminview') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Admin</a>
                     {% endif %}
 
