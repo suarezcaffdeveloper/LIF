@@ -1352,34 +1352,39 @@ def guardar_partido_inferiores():
         return jsonify({"error": "Error interno del servidor"}), 500
 
     
-# -----------------------------------------
-# 1) Página de carga
-# -----------------------------------------
+# ====================================================
+# 1) CARGAR ESTADÍSTICAS MAYORES
+# ====================================================
 @views.route('/cargar_estadisticas_mayores')
 def cargar_estadisticas_mayores():
-    jornadas = db.session.query(Partido.jornada)\
-        .join(Torneo)\
-        .join(Temporada)\
-        .filter(Temporada.activa == True, Torneo.nombre == "Apertura")\
-        .distinct().order_by(Partido.jornada).all()
+    jornadas = (
+        db.session.query(Partido.jornada)
+        .join(Torneo)
+        .join(Temporada)
+        .filter(Temporada.activa == True, Torneo.nombre == "Apertura")
+        .distinct()
+        .order_by(Partido.jornada)
+        .all()
+    )
     jornadas = [j[0] for j in jornadas]
     return render_template('plantillasAdmin/cargar_estadisticas_mayores.html', jornadas=jornadas)
 
 
-# -----------------------------------------
-# 2) Cruces pendientes (solo torneo activo)
-# -----------------------------------------
+# ====================================================
+# 2) CRUCES PENDIENTES MAYORES
+# ====================================================
 @views.route("/api/cruces_pendientes_mayores/<int:jornada>")
 def cruces_pendientes_mayores(jornada):
     torneo_activo = Torneo.query.join(Temporada)\
-        .filter(Temporada.activa==True, Torneo.nombre=="Apertura").first()
+        .filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
     if not torneo_activo:
         return jsonify([])
 
+    # 🔥 Normalizamos categoría a minúsculas
     partidos = Partido.query.filter(
         Partido.jornada == jornada,
         Partido.torneo_id == torneo_activo.id,
-        Partido.categoria.in_(["primera","reserva"]),
+        db.func.lower(Partido.categoria).in_(["primera", "reserva"]),
         Partido.jugado == False
     ).all()
 
@@ -1387,7 +1392,7 @@ def cruces_pendientes_mayores(jornada):
     for p in partidos:
         if not p.equipo_local or not p.equipo_visitante:
             continue
-        # clave única por combinación de clubes (sin importar el orden)
+
         key = tuple(sorted([p.equipo_local.club_id, p.equipo_visitante.club_id]))
         if key not in cruces:
             cruces[key] = {
@@ -1396,9 +1401,11 @@ def cruces_pendientes_mayores(jornada):
                 "primera": None,
                 "reserva": None
             }
-        if p.categoria.lower() == "primera":
+
+        cat = p.categoria.lower()
+        if cat == "primera":
             cruces[key]["primera"] = p.id
-        elif p.categoria.lower() == "reserva":
+        elif cat == "reserva":
             cruces[key]["reserva"] = p.id
 
     respuesta = []
@@ -1410,43 +1417,38 @@ def cruces_pendientes_mayores(jornada):
                 "primera": c["primera"],
                 "reserva": c["reserva"]
             })
+
     return jsonify(respuesta)
 
 
-# -----------------------------------------
-# 3) Información de un cruce
-# -----------------------------------------
+# ====================================================
+# 3) INFO CRUCE MAYORES
+# ====================================================
 @views.route("/api/info_cruce/<int:cruce_id>")
 def info_cruce(cruce_id):
     try:
-        partido_base = Partido.query.get(cruce_id)
-        if not partido_base:
-            return jsonify({"error": "Cruce no encontrado"}), 404
+        partido_base = Partido.query.get_or_404(cruce_id)
 
-        jornada = partido_base.jornada
         torneo_activo = Torneo.query.join(Temporada)\
-            .filter(Temporada.activa==True, Torneo.nombre=="Apertura").first()
+            .filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
         if not torneo_activo or partido_base.torneo_id != torneo_activo.id:
             return jsonify({"error": "Este cruce no pertenece al torneo activo"}), 400
 
-        # Identificar clubes
         local_club_id = partido_base.equipo_local.club_id
         visitante_club_id = partido_base.equipo_visitante.club_id
 
-        # Buscar todos los equipos de ambos clubes
         equipos_local = Equipo.query.filter_by(club_id=local_club_id).all()
         equipos_visitante = Equipo.query.filter_by(club_id=visitante_club_id).all()
 
         ids_equipos_local = [e.id for e in equipos_local]
         ids_equipos_visitante = [e.id for e in equipos_visitante]
 
-        # Buscar partidos Primera/Reserva entre esos equipos en la misma jornada y torneo activo
         partidos = Partido.query.filter(
-            Partido.jornada == jornada,
+            Partido.jornada == partido_base.jornada,
             Partido.torneo_id == torneo_activo.id,
             Partido.equipo_local_id.in_(ids_equipos_local),
             Partido.equipo_visitante_id.in_(ids_equipos_visitante),
-            Partido.categoria.in_(["primera", "reserva"])
+            db.func.lower(Partido.categoria).in_(["primera", "reserva"])
         ).all()
 
         partido_primera = next((p for p in partidos if p.categoria.lower() == "primera"), None)
@@ -1469,16 +1471,17 @@ def info_cruce(cruce_id):
             "local_nombre": partido_base.equipo_local.club.nombre,
             "visitante_id": visitante_club_id,
             "visitante_nombre": partido_base.equipo_visitante.club.nombre,
-            "jornada": jornada
+            "jornada": partido_base.jornada
         })
+
     except Exception as e:
         print("❌ ERROR info_cruce:", e)
         return jsonify({"error": str(e)}), 500
 
 
-# -----------------------------------------
-# 4) Guardar resultados (reutilizable)
-# -----------------------------------------
+# ====================================================
+# 4) GUARDAR ESTADÍSTICAS MAYORES
+# ====================================================
 def validar_y_guardar_estadisticas(data, categoria):
     try:
         id_partido = int(data.get("partido_id"))
@@ -1494,39 +1497,30 @@ def validar_y_guardar_estadisticas(data, categoria):
     rojas_local = data.get("rojas_local", [])
     rojas_visitante = data.get("rojas_visitante", [])
 
-    # 1. Buscar partido
-    partido = Partido.query.get(id_partido)
-    if not partido:
-        return {"success": False, "message": "Partido no encontrado"}, 404
+    partido = Partido.query.get_or_404(id_partido)
 
-    # 2. Validar torneo activo (solo Apertura)
     torneo_activo = Torneo.query.join(Temporada).filter(
-        Temporada.activa==True, Torneo.nombre=="Apertura"
+        Temporada.activa == True, Torneo.nombre == "Apertura"
     ).first()
     if not torneo_activo or partido.torneo_id != torneo_activo.id:
         return {"success": False, "message": "Este endpoint solo guarda partidos del Apertura."}, 400
 
-    # 3. Validar categoría
     if partido.categoria.lower() != categoria.lower():
         return {"success": False, "message": f"Este endpoint solo guarda datos de {categoria.capitalize()}."}, 400
 
-    # 4. Verificar si ya fue jugado
     if partido.jugado:
         return {"success": False, "message": f"El partido de {categoria.capitalize()} ya fue cargado."}, 400
 
-    # 5. Verificar suma de goles
     total_local = sum(int(g.get("goles", 0)) for g in goleadores_local)
     total_visitante = sum(int(g.get("goles", 0)) for g in goleadores_visitante)
     if total_local != goles_local or total_visitante != goles_visitante:
         return {"success": False, "message": "Los goles no coinciden con los goleadores."}, 400
 
-    # 6. Guardar goles y marcar jugado
     partido.goles_local = goles_local
     partido.goles_visitante = goles_visitante
     partido.jugado = True
     db.session.flush()
 
-    # 7. Estadísticas por jugador
     stats = {}
     def ensure(jid):
         if jid not in stats:
@@ -1548,50 +1542,31 @@ def validar_y_guardar_estadisticas(data, categoria):
         ensure(j)
         stats[j]["tarjetas_rojas"] += 1
 
-    # 8. Guardar en DB y enviar mail si corresponde
     try:
         for jugador_id, valores in stats.items():
-            registro = EstadoJugadorPartido(
+            db.session.add(EstadoJugadorPartido(
                 id_jugador=int(jugador_id),
-                id_partido=int(id_partido),
+                id_partido=id_partido,
                 cant_goles=int(valores["cant_goles"]),
                 tarjetas_amarillas=int(valores["tarjetas_amarillas"]),
                 tarjetas_rojas=int(valores["tarjetas_rojas"])
-            )
-            db.session.add(registro)
-
-        db.session.flush()  # flush antes de enviar mail
-
-        # 🔥 Solo verifica jornadas de Mayores
-        if categoria.lower() == "mayores" and jornada_completa(partido.jornada, categoria):
-            usuarios = Usuario.query.filter_by(rol="usuario").all()
-            try:
-                enviar_mail_jornada(usuarios, partido.jornada, categoria)
-            except Exception as e:
-                print("❌ ERROR al enviar mail:", e)
-
-        db.session.commit()
+            ))
+        db.session.flush()
 
         recalcular_tabla_posiciones(partido.categoria)
 
+        db.session.commit()
         return {"success": True, "message": "Estadísticas guardadas correctamente"}, 200
 
-    except IntegrityError as e:
-        db.session.rollback()
-        msg = str(e.orig) if getattr(e, "orig", None) else str(e)
-        if "estado_jugador_partido_pkey" in msg or "duplicate key value" in msg.lower():
-            return {"success": False, "message": "Ya existen estadísticas para alguno de estos jugadores en este partido."}, 400
-        return {"success": False, "message": "Error de integridad en la base de datos"}, 500
     except Exception as e:
         db.session.rollback()
         print("❌ ERROR guardar estadisticas:", e)
         return {"success": False, "message": "Error interno del servidor"}, 500
 
 
-
-# -----------------------------------------
-# 5) Endpoints específicos para cada categoría
-# -----------------------------------------
+# ====================================================
+# 5) ENDPOINTS ESPECÍFICOS
+# ====================================================
 @views.route("/api/guardar_primera", methods=["POST"])
 def guardar_primera():
     data = request.get_json() or {}
