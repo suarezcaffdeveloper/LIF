@@ -6,6 +6,9 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
 from app.commands import create_admin
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 from .database.db import db
 from .models.models import Usuario
@@ -89,6 +92,13 @@ def create_app():
     )
 
     mail.init_app(app)
+    
+    cloudinary.config(
+        cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+        api_key=os.getenv("CLOUDINARY_API_KEY"),
+        api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+        secure=True
+    )
 
     # -----------------------
     # BLUEPRINTS

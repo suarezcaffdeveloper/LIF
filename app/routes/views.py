@@ -13,6 +13,7 @@ from sqlalchemy.orm import joinedload
 from app.utils.email_utils import enviar_mail_bienvenida, enviar_mail_jornada, jornada_completa
 from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+import cloudinary.uploader
 
 views = Blueprint('views', __name__)
 
@@ -2213,25 +2214,21 @@ def cargar_noticia():
         file = request.files.get("imagen")
         imagen_url = None
 
+        # ---------------------------
+        # SUBIDA DE IMAGEN A CLOUDINARY
+        # ---------------------------
         if file and file.filename != "" and allowed_file(file.filename):
+            try:
+                upload_result = cloudinary.uploader.upload(
+                    file,
+                    folder="noticias",
+                    resource_type="image"
+                )
+                imagen_url = upload_result["secure_url"]
 
-            upload_folder = os.path.join(
-                current_app.root_path,
-                "static",
-                "uploads",
-                "noticias"
-            )
-
-            os.makedirs(upload_folder, exist_ok=True)
-
-            filename = secure_filename(file.filename)
-            new_filename = f"{int(datetime.datetime.utcnow().timestamp())}_{filename}"
-
-            file_path = os.path.join(upload_folder, new_filename)
-            file.save(file_path)
-
-            # 👉 GUARDAMOS URL PÚBLICA (CORRECTO)
-            imagen_url = f"/static/uploads/noticias/{new_filename}"
+            except Exception as e:
+                flash("❌ Error al subir la imagen", "danger")
+                imagen_url = None
 
         slug = slugify(titulo)
 
@@ -2254,6 +2251,7 @@ def cargar_noticia():
         "plantillasAdmin/cargar_noticia.html",
         usuario=current_user
     )
+    
 @views.route('/noticia/<int:noticia_id>')
 def noticia_detalle(noticia_id):
     noticia = Noticia.query.get_or_404(noticia_id)
