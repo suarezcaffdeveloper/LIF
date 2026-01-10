@@ -2185,6 +2185,7 @@ def cargar_video():
 import datetime
 from werkzeug.utils import secure_filename
 import os
+import io
 from slugify import slugify
 
 
@@ -2219,15 +2220,33 @@ def cargar_noticia():
         # ---------------------------
         if file and file.filename != "" and allowed_file(file.filename):
             try:
+                # 🔧 Convertir FileStorage de Flask a BytesIO para Cloudinary
+                file_bytes = io.BytesIO(file.read())
+                file_bytes.name = secure_filename(file.filename)
+                
+                # Verificar que Cloudinary esté configurado
+                from app import current_app
+                cloud_name = current_app.config.get('CLOUDINARY_CLOUD_NAME')
+                if not cloud_name:
+                    raise Exception("Cloudinary no está configurado. Revisa las variables de entorno.")
+                
                 upload_result = cloudinary.uploader.upload(
-                    file,
+                    file_bytes,
                     folder="noticias",
-                    resource_type="image"
+                    resource_type="image",
+                    overwrite=True
                 )
-                imagen_url = upload_result["secure_url"]
+                imagen_url = upload_result.get("secure_url")
+                
+                if imagen_url:
+                    flash("✅ Imagen subida a Cloudinary correctamente", "success")
+                else:
+                    flash("❌ No se obtuvo URL de la imagen", "danger")
+                    imagen_url = None
 
             except Exception as e:
-                flash("❌ Error al subir la imagen", "danger")
+                print(f"❌ ERROR Cloudinary: {str(e)}")
+                flash(f"❌ Error al subir la imagen: {str(e)}", "danger")
                 imagen_url = None
 
         slug = slugify(titulo)
