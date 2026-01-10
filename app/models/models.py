@@ -184,6 +184,8 @@ class EstadoJugadorPartido(db.Model):
     def __repr__(self):
         return f"<EstadoJugadorPartido J:{self.id_jugador} P:{self.id_partido} goles:{self.cant_goles}>"
 
+#datos para entrar como admin = email(admin123@gmail.com) contraseña (admin123)
+
 class Usuario(db.Model):
     __tablename__ = 'usuario'
 
