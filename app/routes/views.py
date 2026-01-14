@@ -1,19 +1,25 @@
-from flask import Blueprint, current_app,render_template, jsonify, json,request, redirect, url_for, flash, abort
+from flask import Blueprint, current_app, render_template, jsonify, json, request, redirect, url_for, flash, abort
 from ..models.models import (
     Equipo, Partido, Jugador, Club, Video, Noticia, Usuario, JugadorEquipo, TablaPosiciones,
      EstadoJugadorPartido, Temporada, Torneo, Fase
 )
 from sqlalchemy.exc import IntegrityError
 from collections import defaultdict
-#import jsonify
 from ..database.db import db
 from sqlalchemy import func, or_, and_
-import datetime
 from sqlalchemy.orm import joinedload
 from app.utils.email_utils import enviar_mail_bienvenida, enviar_mail_jornada, jornada_completa
 from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.utils import secure_filename
+import cloudinary
 import cloudinary.uploader
+import io
+import os
+import datetime as dt
+import string
+import secrets
+from slugify import slugify
 
 views = Blueprint('views', __name__)
 
@@ -2182,13 +2188,6 @@ def cargar_video():
     return render_template("plantillasAdmin/cargar_video.html", usuario=current_user)
 
 
-import datetime
-from werkzeug.utils import secure_filename
-import os
-import io
-from slugify import slugify
-
-
 #-----------------------------------------
 # NOTICIAS - CARGAR NOTICIAS CON IMAGENES
 #-----------------------------------------
@@ -2220,22 +2219,21 @@ def cargar_noticia():
         # ---------------------------
         if file and file.filename != "" and allowed_file(file.filename):
             try:
-                # 🔧 Convertir FileStorage de Flask a BytesIO para Cloudinary
-                file_bytes = io.BytesIO(file.read())
-                file_bytes.name = secure_filename(file.filename)
-                
                 # Verificar que Cloudinary esté configurado
-                from app import current_app
                 cloud_name = current_app.config.get('CLOUDINARY_CLOUD_NAME')
                 if not cloud_name:
-                    raise Exception("Cloudinary no está configurado. Revisa las variables de entorno.")
+                    raise Exception("Cloudinary no está configurado. Verifica las variables de entorno: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET")
+                
+                # 🔧 Leer el archivo directamente del stream
+                file.seek(0)  # Asegurar que estamos al inicio del stream
                 
                 upload_result = cloudinary.uploader.upload(
-                    file_bytes,
+                    file.stream,
                     folder="noticias",
                     resource_type="image",
-                    overwrite=True
+                    public_id=secure_filename(f"{slugify(titulo)}-{int(datetime.now().timestamp())}")
                 )
+                
                 imagen_url = upload_result.get("secure_url")
                 
                 if imagen_url:
@@ -2245,26 +2243,45 @@ def cargar_noticia():
                     imagen_url = None
 
             except Exception as e:
+                db.session.rollback()
                 print(f"❌ ERROR Cloudinary: {str(e)}")
                 flash(f"❌ Error al subir la imagen: {str(e)}", "danger")
                 imagen_url = None
 
+        # Validar datos obligatorios
+        if not titulo or not contenido:
+            flash("❌ El título y contenido son obligatorios.", "danger")
+            return render_template(
+                "plantillasAdmin/cargar_noticia.html",
+                usuario=current_user
+            )
+
         slug = slugify(titulo)
 
-        noticia = Noticia(
-            titulo=titulo,
-            contenido=contenido,
-            categoria=categoria,
-            imagen_url=imagen_url,
-            id_autor=current_user.id_usuario,
-            slug=slug
-        )
+        try:
+            noticia = Noticia(
+                titulo=titulo,
+                contenido=contenido,
+                categoria=categoria,
+                imagen_url=imagen_url,
+                id_autor=current_user.id_usuario,
+                slug=slug
+            )
 
-        db.session.add(noticia)
-        db.session.commit()
+            db.session.add(noticia)
+            db.session.commit()
 
-        flash("📰 Noticia cargada correctamente.", "success")
-        return redirect(url_for("views.cargar_noticia"))
+            flash("📰 Noticia cargada correctamente.", "success")
+            return redirect(url_for("views.cargar_noticia"))
+        
+        except Exception as e:
+            db.session.rollback()
+            print(f"❌ ERROR al guardar noticia: {str(e)}")
+            flash(f"❌ Error al guardar la noticia: {str(e)}", "danger")
+            return render_template(
+                "plantillasAdmin/cargar_noticia.html",
+                usuario=current_user
+            )
 
     return render_template(
         "plantillasAdmin/cargar_noticia.html",

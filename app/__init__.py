@@ -93,10 +93,17 @@ def create_app():
 
     mail.init_app(app)
     
+    # -----------------------
+    # CLOUDINARY CONFIG
+    # -----------------------
+    app.config["CLOUDINARY_CLOUD_NAME"] = os.getenv("dzglh4wyq")
+    app.config["CLOUDINARY_API_KEY"] = os.getenv("791785751666643")
+    app.config["CLOUDINARY_API_SECRET"] = os.getenv("1l_8nnprpQgNMtndRjcdgvgsuUY")
+    
     cloudinary.config(
-        cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-        api_key=os.getenv("CLOUDINARY_API_KEY"),
-        api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+        cloud_name=app.config.get("CLOUDINARY_CLOUD_NAME"),
+        api_key=app.config.get("CLOUDINARY_API_KEY"),
+        api_secret=app.config.get("CLOUDINARY_API_SECRET"),
         secure=True
     )
 
