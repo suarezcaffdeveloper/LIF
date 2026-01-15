@@ -11,13 +11,51 @@
 <style>
 body { background:#1f1f1f; color:#f5f6fa; }
 .card { background:#2c2c2c; border-radius:15px; padding:25px; }
-.form-label { color:#5dade2; font-weight:600; }
+.form-label { color:#5dade2; font-weight:600; margin-top:15px; margin-bottom:8px; }
 select,input { background:#1f1f1f !important; color:#fff !important; border:1px solid #5dade2 !important; }
 .subtitulo { color:#5dade2; margin:20px 0 10px; font-weight:600; text-transform:uppercase; }
-.side-box { background:rgba(255,255,255,0.04); border-radius:10px; padding:12px; }
-.list-row { display:flex; gap:8px; margin-bottom:6px; align-items:center; }
-.remove-row { background:transparent; border:1px solid #aa3333; color:#ffaaaa; border-radius:6px; }
-.small-input { max-width:90px; }
+.side-box { background:rgba(255,255,255,0.04); border-radius:10px; padding:20px; border-left:3px solid #5dade2; }
+.list-row { 
+  display:grid; 
+  grid-template-columns: 1fr auto auto;
+  gap:12px; 
+  margin-bottom:10px; 
+  padding:12px; 
+  background:rgba(0,0,0,0.3);
+  border-radius:8px;
+  align-items:center;
+}
+.list-row select { width:100%; }
+.list-row input { width:100%; }
+.remove-row { 
+  background:transparent; 
+  border:1px solid #aa3333; 
+  color:#ffaaaa; 
+  border-radius:6px;
+  padding:6px 12px;
+  cursor:pointer;
+  transition:0.2s;
+}
+.remove-row:hover { background:#aa3333; color:#fff; }
+.small-input { width:100%; }
+.tarjeta-tipo { grid-column:2; }
+.btn-add-item { 
+  margin-top:10px;
+  background:#2a5f7f;
+  border:1px solid #5dade2;
+  color:#5dade2;
+  transition:0.2s;
+}
+.btn-add-item:hover { 
+  background:#5dade2;
+  color:#1f1f1f;
+}
+.side-header {
+  font-weight:700;
+  color:#5dade2;
+  margin-bottom:15px;
+  font-size:1.1em;
+}
 </style>
 </head>
 
@@ -56,49 +94,53 @@ select,input { background:#1f1f1f !important; color:#fff !important; border:1px 
 <!-- ================= PRIMERA ================= -->
 <div id="bloque-primera" style="display:none;">
 <h3 class="subtitulo">Primera</h3>
+<div class="row" style="margin:0;">
 {% for side in ["local","visitante"] %}
-<div class="col-md-6 d-inline-block align-top" style="width:49%;">
+<div class="col-md-6" style="padding:10px;">
 <div class="side-box">
-<h5 id="primera_{{side}}_nombre">{{ side|capitalize }}</h5>
+<div class="side-header" id="primera_{{side}}_nombre">{{ side|capitalize }}</div>
 
 <label class="form-label">Goles</label>
 <input type="number" id="primera_goles_{{side}}" class="form-control" min="0" value="0">
 
-<label class="form-label mt-2">Goleadores</label>
+<label class="form-label">Goleadores</label>
 <div id="primera_goleadores_{{side}}_list"></div>
-<button class="btn btn-sm btn-primary mt-1" onclick="addGoleador('primera','{{side}}')">+ Agregar</button>
+<button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('primera','{{side}}')">+ Agregar Goleador</button>
 
-<label class="form-label mt-2">Tarjetas</label>
+<label class="form-label">Tarjetas Disciplinarias</label>
 <div id="primera_tarjetas_{{side}}_list"></div>
-<button class="btn btn-sm btn-warning mt-1" onclick="addTarjeta('primera','{{side}}')">+ Agregar</button>
+<button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('primera','{{side}}')">+ Agregar Tarjeta</button>
 </div>
 </div>
 {% endfor %}
-<button id="btn_guardar_primera" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('primera')">Guardar Primera</button>
+</div>
+<button id="btn_guardar_primera" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('primera')">Guardar Primera</button>
 </div>
 
 <!-- ================= RESERVA ================= -->
 <div id="bloque-reserva" style="display:none;">
 <h3 class="subtitulo">Reserva</h3>
+<div class="row" style="margin:0;">
 {% for side in ["local","visitante"] %}
-<div class="col-md-6 d-inline-block align-top" style="width:49%;">
+<div class="col-md-6" style="padding:10px;">
 <div class="side-box">
-<h5 id="reserva_{{side}}_nombre">{{ side|capitalize }}</h5>
+<div class="side-header" id="reserva_{{side}}_nombre">{{ side|capitalize }}</div>
 
 <label class="form-label">Goles</label>
 <input type="number" id="reserva_goles_{{side}}" class="form-control" min="0" value="0">
 
-<label class="form-label mt-2">Goleadores</label>
+<label class="form-label">Goleadores</label>
 <div id="reserva_goleadores_{{side}}_list"></div>
-<button class="btn btn-sm btn-primary mt-1" onclick="addGoleador('reserva','{{side}}')">+ Agregar</button>
+<button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('reserva','{{side}}')">+ Agregar Goleador</button>
 
-<label class="form-label mt-2">Tarjetas</label>
+<label class="form-label">Tarjetas Disciplinarias</label>
 <div id="reserva_tarjetas_{{side}}_list"></div>
-<button class="btn btn-sm btn-warning mt-1" onclick="addTarjeta('reserva','{{side}}')">+ Agregar</button>
+<button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('reserva','{{side}}')">+ Agregar Tarjeta</button>
 </div>
 </div>
 {% endfor %}
-<button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-3" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
+</div>
+<button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
 </div>
 
 </div>
@@ -263,11 +305,11 @@ function addGoleador(cat,side){
 
   cont.insertAdjacentHTML("beforeend",`
     <div class="list-row">
-      <select class="form-select" data-player>
-        <option value="">Jugador</option>${buildOptions(players)}
+      <select class="form-select" data-player style="grid-column:1;">
+        <option value="">Seleccionar Jugador</option>${buildOptions(players)}
       </select>
-      <input type="number" class="form-control small-input" data-goles min="1" value="1">
-      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()">✕</button>
+      <input type="number" class="form-control" data-goles min="1" value="1" placeholder="Goles" style="grid-column:2; max-width:100px;">
+      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()" style="grid-column:3;">✕</button>
     </div>
   `);
 }
@@ -278,14 +320,14 @@ function addTarjeta(cat,side){
 
   cont.insertAdjacentHTML("beforeend",`
     <div class="list-row">
-      <select class="form-select tarjeta-player">
-        <option value="">Jugador</option>${buildOptions(players)}
+      <select class="form-select tarjeta-player" style="grid-column:1;">
+        <option value="">Seleccionar Jugador</option>${buildOptions(players)}
       </select>
-      <select class="form-select tarjeta-tipo">
+      <select class="form-select tarjeta-tipo" style="grid-column:2; max-width:120px;">
         <option value="amarilla">Amarilla</option>
         <option value="roja">Roja</option>
       </select>
-      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()">✕</button>
+      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()" style="grid-column:3;">✕</button>
     </div>
   `);
 }
