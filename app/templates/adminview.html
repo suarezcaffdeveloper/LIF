@@ -7,102 +7,226 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #1f1f1f;
+      background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
       color: #f5f6fa;
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     h1 {
       text-align: center;
-      margin-top: 40px;
-      margin-bottom: 40px;
-      font-weight: 700;
+      margin-top: 50px;
+      margin-bottom: 60px;
+      font-weight: 800;
       color: #5dade2;
       text-transform: uppercase;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
+      font-size: 2.5rem;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    h1::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, #5dade2, #2a5f7f);
+      margin: 15px auto 0;
+      border-radius: 2px;
     }
 
     .top-buttons {
       position: absolute;
-      top: 20px;
-      right: 20px;
+      top: 30px;
+      right: 30px;
       display: flex;
-      gap: 10px;
+      gap: 12px;
+      z-index: 100;
     }
 
     .top-buttons a {
-      background-color: #2c2c2c;
+      background-color: rgba(45, 45, 45, 0.9);
       color: #5dade2;
       border: 2px solid #5dade2;
-      border-radius: 8px;
-      padding: 8px 15px;
+      border-radius: 10px;
+      padding: 10px 18px;
       text-decoration: none;
       font-weight: 600;
-      transition: .3s ease;
+      font-size: 0.95rem;
+      transition: all .3s ease;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
+      backdrop-filter: blur(10px);
     }
 
     .top-buttons a:hover {
       background-color: #5dade2;
       color: #1f1f1f;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(93, 173, 226, 0.3);
+    }
+
+    /* SECCIÓN WRAPPER */
+    .section-wrapper {
+      margin-bottom: 60px;
+    }
+
+    /* SECTION TITLE */
+    .section-title {
+      color: #5dade2;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 1.35rem;
+      margin: 0 0 30px 0;
+      position: relative;
+      padding-left: 20px;
+      letter-spacing: 1px;
+    }
+
+    .section-title::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 28px;
+      background: linear-gradient(180deg, #5dade2, #2a5f7f);
+      border-radius: 2px;
     }
 
     /* GRID PRINCIPAL */
     .panel-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 20px;
-      padding: 60px 20px 40px 20px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 25px;
+      padding: 0 0 20px 0;
     }
 
     /* CARD BASE */
+    .admin-card-wrapper {
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      transform: translateZ(0);
+    }
+
     .admin-card {
-      background-color: #2c2c2c;
-      border-radius: 14px;
-      padding: 20px;
+      background: linear-gradient(135deg, rgba(45, 45, 45, 0.8), rgba(60, 60, 60, 0.6));
+      border-radius: 16px;
+      padding: 35px 25px;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
-      transition: transform .3s ease, box-shadow .3s ease;
+      min-height: 160px;
+      transition: all 0.3s ease;
       cursor: pointer;
-      border: 1px solid #3a3a3a;
+      border: 1px solid rgba(93, 173, 226, 0.2);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .admin-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(93, 173, 226, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .admin-card-wrapper:hover .admin-card::before {
+      left: 100%;
     }
 
     .admin-card h5 {
       margin: 0;
       color: #5dade2;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 1.15rem;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+      line-height: 1.4;
     }
 
-    .admin-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-      border-color: #5dade2;
+    .admin-card-wrapper:hover .admin-card h5 {
+      color: #a8d8f0;
+      text-shadow: 0 0 10px rgba(93, 173, 226, 0.3);
     }
 
-    /* TAMAÑOS VARIADOS */
-    .tall { height: 220px; }
-    .wide { grid-column: span 2; height: 160px; }
-    .square { height: 140px; }
-    .medium { height: 180px; }
+    .admin-card-wrapper:hover .admin-card {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 40px rgba(93, 173, 226, 0.2), 0 0 30px rgba(93, 173, 226, 0.1);
+      border-color: rgba(93, 173, 226, 0.5);
+      background: linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(65, 65, 65, 0.8));
+    }
 
-    /* SECCION */
-    .section-title {
-      color: #5dade2;
-      text-transform: uppercase;
-      font-weight: 600;
-      font-size: 1.1rem;
-      margin: 15px 0 10px 0;
-      border-bottom: 1px solid #5dade2;
-      padding-bottom: 5px;
+    /* ICON POSITION */
+    .admin-card-icon {
+      font-size: 2.5rem;
+      margin-right: 15px;
+      opacity: 0.8;
+      transition: all 0.3s ease;
+    }
+
+    .admin-card-wrapper:hover .admin-card-icon {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    /* RESPONS */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+        margin-top: 30px;
+        margin-bottom: 40px;
+      }
+
+      .top-buttons {
+        position: static;
+        justify-content: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .panel-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 18px;
+      }
+
+      .admin-card {
+        padding: 25px 15px;
+        min-height: 140px;
+      }
+
+      .admin-card h5 {
+        font-size: 0.95rem;
+      }
+
+      .admin-card-icon {
+        font-size: 1.8rem;
+        margin-right: 10px;
+      }
     }
 
   </style>
@@ -111,106 +235,114 @@
 <body>
   <div class="container position-relative">
 
-    <h1>PANEL DE ADMINISTRACIÓN</h1>
+    <h1>Panel de Administración</h1>
 
     <!-- BOTONES SUPERIORES -->
     <div class="top-buttons">
       <a href="{{ url_for('views.index') }}">🏠 Inicio</a>
-      <a href="{{ url_for('views.logout') }}">🔒 Cerrar Sesión</a>
+      <a href="{{ url_for('views.logout') }}">🚪 Cerrar Sesión</a>
     </div>
 
     <!-- SECCIÓN 1: Estadísticas -->
-    <div class="section-title">Estadísticas</div>
-    <div class="panel-grid">
-      <a href="/cargar_estadisticas_mayores" class="text-decoration-none">
-        <div class="admin-card tall">
-          <h5>Cargar Estadísticas Mayores</h5>
-        </div>
-      </a>
+    <div class="section-wrapper">
+      <div class="section-title">📊 Estadísticas</div>
+      <div class="panel-grid">
+        <a href="/cargar_estadisticas_mayores" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Estadísticas Mayores</h5>
+          </div>
+        </a>
 
-      <a href="/cargar_estadisticas_inferiores" class="text-decoration-none">
-        <div class="admin-card medium">
-          <h5>Cargar Estadísticas Inferiores</h5>
-        </div>
-      </a>
+        <a href="/cargar_estadisticas_inferiores" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Estadísticas Inferiores</h5>
+          </div>
+        </a>
+      </div>
     </div>
 
     <!-- SECCIÓN 2: Jugadores y Equipos -->
-    <div class="section-title">Jugadores y Equipos</div>
-    <div class="panel-grid">
-      <a href="/cargar_jugadores" class="text-decoration-none">
-        <div class="admin-card wide">
-          <h5>Cargar Jugadores</h5>
-        </div>
-      </a>
+    <div class="section-wrapper">
+      <div class="section-title">👥 Jugadores y Equipos</div>
+      <div class="panel-grid">
+        <a href="/cargar_jugadores" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Jugadores</h5>
+          </div>
+        </a>
 
-      <a href="/asignar_jugador_categoria" class="text-decoration-none">
-        <div class="admin-card square">
-          <h5>Asignar Jugador a Equipo</h5>
-        </div>
-      </a>
+        <a href="/asignar_jugador_categoria" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Asignar Jugador a Equipo</h5>
+          </div>
+        </a>
 
-      <a href="/cargar_clubes" class="text-decoration-none">
-        <div class="admin-card medium">
-          <h5>Cargar Clubes</h5>
-        </div>
-      </a>
+        <a href="/cargar_clubes" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Clubes</h5>
+          </div>
+        </a>
 
-      <a href="/cargar_equipos" class="text-decoration-none">
-        <div class="admin-card square">
-          <h5>Cargar Equipos</h5>
-        </div>
-      </a>
+        <a href="/cargar_equipos" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Equipos</h5>
+          </div>
+        </a>
 
-      <a href="{{ url_for('views.vista_crear_partido_playoff') }}" class="text-decoration-none">
-        <div class="admin-card tall">
-          <h5>Cargar Partidos Playoffs</h5>
-        </div>
-      </a>
+        <a href="{{ url_for('views.vista_crear_partido_playoff') }}" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Partidos Playoffs</h5>
+          </div>
+        </a>
+      </div>
     </div>
 
-    <!-- SECCIÓN 3: Fixture y Noticias -->
-    <div class="section-title">Fixture y Noticias</div>
-    <div class="panel-grid">
-      <a href="/cargar_fixture_mayores" class="text-decoration-none">
-        <div class="admin-card tall">
-          <h5>Cargar Fixture Mayores</h5>
-        </div>
-      </a>
+    <!-- SECCIÓN 3: Fixture y Contenido -->
+    <div class="section-wrapper">
+      <div class="section-title">🎯 Fixture y Contenido</div>
+      <div class="panel-grid">
+        <a href="/cargar_fixture_mayores" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Fixture Mayores</h5>
+          </div>
+        </a>
 
-      <a href="/cargar_fixture_inferiores" class="text-decoration-none">
-        <div class="admin-card medium">
-          <h5>Cargar Fixture Inferiores</h5>
-        </div>
-      </a>
+        <a href="/cargar_fixture_inferiores" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Fixture Inferiores</h5>
+          </div>
+        </a>
 
-      <a href="/cargar_noticia" class="text-decoration-none">
-        <div class="admin-card square">
-          <h5>Cargar Noticia</h5>
-        </div>
-      </a>
+        <a href="/cargar_noticia" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Noticia</h5>
+          </div>
+        </a>
 
-      <a href="/cargar_video" class="text-decoration-none">
-        <div class="admin-card medium">
-          <h5>Cargar Video</h5>
-        </div>
-      </a>
+        <a href="/cargar_video" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Video</h5>
+          </div>
+        </a>
 
-      <a href="/crear_periodista" class="text-decoration-none">
-        <div class="admin-card square">
-          <h5>Registrar Periodista</h5>
-        </div>
-      </a>
+        <a href="/crear_periodista" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Registrar Periodista</h5>
+          </div>
+        </a>
+      </div>
     </div>
 
     <!-- SECCIÓN 4: Parámetros -->
-    <div class="section-title">Parámetros</div>
-    <div class="panel-grid">
-      <a href="/admin/temporadas" class="text-decoration-none">
-        <div class="admin-card wide">
-          <h5>Cargar Parámetros</h5>
-        </div>
-      </a>
+    <div class="section-wrapper">
+      <div class="section-title">⚙️ Parámetros</div>
+      <div class="panel-grid">
+        <a href="/admin/temporadas" class="admin-card-wrapper">
+          <div class="admin-card">
+            <h5>Cargar Parámetros</h5>
+          </div>
+        </a>
+      </div>
     </div>
 
   </div>

@@ -8,15 +8,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    background-color: #1e1e2f;
+    background: linear-gradient(135deg, #1a1a2e 0%, #242440 100%);
     position: relative;
     color: #ffffff;
     min-height: 100vh;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
-    padding: 40px;
+    padding: 40px 20px;
 }
 
 /* FLASH FLOTA SOBRE EL FORMULARIO */
@@ -28,144 +34,308 @@ body {
     z-index: 2000;
     pointer-events: none;
 }
+
 .flash-message {
     display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
     text-align: center;
     opacity: 0;
     transition: opacity 0.5s ease, transform 0.5s ease;
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
     transform: translateY(-20px);
     pointer-events: auto;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
-.flash-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-.flash-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+.flash-success { 
+    background-color: rgba(76, 175, 80, 0.9);
+    color: #fff;
+    border: 1px solid rgba(76, 175, 80, 0.5);
+}
+
+.flash-danger { 
+    background-color: rgba(244, 67, 54, 0.9);
+    color: #fff;
+    border: 1px solid rgba(244, 67, 54, 0.5);
+}
 
 .panel-container {
     display: flex;
-    gap: 30px;
+    gap: 35px;
     width: 100%;
-    max-width: 1100px;
+    max-width: 1300px;
     align-items: flex-start;
 }
 
 /* PANEL IZQUIERDO */
 .form-box {
     flex: 1;
-    background: #2a2a3d;
-    padding: 30px;
+    background: linear-gradient(135deg, rgba(45, 45, 60, 0.9), rgba(60, 60, 80, 0.8));
+    padding: 40px;
     border-radius: 20px;
-    box-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(93, 173, 226, 0.1);
     display: flex;
     flex-direction: column;
+    border: 1px solid rgba(93, 173, 226, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.form-box h2 {
+    color: #5dade2;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+}
+
+.form-box label {
+    color: #5dade2;
+    font-weight: 600;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+}
+
+.form-box .form-select {
+    background: linear-gradient(135deg, #2a2a3f, #3a3a50) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(93, 173, 226, 0.4) !important;
+    border-radius: 10px;
+    padding: 12px 15px !important;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.form-box .form-select option {
+    background: linear-gradient(135deg, #2a2a3f, #3a3a50);
+    color: #ffffff;
+    padding: 10px 15px;
+    font-weight: 500;
+}
+
+.form-box .form-select option:checked {
+    background: linear-gradient(135deg, #5dade2, #4a96c7);
+    color: #ffffff;
+}
+
+.form-box .form-select option:hover {
+    background: #5dade2;
+    color: #1a1a2e;
+}
+
+.form-box .form-select:hover {
+    border-color: rgba(93, 173, 226, 0.6) !important;
+    box-shadow: 0 0 15px rgba(93, 173, 226, 0.1) !important;
+}
+
+.form-box .form-select:focus {
+    background: linear-gradient(135deg, #3a3a50, #4a4a65) !important;
+    border-color: #5dade2 !important;
+    box-shadow: 0 0 20px rgba(93, 173, 226, 0.2) !important;
+    outline: none !important;
+}
+
+.form-box .btn-primary {
+    background: linear-gradient(135deg, #5dade2, #4a96c7);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-weight: 700;
+    margin-top: 25px;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.form-box .btn-primary:hover {
+    background: linear-gradient(135deg, #4a96c7, #3d7da8);
+    box-shadow: 0 10px 30px rgba(93, 173, 226, 0.3);
+    transform: translateY(-2px);
+}
+
+.form-box .btn-primary:active {
+    transform: translateY(0);
 }
 
 /* PANEL DERECHO */
 .right-panel {
     flex: 1;
-    background: #2a2a3d;
-    padding: 30px;
+    background: linear-gradient(135deg, rgba(45, 45, 60, 0.9), rgba(60, 60, 80, 0.8));
+    padding: 40px;
     border-radius: 20px;
-    min-height: 700px;
+    min-height: 650px;
     max-height: 700px;
     display: flex;
     flex-direction: column;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(93, 173, 226, 0.1);
+    border: 1px solid rgba(93, 173, 226, 0.2);
+    backdrop-filter: blur(10px);
 }
 
 .right-panel h2 {
     text-align: center;
-    color: #4fc3f7;
-    margin-bottom: 20px;
+    color: #5dade2;
+    margin-bottom: 25px;
+    font-weight: 700;
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
 }
 
 /* LISTA SCROLL */
 .lista-scroll {
     flex: 1;
     overflow-y: auto;
-    padding-right: 10px;
+    padding-right: 8px;
 }
+
 .lista-scroll::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
-.lista-scroll::-webkit-scrollbar-thumb {
-    background: #4fc3f7;
+
+.lista-scroll::-webkit-scrollbar-track {
+    background: rgba(93, 173, 226, 0.05);
     border-radius: 10px;
+}
+
+.lista-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #5dade2, #4a96c7);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.lista-scroll::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #4a96c7, #3d7da8);
 }
 
 /* GRID 2 COLUMNAS */
 #lista-asignados {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columnas */
-    grid-auto-rows: min-content;           /* filas se ajustan al contenido */
-    gap: 5px 12px;                         /* espacio vertical y horizontal */
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: min-content;
+    gap: 12px;
     overflow-y: auto;
     flex: 1;
-    padding-right: 10px;
+    padding-right: 8px;
 }
 
-/* CARD DE JUGADOR */
-.card-jugador {
-    background: #fff;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-
-    width: calc(50% - 6px); /* 2 columnas fijas */
-    display: flex;
-    align-items: center;
-    transition: transform .15s ease, box-shadow .15s ease;
-}
-.card-jugador:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-
-/* TARJETA FINAL DEFINITIVA */
+/* TARJETA JUGADOR ASIGNADO */
 .player-card {
-    background: #383852;
-    padding: 12px 15px;
-    border-radius: 10px;
-    border-left: 4px solid #4fc3f7;
-    width: 100%;       
+    background: linear-gradient(135deg, rgba(93, 173, 226, 0.1), rgba(50, 150, 200, 0.08));
+    padding: 14px 16px;
+    border-radius: 12px;
+    border-left: 4px solid #5dade2;
+    border: 1px solid rgba(93, 173, 226, 0.3);
+    width: 100%;
     display: flex;
     align-items: center;
-    color: #e0e0e0;
-    font-size: 15px;
+    color: #c5e3ff;
+    font-size: 0.95rem;
     cursor: pointer;
     opacity: 0;
     animation: fadeIn 0.25s ease-out forwards;
-    transition: background 0.25s ease, transform 0.15s ease;
+    transition: all 0.25s ease;
+    font-weight: 500;
 }
+
 .player-card:hover {
-    background: #4fc3f7;
-    color: #1a1a2e;
+    background: linear-gradient(135deg, rgba(93, 173, 226, 0.25), rgba(50, 150, 200, 0.18));
+    border-left-color: #a8d8f0;
     transform: translateX(6px);
+    box-shadow: 0 6px 20px rgba(93, 173, 226, 0.15);
 }
+
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { 
+        opacity: 0; 
+        transform: translateY(-4px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
 }
 
 /* PREVIEW */
-.preview-wrapper { min-height: 120px; }
-.preview-card {
+.preview-wrapper { 
+    min-height: 120px;
     margin-top: 20px;
-    padding: 15px;
-    background: #151522;
-    border-left: 4px solid #4fc3f7;
-    border-radius: 10px;
 }
 
-/* BOTÓN VOLVER ABAJO DEL FORM */
-.back-link {
-    margin-top: 15px;
-    color: #ccc;
-    text-align: center;
+.preview-card {
+    padding: 18px 20px;
+    background: linear-gradient(135deg, rgba(93, 173, 226, 0.15), rgba(50, 150, 200, 0.1));
+    border-left: 4px solid #5dade2;
+    border-radius: 12px;
+    border: 1px solid rgba(93, 173, 226, 0.3);
+    transition: all 0.3s ease;
+    color: #c5e3ff;
+    font-weight: 500;
+    line-height: 1.6;
 }
-.back-link:hover { color: #00bfff; }
+
+.preview-card strong {
+    color: #5dade2;
+    font-weight: 700;
+}
+
+/* BOTÓN VOLVER */
+.back-link {
+    margin-top: 20px;
+    color: #999;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.back-link:hover { 
+    color: #5dade2;
+    text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1000px) {
+    .panel-container {
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .right-panel {
+        min-height: 400px;
+        max-height: none;
+    }
+
+    #lista-asignados {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .form-box, .right-panel {
+        padding: 25px;
+    }
+
+    .form-box h2, .right-panel h2 {
+        font-size: 1.4rem;
+    }
+
+    #lista-asignados {
+        grid-template-columns: 1fr;
+    }
+
+    body {
+        padding: 20px 10px;
+    }
+}
 </style>
 </head>
 
@@ -188,7 +358,7 @@ body {
 
     <!-- FORMULARIO -->
     <div class="form-box">
-        <h2>Asignar Jugador</h2>
+        <h2>👥 Asignar Jugador</h2>
 
         <form id="form-asignar" method="POST" action="{{ url_for('views.asignar_jugador_categoria') }}">
 
@@ -210,7 +380,7 @@ body {
                 <option value="">Seleccione un club...</option>
             </select>           
 
-            <button class="btn btn-primary w-100">Asignar</button>
+            <button class="btn btn-primary w-100">✓ Asignar Jugador</button>
         </form>
 
         <div class="preview-wrapper">

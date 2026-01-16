@@ -1,151 +1,386 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<title>Cargar Estadísticas — Mayores</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <title>Cargar Estadísticas — Mayores</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<style>
-body { background:#1f1f1f; color:#f5f6fa; }
-.card { background:#2c2c2c; border-radius:15px; padding:25px; }
-.form-label { color:#5dade2; font-weight:600; margin-top:15px; margin-bottom:8px; }
-select,input { background:#1f1f1f !important; color:#fff !important; border:1px solid #5dade2 !important; }
-.subtitulo { color:#5dade2; margin:20px 0 10px; font-weight:600; text-transform:uppercase; }
-.side-box { background:rgba(255,255,255,0.04); border-radius:10px; padding:20px; border-left:3px solid #5dade2; }
-.list-row { 
-  display:grid; 
-  grid-template-columns: 1fr auto auto;
-  gap:12px; 
-  margin-bottom:10px; 
-  padding:12px; 
-  background:rgba(0,0,0,0.3);
-  border-radius:8px;
-  align-items:center;
-}
-.list-row select { width:100%; }
-.list-row input { width:100%; }
-.remove-row { 
-  background:transparent; 
-  border:1px solid #aa3333; 
-  color:#ffaaaa; 
-  border-radius:6px;
-  padding:6px 12px;
-  cursor:pointer;
-  transition:0.2s;
-}
-.remove-row:hover { background:#aa3333; color:#fff; }
-.small-input { width:100%; }
-.tarjeta-tipo { grid-column:2; }
-.btn-add-item { 
-  margin-top:10px;
-  background:#2a5f7f;
-  border:1px solid #5dade2;
-  color:#5dade2;
-  transition:0.2s;
-}
-.btn-add-item:hover { 
-  background:#5dade2;
-  color:#1f1f1f;
-}
-.side-header {
-  font-weight:700;
-  color:#5dade2;
-  margin-bottom:15px;
-  font-size:1.1em;
-}
-</style>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #242440 100%);
+      color: #f5f6fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 50px;
+      margin-bottom: 60px;
+      font-weight: 800;
+      color: #5dade2;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 2.5rem;
+      position: relative;
+      padding-bottom: 20px;
+    }
+
+    h1::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, #5dade2, #2a5f7f);
+      margin: 15px auto 0;
+      border-radius: 2px;
+    }
+
+    .card {
+      background: linear-gradient(135deg, rgba(45, 45, 60, 0.9), rgba(60, 60, 80, 0.8));
+      border: none;
+      border-radius: 20px;
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(93, 173, 226, 0.1);
+      color: #f5f6fa;
+      padding: 35px;
+      border: 1px solid rgba(93, 173, 226, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .form-label {
+      font-weight: 700;
+      color: #5dade2;
+      margin-top: 15px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      letter-spacing: 0.3px;
+    }
+
+    select, input {
+      background: linear-gradient(135deg, #2a2a3f, #3a3a50) !important;
+      color: #fff !important;
+      border: 1px solid rgba(93, 173, 226, 0.4) !important;
+      border-radius: 10px;
+      padding: 12px 15px !important;
+      transition: all 0.3s ease !important;
+      font-weight: 500 !important;
+    }
+
+    select:hover, input:hover {
+      border-color: rgba(93, 173, 226, 0.6) !important;
+      box-shadow: 0 0 15px rgba(93, 173, 226, 0.1) !important;
+    }
+
+    select:focus, input:focus {
+      background: linear-gradient(135deg, #3a3a50, #4a4a65) !important;
+      border-color: #5dade2 !important;
+      box-shadow: 0 0 20px rgba(93, 173, 226, 0.2) !important;
+      outline: none !important;
+    }
+
+    select option {
+      background: linear-gradient(135deg, #2a2a3f, #3a3a50);
+      color: #ffffff;
+      padding: 10px 15px;
+      font-weight: 500;
+    }
+
+    select option:checked {
+      background: linear-gradient(135deg, #5dade2, #4a96c7);
+      color: #ffffff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #5dade2, #4a96c7);
+      border-color: #5dade2;
+      border: none;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 10px 16px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4a96c7, #3d7da8);
+      box-shadow: 0 10px 25px rgba(93, 173, 226, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-add-item {
+      background: #2a5f7f !important;
+      border: 1px solid #5dade2 !important;
+      color: #5dade2 !important;
+      transition: 0.2s;
+      border-radius: 8px;
+    }
+
+    .btn-add-item:hover {
+      background: #5dade2 !important;
+      color: #1f1f1f !important;
+    }
+
+    .subtitulo {
+      color: #5dade2;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 30px 0 20px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .side-box {
+      border-radius: 16px;
+      padding: 20px;
+      background: rgba(93, 173, 226, 0.05);
+      border-left: 3px solid #5dade2;
+      border: 1px solid rgba(93, 173, 226, 0.2);
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .side-box:hover {
+      background: rgba(93, 173, 226, 0.08);
+      border-color: rgba(93, 173, 226, 0.4);
+    }
+
+    .side-box h5 {
+      font-weight: 700;
+      color: #5dade2;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+
+    .list-row {
+      margin-bottom: 10px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border-left: 3px solid #5dade2;
+    }
+
+    .list-row select {
+      width: 100%;
+    }
+
+    .list-row input {
+      width: 100%;
+    }
+
+    .remove-row {
+      background: transparent;
+      border: 1px solid #aa3333;
+      color: #ffaaaa;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .remove-row:hover {
+      background: #aa3333;
+      color: #fff;
+    }
+
+    .small-input { width: 100%; }
+    .muted { color: #bfc9d9; font-size: 0.9rem; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 15px;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+        margin-top: 30px;
+        margin-bottom: 40px;
+      }
+
+      .card {
+        padding: 25px;
+      }
+
+      .list-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="container mt-5">
-<h2 class="text-center mb-4">Cargar Estadísticas — Mayores</h2>
 
-<div class="card">
+<div class="container">
+  <h1>📊 Cargar Estadísticas — Mayores</h1>
 
-<!-- JORNADA -->
-<div class="mb-3">
-<label class="form-label">Jornada</label>
-<select id="select-jornada" class="form-select">
-<option value="">Seleccionar...</option>
-{% for j in jornadas %}
-<option value="{{ j }}">Jornada {{ j }}</option>
-{% endfor %}
-</select>
+  <!-- FLASH MESSAGES -->
+  <div class="container mt-3" id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 
+            'success' if category=='success' else 
+            'danger' if category=='error' else 
+            'warning' if category=='warning' else 
+            'info' }}" 
+            role="alert"
+            style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid rgba(93, 173, 226, 0.2); backdrop-filter: blur(10px);">
+
+            <div class="d-flex justify-content-between align-items-center">
+              <span>{{ message }}</span>
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="card">
+
+    <!-- JORNADAS -->
+    <div class="mb-3">
+      <label class="form-label">Seleccionar Jornada</label>
+      <select id="select-jornada" class="form-select">
+        <option value="">Seleccionar...</option>
+        {% for j in jornadas %}
+          <option value="{{ j }}">Jornada {{ j }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- CRUCES -->
+    <div id="cruces-container" style="display:none;">
+      <div class="mb-3">
+        <label class="form-label">Cruces de la Jornada</label>
+        <select id="select-cruce" class="form-select">
+          <option value="">Seleccione un cruce...</option>
+        </select>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- FORMULARIOS -->
+    <div id="formularios-estadisticas" style="display:none;">
+
+      <!-- PRIMERA -->
+      <div id="bloque-primera" style="display:none;">
+        <h3 class="subtitulo">Primera División</h3>
+
+        <div class="row" style="margin:0;">
+          <!-- LOCAL -->
+          <div class="col-md-6" style="padding:10px;">
+            <div class="side-box">
+              <h5 id="primera_local_nombre">Local</h5>
+
+              <label class="form-label">Goles</label>
+              <input type="number" id="primera_goles_local" class="form-control" min="0" value="0">
+
+              <label class="form-label">Goleadores</label>
+              <div id="primera_goleadores_local_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('primera','local')">+ Agregar Goleador</button>
+
+              <label class="form-label">Tarjetas Disciplinarias</label>
+              <div id="primera_tarjetas_local_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('primera','local')">+ Agregar Tarjeta</button>
+            </div>
+          </div>
+
+          <!-- VISITANTE -->
+          <div class="col-md-6" style="padding:10px;">
+            <div class="side-box">
+              <h5 id="primera_visitante_nombre">Visitante</h5>
+
+              <label class="form-label">Goles</label>
+              <input type="number" id="primera_goles_visitante" class="form-control" min="0" value="0">
+
+              <label class="form-label">Goleadores</label>
+              <div id="primera_goleadores_visitante_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('primera','visitante')">+ Agregar Goleador</button>
+
+              <label class="form-label">Tarjetas Disciplinarias</label>
+              <div id="primera_tarjetas_visitante_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('primera','visitante')">+ Agregar Tarjeta</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn_guardar_primera" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('primera')">Guardar Primera</button>
+      </div>
+
+      <!-- RESERVA -->
+      <div id="bloque-reserva" style="display:none;">
+        <h3 class="subtitulo">Reserva</h3>
+
+        <div class="row" style="margin:0;">
+          <!-- LOCAL -->
+          <div class="col-md-6" style="padding:10px;">
+            <div class="side-box">
+              <h5 id="reserva_local_nombre">Local</h5>
+
+              <label class="form-label">Goles</label>
+              <input type="number" id="reserva_goles_local" class="form-control" min="0" value="0">
+
+              <label class="form-label">Goleadores</label>
+              <div id="reserva_goleadores_local_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('reserva','local')">+ Agregar Goleador</button>
+
+              <label class="form-label">Tarjetas Disciplinarias</label>
+              <div id="reserva_tarjetas_local_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('reserva','local')">+ Agregar Tarjeta</button>
+            </div>
+          </div>
+
+          <!-- VISITANTE -->
+          <div class="col-md-6" style="padding:10px;">
+            <div class="side-box">
+              <h5 id="reserva_visitante_nombre">Visitante</h5>
+
+              <label class="form-label">Goles</label>
+              <input type="number" id="reserva_goles_visitante" class="form-control" min="0" value="0">
+
+              <label class="form-label">Goleadores</label>
+              <div id="reserva_goleadores_visitante_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('reserva','visitante')">+ Agregar Goleador</button>
+
+              <label class="form-label">Tarjetas Disciplinarias</label>
+              <div id="reserva_tarjetas_visitante_list"></div>
+              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('reserva','visitante')">+ Agregar Tarjeta</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
+      </div>
+
+    </div>
+
+  </div>
 </div>
 
-<!-- CRUCES -->
-<div id="cruces-container" style="display:none;">
-<label class="form-label">Cruces pendientes</label>
-<select id="select-cruce" class="form-select">
-<option value="">Seleccionar...</option>
-</select>
-</div>
-
-<hr>
-
-<div id="formularios-estadisticas" style="display:none;">
-
-<input type="hidden" id="primera_partido_id">
-<input type="hidden" id="reserva_partido_id">
-
-<!-- ================= PRIMERA ================= -->
-<div id="bloque-primera" style="display:none;">
-<h3 class="subtitulo">Primera</h3>
-<div class="row" style="margin:0;">
-{% for side in ["local","visitante"] %}
-<div class="col-md-6" style="padding:10px;">
-<div class="side-box">
-<div class="side-header" id="primera_{{side}}_nombre">{{ side|capitalize }}</div>
-
-<label class="form-label">Goles</label>
-<input type="number" id="primera_goles_{{side}}" class="form-control" min="0" value="0">
-
-<label class="form-label">Goleadores</label>
-<div id="primera_goleadores_{{side}}_list"></div>
-<button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('primera','{{side}}')">+ Agregar Goleador</button>
-
-<label class="form-label">Tarjetas Disciplinarias</label>
-<div id="primera_tarjetas_{{side}}_list"></div>
-<button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('primera','{{side}}')">+ Agregar Tarjeta</button>
-</div>
-</div>
-{% endfor %}
-</div>
-<button id="btn_guardar_primera" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('primera')">Guardar Primera</button>
-</div>
-
-<!-- ================= RESERVA ================= -->
-<div id="bloque-reserva" style="display:none;">
-<h3 class="subtitulo">Reserva</h3>
-<div class="row" style="margin:0;">
-{% for side in ["local","visitante"] %}
-<div class="col-md-6" style="padding:10px;">
-<div class="side-box">
-<div class="side-header" id="reserva_{{side}}_nombre">{{ side|capitalize }}</div>
-
-<label class="form-label">Goles</label>
-<input type="number" id="reserva_goles_{{side}}" class="form-control" min="0" value="0">
-
-<label class="form-label">Goleadores</label>
-<div id="reserva_goleadores_{{side}}_list"></div>
-<button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('reserva','{{side}}')">+ Agregar Goleador</button>
-
-<label class="form-label">Tarjetas Disciplinarias</label>
-<div id="reserva_tarjetas_{{side}}_list"></div>
-<button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('reserva','{{side}}')">+ Agregar Tarjeta</button>
-</div>
-</div>
-{% endfor %}
-</div>
-<button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
-</div>
-
-</div>
-</div>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
 const CATS = ["primera", "reserva"];
