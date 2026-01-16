@@ -807,7 +807,7 @@ def cargar_jugadores():
         fecha_nac = None
         if fecha_nacimiento:
             try:
-                fecha_nac = datetime.datetime.strptime(fecha_nacimiento, '%Y-%m-%d').date()
+                fecha_nac = datetime.strptime(fecha_nacimiento, '%Y-%m-%d').date()
             except ValueError:
                 flash("La fecha de nacimiento no es válida.", "danger")
                 return redirect(url_for('views.cargar_jugadores'))
