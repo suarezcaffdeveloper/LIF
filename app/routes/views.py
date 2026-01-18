@@ -1560,7 +1560,36 @@ def validar_y_guardar_estadisticas(data, categoria):
         recalcular_tabla_posiciones(partido.categoria)
 
         db.session.commit()
-        return {"success": True, "message": "Estadísticas guardadas correctamente"}, 200
+        
+        # -------------------- ENVÍO AUTOMÁTICO DE MAIL PARA MAYORES --------------------
+        try:
+            if jornada_completa(partido.jornada, categoria="Mayores"):
+                usuarios = Usuario.query.filter_by(rol="usuario").all()
+                
+                if usuarios:
+                    enviar_mail_jornada(usuarios, partido.jornada, categoria="Mayores")
+                    return {
+                        "success": True, 
+                        "message": f"Jornada {partido.jornada} de Mayores completa. Estadísticas actualizadas y mails enviados",
+                        "jornada_completa": True
+                    }, 200
+                else:
+                    return {
+                        "success": True,
+                        "message": f"Estadísticas guardadas. Jornada {partido.jornada} completa pero no hay usuarios para notificar",
+                        "jornada_completa": True
+                    }, 200
+            else:
+                return {"success": True, "message": "Estadísticas guardadas correctamente", "jornada_completa": False}, 200
+                
+        except Exception as e:
+            print(f"⚠️ Error en envío de mails para mayores: {e}")
+            return {
+                "success": True,
+                "message": "Estadísticas guardadas pero hubo error enviando mails",
+                "error_mail": str(e),
+                "jornada_completa": False
+            }, 200
 
     except Exception as e:
         db.session.rollback()
@@ -1583,15 +1612,7 @@ def guardar_reserva():
     resp, code = validar_y_guardar_estadisticas(data, "reserva")
     return jsonify(resp), code
 
-# ---------------------------
-#   INFERIORES
-# ---------------------------
-# ====================================================
-# CARGAR INTERFAZ
-# ====================================================
-# ====================================================
-# CARGAR ESTADÍSTICAS INFERIORES
-# ====================================================
+
 # ====================================================
 # CARGAR ESTADÍSTICAS INFERIORES
 # ====================================================
@@ -1885,6 +1906,22 @@ def guardar_inferiores():
 
         # -------------------- MARCAR PARTIDO JUGADO --------------------
         partido = Partido.query.get_or_404(partido_id)
+        
+        # 🔥 Validar que el partido pertenezca al torneo activo
+        temporada_activa = Temporada.query.filter_by(activa=True).first()
+        if not temporada_activa:
+            db.session.rollback()
+            return jsonify({"success": False, "message": "No hay temporada activa"}), 400
+        
+        torneo_activo = Torneo.query.filter_by(
+            nombre="Apertura",
+            temporada_id=temporada_activa.id
+        ).first()
+        
+        if not torneo_activo or partido.torneo_id != torneo_activo.id:
+            db.session.rollback()
+            return jsonify({"success": False, "message": "El partido no pertenece al torneo activo"}), 400
+        
         partido.goles_local = goles_local
         partido.goles_visitante = goles_visitante
         partido.jugado = True
@@ -1893,12 +1930,38 @@ def guardar_inferiores():
         db.session.commit()
 
         # -------------------- ENVÍO AUTOMÁTICO DE MAIL --------------------
-        if jornada_completa(partido.jornada, categoria="Inferiores"):
-            usuarios = Usuario.query.filter_by(rol="usuario").all()
-            enviar_mail_jornada(usuarios, partido.jornada, categoria="Inferiores")
-            return jsonify({"success": True, "message": "Jornada completa. Estadísticas actualizadas y mails enviados"})
-
-        return jsonify({"success": True, "message": "Partido guardado correctamente"})
+        try:
+            if jornada_completa(partido.jornada, categoria="Inferiores"):
+                usuarios = Usuario.query.filter_by(rol="usuario").all()
+                
+                if usuarios:
+                    enviar_mail_jornada(usuarios, partido.jornada, categoria="Inferiores")
+                    return jsonify({
+                        "success": True, 
+                        "message": f"Jornada {partido.jornada} completa. Estadísticas actualizadas y mails enviados",
+                        "jornada_completa": True
+                    })
+                else:
+                    print("⚠️ No hay usuarios con rol 'usuario' para notificar")
+                    return jsonify({
+                        "success": True,
+                        "message": f"Jornada {partido.jornada} completa pero no hay usuarios para notificar",
+                        "jornada_completa": True
+                    })
+            else:
+                return jsonify({
+                    "success": True, 
+                    "message": "Partido guardado correctamente",
+                    "jornada_completa": False
+                })
+        except Exception as e:
+            print(f"❌ Error en envío de mails: {e}")
+            return jsonify({
+                "success": True,
+                "message": "Partido guardado pero hubo error enviando mails",
+                "error_mail": str(e),
+                "jornada_completa": False
+            })
 
     except Exception as e:
         db.session.rollback()

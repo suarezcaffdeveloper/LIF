@@ -5,6 +5,7 @@ import smtplib
 from email.mime.text import MIMEText
 from ..models.models import Partido
 from flask import render_template
+from sqlalchemy import func
 
 def enviar_mail_bienvenida(destinatario, nombre):
     asunto = "¡Bienvenido a la LigaInterprovincial de Futbol!"
@@ -66,30 +67,63 @@ Administrador del Sistema
     
 def jornada_completa(jornada, categoria):
     """
-    Retorna True si todos los partidos existentes de la jornada están jugados.
-    Solo considera la categoría indicada ('Mayores' o 'Inferiores'),
-    pero en tu caso solo se usaría 'Mayores' (primera y reserva).
+    Retorna True si todos los partidos existentes de la jornada están jugados
+    en el TORNEO ACTIVO (Apertura).
+    Solo considera la categoría indicada ('Mayores' o 'Inferiores').
+    Normaliza categorías a minúsculas y sin espacios.
     """
+    from ..models.models import Temporada, Torneo
+    
     categoria = categoria.lower().strip()
 
     if categoria == "mayores":
-        categorias = ["primera", "reserva"]  # Solo mayores
+        categorias_validas = ["primera", "reserva"]  # Solo mayores
     elif categoria == "inferiores":
-        categorias = ["quinta", "sexta", "septima"]  # Si se usara
+        categorias_validas = ["quinta", "sexta", "septima"]  # Inferiores
     else:
         return False
 
-    # Traer solo los partidos existentes de la jornada para estas categorías
-    partidos = Partido.query.filter(
-        Partido.jornada == jornada,
-        Partido.categoria.in_(categorias)
-    ).all()
+    try:
+        # 🔥 Obtener el torneo Apertura activo
+        temporada_activa = Temporada.query.filter_by(activa=True).first()
+        if not temporada_activa:
+            print("⚠️ No hay temporada activa")
+            return False
 
-    if not partidos:
+        torneo_activo = Torneo.query.filter_by(
+            nombre="Apertura",
+            temporada_id=temporada_activa.id
+        ).first()
+        
+        if not torneo_activo:
+            print("⚠️ No hay torneo Apertura en la temporada activa")
+            return False
+
+        # Traer partidos de la jornada para estas categorías (normalizando)
+        partidos = Partido.query.filter(
+            Partido.jornada == jornada,
+            Partido.torneo_id == torneo_activo.id,
+            func.lower(func.trim(Partido.categoria)).in_(categorias_validas)
+        ).all()
+
+        if not partidos:
+            print(f"⚠️ No hay partidos de jornada {jornada} en el torneo activo para {categoria}")
+            return False
+
+        # Verificar que TODOS los partidos estén jugados
+        todos_jugados = all(p.jugado for p in partidos)
+        
+        if todos_jugados:
+            print(f"✅ Jornada {jornada} de {categoria} COMPLETA ({len(partidos)} partidos)")
+        else:
+            partidos_pendientes = [p.id for p in partidos if not p.jugado]
+            print(f"⏳ Jornada {jornada} INCOMPLETA: Faltan {len(partidos_pendientes)} partidos: {partidos_pendientes}")
+        
+        return todos_jugados
+
+    except Exception as e:
+        print(f"❌ Error en jornada_completa(): {e}")
         return False
-
-    # Devuelve True si todos los partidos cargados de la jornada están jugados
-    return all(p.jugado for p in partidos)
 
     
 #--------------------------------------------------------------
