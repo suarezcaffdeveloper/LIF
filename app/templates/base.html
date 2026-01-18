@@ -153,10 +153,13 @@
             <div class="navbar-links">
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('views.logout') }}">Log-Out</a>
-                    <span style="color: white; margin-left: 10px;">{{ current_user.nombre_completo }}</span>
 
                     {% if current_user.rol == 'administrador' %}
                         <a href="{{ url_for('views.adminview') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Admin</a>
+                    {% endif %}
+
+                    {% if current_user.rol == 'periodista' %}
+                        <a href="{{ url_for('views.panelperiodista') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Periodista</a>
                     {% endif %}
 
                 {% else %}

@@ -1722,7 +1722,8 @@ def get_partidos_cruce_inferiores():
             Partido.jornada == jornada,
             Partido.equipo_local.has(club_id=local_club_id),
             Partido.equipo_visitante.has(club_id=visitante_club_id),
-            db.func.lower(Partido.categoria).in_(categorias)
+            db.func.lower(Partido.categoria).in_(categorias),
+            Partido.jugado == False  # 🔥 Solo traer partidos NO jugados (no cargados)
         ).all()
 
         respuesta = {}
@@ -1864,6 +1865,16 @@ def guardar_inferiores():
         if total_gv != goles_visitante:
             return jsonify({"success": False, "message": "Los goles del visitante no coinciden"}), 400
 
+        # -------------------- VALIDACIÓN: PARTIDO YA CARGADO --------------------
+        # 🔥 Verificar que el partido NO haya sido cargado anteriormente
+        partido = Partido.query.get_or_404(partido_id)
+        
+        if partido.jugado:
+            return jsonify({
+                "success": False, 
+                "message": f"Este partido ya fue cargado anteriormente con resultado {partido.goles_local} - {partido.goles_visitante}"
+            }), 409
+
         # -------------------- UNIFICAR JUGADORES --------------------
         jugadores_local = set(j.get("id") or j.get("jugador_id") or j.get("numero_carnet") 
                               for j in goleadores_local if j.get("id") or j.get("jugador_id") or j.get("numero_carnet"))
@@ -1905,8 +1916,6 @@ def guardar_inferiores():
             db.session.add(estado)
 
         # -------------------- MARCAR PARTIDO JUGADO --------------------
-        partido = Partido.query.get_or_404(partido_id)
-        
         # 🔥 Validar que el partido pertenezca al torneo activo
         temporada_activa = Temporada.query.filter_by(activa=True).first()
         if not temporada_activa:
