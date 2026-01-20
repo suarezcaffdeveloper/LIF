@@ -2066,8 +2066,14 @@ def crear_partido_playoff():
         if not club_local or not club_visitante:
             return jsonify(success=False, message="Club inexistente"), 404
 
-        equipo_local = Equipo.query.filter_by(club_id=club_local.id, categoria=categoria).first()
-        equipo_visitante = Equipo.query.filter_by(club_id=club_visitante.id, categoria=categoria).first()
+        equipo_local = Equipo.query.filter(
+            Equipo.club_id == club_local.id,
+            func.lower(func.trim(Equipo.categoria)) == categoria
+        ).first()
+        equipo_visitante = Equipo.query.filter(
+            Equipo.club_id == club_visitante.id,
+            func.lower(func.trim(Equipo.categoria)) == categoria
+        ).first()
         if not equipo_local or not equipo_visitante:
             return jsonify(success=False, message=f"Alguno de los clubes no tiene equipo cargado en la categoría {categoria.capitalize()}"), 400
 
