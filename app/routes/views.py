@@ -2048,9 +2048,16 @@ def crear_partido_playoff():
 
         # ============== JORNADA ==============
         jornada = int(data.get("jornada", 1))
-        if fase.ida_vuelta and jornada not in (1,2):
+        
+        # ============== DETERMINAR SI ES IDA Y VUELTA ==============
+        # Si el frontend envía ida_vuelta, usamos ese valor; si no, usamos el de la fase
+        ida_vuelta = data.get("ida_vuelta", fase.ida_vuelta)
+        if isinstance(ida_vuelta, str):
+            ida_vuelta = ida_vuelta.lower() == "true"
+        
+        if ida_vuelta and jornada not in (1,2):
             return jsonify(success=False, message="La fase ida/vuelta solo permite jornada 1 o 2"), 400
-        if not fase.ida_vuelta:
+        if not ida_vuelta:
             jornada = 1
 
         # ============== CLUBES ==============
@@ -2065,7 +2072,7 @@ def crear_partido_playoff():
             return jsonify(success=False, message=f"Alguno de los clubes no tiene equipo cargado en la categoría {categoria.capitalize()}"), 400
 
         # ============== VALIDAR SECUENCIA DE FASES ==============
-        fases_ordenadas = ["Cuartos de Final", "Semifinal", "Final", "Finalísima"]
+        fases_ordenadas = ["Cuartos", "Semifinal", "Final", "Finalísima"]
         if fase.nombre in fases_ordenadas:
             idx = fases_ordenadas.index(fase.nombre)
             if idx > 0:
@@ -2106,7 +2113,7 @@ def crear_partido_playoff():
         # ============== CREAR PARTIDO(S) ==============
         partidos_creados = []
 
-        if fase.ida_vuelta:
+        if ida_vuelta:
             # Crear ida
             partido_ida = Partido(
                 torneo_id=torneo.id,
@@ -2160,7 +2167,8 @@ def crear_partido_playoff():
 
         db.session.commit()
 
-        return jsonify(success=True, message="Partido(s) creado(s) correctamente", ids=[p.id for p in partidos_creados])
+        partidos_msg = f"{len(partidos_creados)} partido(s)" if len(partidos_creados) > 1 else "Partido"
+        return jsonify(success=True, message=f"{partidos_msg} creado(s) correctamente", ids=[p.id for p in partidos_creados])
     
     except Exception as e:
         print("ERROR crear_partido_playoff:", e)
@@ -2179,26 +2187,12 @@ def vista_crear_partido_playoff():
     # Categorías extendidas: Primera, Reserva, Quinta, Sexta, Séptima
     categorias = ["Primera", "Reserva", "Quinta", "Sexta", "Séptima"]
 
-    fases = []
-    fases_ordenadas = ["Cuartos de Final","Semifinal","Final","Finalísima"]
-
-    # Mostrar fases solo si se cumplen las secuencias
-    for nombre_fase in fases_ordenadas:
-        fase_obj = Fase.query.filter_by(nombre=nombre_fase).first()
-        if not fase_obj:
-            continue
-
-        # Validar secuencia (excepto cuartos)
-        if nombre_fase != "Cuartos de Final":
-            idx = fases_ordenadas.index(nombre_fase)
-            fase_anterior = Fase.query.filter_by(nombre=fases_ordenadas[idx-1]).first()
-            if not fase_anterior:
-                continue
-            # Chequear que haya partidos de la fase anterior (sin filtrar por categoría, solo verificar existencia)
-            if not Partido.query.filter_by(fase_id=fase_anterior.id).first():
-                continue
-
-        fases.append(fase_obj)
+    # Traer todas las fases de playoff ordenadas (sin duplicados)
+    # Usar group_by para evitar duplicados de diferentes torneos
+    from sqlalchemy import func
+    fases = db.session.query(Fase).filter(Fase.nombre.in_([
+        "Cuartos", "Semifinal", "Final", "Finalísima"
+    ])).group_by(Fase.nombre).order_by(Fase.orden).all()
 
     return render_template(
         "plantillasAdmin/cargar_partidos_playoff.html",
@@ -2211,9 +2205,9 @@ def vista_crear_partido_playoff():
 @views.route("/playoff/partidos", methods=["GET"])
 def vista_partidos_playoff():
     torneos = Torneo.query.order_by(Torneo.id.desc()).all()
-    fases = Fase.query.filter(Fase.nombre.in_([
-        "Cuartos de Final", "Semifinal", "Final", "Finalísima"
-    ])).order_by(Fase.orden).all()
+    fases = db.session.query(Fase).filter(Fase.nombre.in_([
+        "Cuartos", "Semifinal", "Final", "Finalísima"
+    ])).group_by(Fase.nombre).order_by(Fase.orden).all()
 
     # Traer todos los partidos de playoff
     partidos = (

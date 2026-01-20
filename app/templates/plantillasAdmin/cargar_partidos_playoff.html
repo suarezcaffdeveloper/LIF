@@ -307,13 +307,26 @@ body {
           <select id="fase_id" class="form-select" required>
             <option value="">-- Seleccionar fase --</option>
             {% for fase in fases %}
-              <option value="{{ fase.id }}" data-ida="{{ 1 if fase.ida_vuelta else 0 }}">
-                {{ fase.nombre }}{% if fase.ida_vuelta %} (Ida y Vuelta){% endif %}
+              <option value="{{ fase.id }}">
+                {{ fase.nombre }}
               </option>
             {% endfor %}
           </select>
           <div class="info-box">
-            <i class="fas fa-info-circle"></i> Las fases aparecen en orden de progresión
+            <i class="fas fa-info-circle"></i> Cuartos de Final, Semifinal, Final, Finalísima
+          </div>
+        </div>
+
+        <!-- TIPO DE FASE (Solo Ida o Ida y Vuelta) -->
+        <div class="mb-3">
+          <label class="form-label">Tipo de Enfrentamiento</label>
+          <select id="tipo_fase" class="form-select" required>
+            <option value="">-- Seleccionar tipo --</option>
+            <option value="0">Solo Ida (1 partido)</option>
+            <option value="1">Ida y Vuelta (2 partidos)</option>
+          </select>
+          <div class="info-box">
+            <i class="fas fa-info-circle"></i> Mayores: Ida y Vuelta | Inferiores: Solo Ida (excepto Final que es Ida y Vuelta)
           </div>
         </div>
 
@@ -339,7 +352,7 @@ body {
         <div class="categoria-group">
           {% for c in categorias %}
             <label class="categoria-btn">
-              <input type="radio" name="categoria" value="{{ c }}" required>
+              <input type="radio" name="categoria" value="{{ c|lower }}" required>
               <span>{{ c }}</span>
             </label>
           {% endfor %}
@@ -423,6 +436,7 @@ const $query = sel => document.querySelector(sel);
 // ========== ELEMENTOS DEL FORMULARIO ==========
 const torneo = $id("torneo_id");
 const fase = $id("fase_id");
+const tipoFase = $id("tipo_fase");
 const jornada = $id("jornada");
 const bloqueIdaVuelta = $id("bloque-ida-vuelta");
 const categoriaRadios = document.querySelectorAll('input[name="categoria"]');
@@ -435,17 +449,13 @@ const loading = $id("loading");
 
 // ========== EVENTOS ==========
 
-// Mostrar/ocultar bloque ida-vuelta según la fase
-fase.addEventListener("change", e => {
-  const opt = e.target.selectedOptions[0];
-  if (!opt || !opt.value) {
-    bloqueIdaVuelta.style.display = "none";
-    jornada.value = "1";
-    return;
-  }
-  const idaVuelta = opt.dataset.ida === "1";
+// Mostrar/ocultar bloque ida-vuelta según el tipo de fase seleccionado
+tipoFase.addEventListener("change", e => {
+  const idaVuelta = e.target.value === "1";
   bloqueIdaVuelta.style.display = idaVuelta ? "block" : "none";
-  if (!idaVuelta) jornada.value = "1";
+  if (!idaVuelta) {
+    jornada.value = "1";
+  }
 });
 
 // Evitar seleccionar el mismo club en ambos selectores
@@ -491,11 +501,12 @@ async function guardarPartido() {
   // Validación de campos obligatorios
   const torneo_id = torneo.value;
   const fase_id = fase.value;
+  const tipo_fase = tipoFase.value;
   const categoria = document.querySelector('input[name="categoria"]:checked')?.value;
   const club_local_id = clubLocal.value;
   const club_visitante_id = clubVisitante.value;
 
-  if (!torneo_id || !fase_id || !categoria || !club_local_id || !club_visitante_id) {
+  if (!torneo_id || !fase_id || !tipo_fase || !categoria || !club_local_id || !club_visitante_id) {
     Swal.fire({
       icon: "warning",
       title: "Campos incompletos",
@@ -528,6 +539,7 @@ async function guardarPartido() {
     club_local_id: parseInt(club_local_id),
     club_visitante_id: parseInt(club_visitante_id),
     jornada: parseInt(jornada.value),
+    ida_vuelta: tipo_fase === "1",
     fecha_partido: fechaPartido.value || null,
     hora_partido: horaPartido.value || null
   };
@@ -564,6 +576,7 @@ async function guardarPartido() {
     clubVisitante.value = "";
     fechaPartido.value = "";
     horaPartido.value = "";
+    tipoFase.value = "";
     document.querySelector('input[name="categoria"]:checked').checked = false;
     updateMatchInfo();
 
