@@ -2188,11 +2188,16 @@ def vista_crear_partido_playoff():
     categorias = ["Primera", "Reserva", "Quinta", "Sexta", "Séptima"]
 
     # Traer todas las fases de playoff ordenadas (sin duplicados)
-    # Usar group_by para evitar duplicados de diferentes torneos
-    from sqlalchemy import func
-    fases = db.session.query(Fase).filter(Fase.nombre.in_([
+    fases_list = Fase.query.filter(Fase.nombre.in_([
         "Cuartos", "Semifinal", "Final", "Finalísima"
-    ])).group_by(Fase.nombre).order_by(Fase.orden).all()
+    ])).order_by(Fase.orden).all()
+    
+    # Eliminar duplicados manteniendo el orden por nombre
+    fases_dict = {}
+    for fase in fases_list:
+        if fase.nombre not in fases_dict:
+            fases_dict[fase.nombre] = fase
+    fases = list(fases_dict.values())
 
     return render_template(
         "plantillasAdmin/cargar_partidos_playoff.html",
@@ -2205,9 +2210,17 @@ def vista_crear_partido_playoff():
 @views.route("/playoff/partidos", methods=["GET"])
 def vista_partidos_playoff():
     torneos = Torneo.query.order_by(Torneo.id.desc()).all()
-    fases = db.session.query(Fase).filter(Fase.nombre.in_([
+    
+    fases_list = Fase.query.filter(Fase.nombre.in_([
         "Cuartos", "Semifinal", "Final", "Finalísima"
-    ])).group_by(Fase.nombre).order_by(Fase.orden).all()
+    ])).order_by(Fase.orden).all()
+    
+    # Eliminar duplicados manteniendo el orden por nombre
+    fases_dict = {}
+    for fase in fases_list:
+        if fase.nombre not in fases_dict:
+            fases_dict[fase.nombre] = fase
+    fases = list(fases_dict.values())
 
     # Traer todos los partidos de playoff
     partidos = (
