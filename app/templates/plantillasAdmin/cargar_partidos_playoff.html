@@ -365,7 +365,7 @@ body {
       <!-- SECCIÓN 3: EQUIPOS -->
       <div class="form-section">
         <div class="section-title">
-          <i class="fas fa-shield-alt"></i> Equipos
+          <i class="fas fa-shield-alt"></i> Equipos Clasificados
         </div>
 
         <div class="row">
@@ -373,18 +373,12 @@ body {
             <label class="form-label">Club Local</label>
             <select id="club_local_id" class="form-select" required>
               <option value="">-- Seleccionar club --</option>
-              {% for club in clubes %}
-                <option value="{{ club.id }}">{{ club.nombre }}</option>
-              {% endfor %}
             </select>
           </div>
           <div class="col-md-6">
             <label class="form-label">Club Visitante</label>
             <select id="club_visitante_id" class="form-select" required>
               <option value="">-- Seleccionar club --</option>
-              {% for club in clubes %}
-                <option value="{{ club.id }}">{{ club.nombre }}</option>
-              {% endfor %}
             </select>
           </div>
         </div>
@@ -447,7 +441,104 @@ const horaPartido = $id("hora_partido");
 const btnGuardar = $id("btnGuardar");
 const loading = $id("loading");
 
+// Variables para almacenar clubes disponibles
+let clubesDisponibles = [];
+
+// ========== CARGAR CLUBES CLASIFICADOS ==========
+async function cargarClubesClasificados() {
+  const torneo_id = torneo.value;
+  const fase_id = fase.value;
+  const categoria = document.querySelector('input[name="categoria"]:checked')?.value;
+
+  console.log("🔄 Cargando clubes clasificados:", { torneo_id, fase_id, categoria });
+
+  if (!torneo_id || !fase_id || !categoria) {
+    console.warn("⚠️ Faltan parámetros para cargar clubes");
+    clubLocal.innerHTML = '<option value="">-- Seleccionar club --</option>';
+    clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
+    return;
+  }
+
+  try {
+    const url = `/api/playoff/clubes_clasificados?torneo_id=${torneo_id}&fase_id=${fase_id}&categoria=${categoria}`;
+    console.log("📡 URL:", url);
+    
+    const res = await fetch(url);
+    const data = await res.json();
+
+    console.log("✅ Respuesta del servidor:", data);
+
+    if (data.success && data.clubes) {
+      clubesDisponibles = data.clubes;
+      console.log("📋 Clubes disponibles:", clubesDisponibles);
+      actualizarSelectsClubes();
+    } else {
+      console.warn("❌ No se pudieron cargar clubes clasificados:", data.message);
+      clubLocal.innerHTML = '<option value="">-- Seleccionar club --</option>';
+      clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
+    }
+  } catch (err) {
+    console.error("❌ Error cargando clubes:", err);
+  }
+}
+
+// ========== ACTUALIZAR SELECTS DE CLUBES ==========
+function actualizarSelectsClubes() {
+  console.log("🔧 Actualizando selects de clubes. Total disponibles:", clubesDisponibles.length);
+  
+  const localId = clubLocal.value;
+  const visitanteId = clubVisitante.value;
+
+  // Limpiar y reconstruir select local
+  clubLocal.innerHTML = '<option value="">-- Seleccionar club --</option>';
+  
+  if (clubesDisponibles.length === 0) {
+    console.warn("⚠️ No hay clubes disponibles para mostrar");
+    clubLocal.innerHTML += '<option disabled>No hay clubes disponibles</option>';
+    clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
+    clubVisitante.innerHTML += '<option disabled>No hay clubes disponibles</option>';
+    return;
+  }
+  
+  clubesDisponibles.forEach(club => {
+    console.log("  - Agregando club local:", club.id, club.nombre);
+    const opt = document.createElement('option');
+    opt.value = club.id;
+    opt.textContent = club.nombre;
+    if (String(club.id) === String(localId)) {
+      opt.selected = true;
+    }
+    clubLocal.appendChild(opt);
+  });
+
+  // Reconstruir select visitante (excluir el club local seleccionado)
+  clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
+  clubesDisponibles.forEach(club => {
+    // No mostrar el club local en el visitante
+    if (String(club.id) !== String(localId)) {
+      console.log("  - Agregando club visitante:", club.id, club.nombre);
+      const opt = document.createElement('option');
+      opt.value = club.id;
+      opt.textContent = club.nombre;
+      if (String(club.id) === String(visitanteId)) {
+        opt.selected = true;
+      }
+      clubVisitante.appendChild(opt);
+    }
+  });
+
+  console.log("✅ Selects actualizados con", clubesDisponibles.length, "clubes");
+  updateMatchInfo();
+}
+
 // ========== EVENTOS ==========
+
+// Cargar clubes cuando cambie torneo, fase o categoría
+torneo.addEventListener("change", cargarClubesClasificados);
+fase.addEventListener("change", cargarClubesClasificados);
+categoriaRadios.forEach(radio => {
+  radio.addEventListener("change", cargarClubesClasificados);
+});
 
 // Mostrar/ocultar bloque ida-vuelta según el tipo de fase seleccionado
 tipoFase.addEventListener("change", e => {
@@ -458,16 +549,8 @@ tipoFase.addEventListener("change", e => {
   }
 });
 
-// Evitar seleccionar el mismo club en ambos selectores
-clubLocal.addEventListener("change", e => {
-  const localId = e.target.value;
-  Array.from(clubVisitante.options).forEach(opt => {
-    opt.disabled = opt.value === localId && localId !== "";
-  });
-  updateMatchInfo();
-});
-
-clubVisitante.addEventListener("change", updateMatchInfo);
+// Actualizar clubes visitantes cuando cambie local
+clubLocal.addEventListener("change", actualizarSelectsClubes);
 
 function updateMatchInfo() {
   const localId = clubLocal.value;
