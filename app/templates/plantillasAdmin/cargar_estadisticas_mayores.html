@@ -95,15 +95,28 @@
     }
 
     select option {
-      background: linear-gradient(135deg, #2a2a3f, #3a3a50);
-      color: #ffffff;
+      background-color: #2d3748 !important;
+      color: #ffffff !important;
       padding: 10px 15px;
       font-weight: 500;
     }
 
     select option:checked {
-      background: linear-gradient(135deg, #5dade2, #4a96c7);
-      color: #ffffff;
+      background: linear-gradient(135deg, #5dade2, #4a96c7) !important;
+      background-color: #5dade2 !important;
+      color: #ffffff !important;
+    }
+
+    select option:hover {
+      background-color: #4a5f7f !important;
+    }
+
+    select optgroup {
+      background-color: #2d3748 !important;
+      color: #5dade2 !important;
+      font-weight: 700 !important;
+      font-size: 0.95rem !important;
+      letter-spacing: 0.5px !important;
     }
 
     .btn-primary {
@@ -261,19 +274,48 @@
 
     <!-- JORNADAS -->
     <div class="mb-3">
-      <label class="form-label">Seleccionar Jornada</label>
+      <label class="form-label">📋 Seleccionar Jornada o Fase</label>
       <select id="select-jornada" class="form-select">
+        <option value="">-- Seleccionar --</option>
+        <!-- JORNADAS REGULARES -->
+        <optgroup label="━━━ 📅 FASE REGULAR ━━━">
+          {% for j in jornadas %}
+            <option value="jornada_{{ j }}">Jornada {{ j }}</option>
+          {% endfor %}
+        </optgroup>
+        <!-- FASES PLAYOFF -->
+        <optgroup label="━━━ 🏆 FASE DECISIVA ━━━">
+          {% for fase in fases_playoff %}
+            <option value="fase_{{ fase.id }}">{{ fase.nombre }}</option>
+          {% endfor %}
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- IDA/VUELTA (solo para playoff con ida_vuelta=true) -->
+    <div id="ida-vuelta-container" style="display:none;" class="mb-3">
+      <label class="form-label">🔄 Tipo de Partido</label>
+      <select id="select-ida-vuelta" class="form-select">
+        <option value="">-- Seleccionar --</option>
+        <option value="ida">Ida 🏟️</option>
+        <option value="vuelta">Vuelta 🏟️</option>
+      </select>
+    </div>
+
+    <!-- CATEGORÍA PLAYOFF (solo para playoff) -->
+    <div id="categoria-playoff-container" style="display:none;" class="mb-3">
+      <label class="form-label">Seleccionar Categoría</label>
+      <select id="select-categoria-playoff" class="form-select">
         <option value="">Seleccionar...</option>
-        {% for j in jornadas %}
-          <option value="{{ j }}">Jornada {{ j }}</option>
-        {% endfor %}
+        <option value="primera">Primera</option>
+        <option value="reserva">Reserva</option>
       </select>
     </div>
 
     <!-- CRUCES -->
     <div id="cruces-container" style="display:none;">
       <div class="mb-3">
-        <label class="form-label">Cruces de la Jornada</label>
+        <label class="form-label">Cruces de la Jornada/Fase</label>
         <select id="select-cruce" class="form-select">
           <option value="">Seleccione un cruce...</option>
         </select>
@@ -388,6 +430,8 @@ const estadoCruces = {};
 
 let current = {
   jornada: null,
+  fase_id: null,
+  ida_vuelta: null,
   local_id: null,
   visitante_id: null,
   id_primera: null,
@@ -428,6 +472,8 @@ function resetFormularioCompleto(resetJornada=false) {
 
   current = {
     jornada: resetJornada ? null : current.jornada,
+    fase_id: resetJornada ? null : current.fase_id,
+    ida_vuelta: resetJornada ? null : current.ida_vuelta,
     local_id:null,
     visitante_id:null,
     id_primera:null,
@@ -440,16 +486,63 @@ function resetFormularioCompleto(resetJornada=false) {
   };
 }
 
-/* ================= JORNADA ================= */
+/* ================= JORNADA / FASE ================= */
 $id("select-jornada").addEventListener("change", async e=>{
-  const j = e.target.value;
-  if(!j) return;
+  const val = e.target.value;
+  if(!val) {
+    $id("cruces-container").style.display="none";
+    $id("ida-vuelta-container").style.display="none";
+    $id("categoria-playoff-container").style.display="none";
+    return;
+  }
 
-  current.jornada = j;
   resetFormularioCompleto();
 
+  // Detectar si es jornada regular o fase de playoff
+  if(val.startsWith("jornada_")) {
+    // JORNADA REGULAR
+    const jornada = val.replace("jornada_", "");
+    current.jornada = jornada;
+    $id("ida-vuelta-container").style.display="none";
+    $id("categoria-playoff-container").style.display="none";
+    cargarCrucesRegulares(jornada);
+  } else if(val.startsWith("fase_")) {
+    // FASE PLAYOFF
+    const faseId = val.replace("fase_", "");
+    current.fase_id = faseId;
+    $id("ida-vuelta-container").style.display="block";
+    $id("select-ida-vuelta").value = "";
+    $id("categoria-playoff-container").style.display="none";
+    $id("cruces-container").style.display="none";
+  }
+});
+
+/* IDA/VUELTA PLAYOFF */
+$id("select-ida-vuelta").addEventListener("change", async e=>{
+  const val = e.target.value;
+  if(!val || !current.fase_id) {
+    $id("categoria-playoff-container").style.display="none";
+    $id("cruces-container").style.display="none";
+    return;
+  }
+
+  current.ida_vuelta = val;
+  $id("categoria-playoff-container").style.display="block";
+  $id("select-categoria-playoff").value = "";
+  $id("cruces-container").style.display="none";
+});
+
+/* CATEGORÍA PLAYOFF */
+$id("select-categoria-playoff").addEventListener("change", async e=>{
+  const categoria = e.target.value;
+  if(!categoria || !current.fase_id || !current.ida_vuelta) return;
+
+  cargarCrucesPlayoff(current.fase_id, categoria, current.ida_vuelta);
+});
+
+async function cargarCrucesRegulares(jornada) {
   try{
-    const r = await fetch(`/api/cruces_pendientes_mayores/${j}`);
+    const r = await fetch(`/api/cruces_pendientes_mayores/${jornada}`);
     const data = await r.json();
 
     const sel = $id("select-cruce");
@@ -473,7 +566,35 @@ $id("select-jornada").addEventListener("change", async e=>{
     console.error(err);
     Swal.fire("Error","No se pudieron cargar los cruces","error");
   }
-});
+}
+
+async function cargarCrucesPlayoff(faseId, categoria, idaVuelta) {
+  try{
+    const r = await fetch(`/api/cruces_playoff_mayores/${faseId}/${categoria}/${idaVuelta}`);
+    const data = await r.json();
+
+    const sel = $id("select-cruce");
+    sel.innerHTML='<option value="">Seleccionar...</option>';
+
+    if(!Array.isArray(data) || data.length === 0){
+      $id("cruces-container").style.display="none";
+      Swal.fire("Info","No hay cruces pendientes de carga","info");
+      return;
+    }
+
+    data.forEach(c=>{
+      const o = document.createElement("option");
+      o.value=c.id;
+      o.textContent=c.texto;
+      sel.appendChild(o);
+    });
+
+    $id("cruces-container").style.display="block";
+  }catch(err){
+    console.error(err);
+    Swal.fire("Error","No se pudieron cargar los cruces","error");
+  }
+}
 
 /* ================= CRUCE ================= */
 $id("select-cruce").addEventListener("change", async e=>{
@@ -484,7 +605,23 @@ $id("select-cruce").addEventListener("change", async e=>{
   estadoCruces[id] = estadoCruces[id] || {};
 
   try{
-    const info = await fetch(`/api/info_cruce/${id}`).then(r=>r.json());
+    // Determinar si es playoff o regular
+    const esPlayoff = current.fase_id ? true : false;
+    
+    let info;
+    if(esPlayoff) {
+      const categoria = $id("select-categoria-playoff").value;
+      const idaVuelta = current.ida_vuelta;
+      info = await fetch(`/api/info_cruce_playoff/${id}/${categoria}/${idaVuelta}`).then(r=>r.json());
+    } else {
+      info = await fetch(`/api/info_cruce/${id}`).then(r=>r.json());
+    }
+
+    if(info.error) {
+      Swal.fire("Error", info.error, "error");
+      return;
+    }
+
     current.local_id = info.local_id;
     current.visitante_id = info.visitante_id;
 
@@ -493,6 +630,15 @@ $id("select-cruce").addEventListener("change", async e=>{
     CATS.forEach(cat=>{
       const data = info[cat];
       if(!data || data.jugado || !data.id) return;
+
+      // En playoff, solo mostrar la categoría seleccionada
+      if(esPlayoff){
+        const categoriaSeleccionada = $id("select-categoria-playoff").value;
+        if(cat !== categoriaSeleccionada){
+          $id(`bloque-${cat}`).style.display="none";
+          return;
+        }
+      }
 
       hayPendiente=true;
       current[`id_${cat}`] = data.id;
