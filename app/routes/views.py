@@ -1988,7 +1988,7 @@ def jornadas_disponibles():
     if not torneo_id or not fase_id or not categoria:
         return jsonify({"success": False, "message": "Faltan parámetros"}), 400
 
-    # Obtener jornadas ya cargadas
+    # Obtener jornadas ya cargadas para esta combinación
     partidos = Partido.query.filter_by(
         torneo_id=torneo_id,
         fase_id=fase_id,
@@ -1996,12 +1996,21 @@ def jornadas_disponibles():
     ).all()
 
     jornadas_existentes = [p.jornada for p in partidos]
+    
+    # Consultar si la fase es ida y vuelta
+    fase = Fase.query.get(fase_id)
+    if not fase:
+        return jsonify({"success": False, "message": "Fase inexistente"}), 404
 
     opciones = []
-    if 1 not in jornadas_existentes:
-        opciones.append({"valor": 1, "label": "Ida"})
-    if 2 not in jornadas_existentes:
-        opciones.append({"valor": 2, "label": "Vuelta"})
+    if fase.ida_vuelta:
+        if 1 not in jornadas_existentes:
+            opciones.append({"valor": 1, "label": "Ida"})
+        if 2 not in jornadas_existentes:
+            opciones.append({"valor": 2, "label": "Vuelta"})
+    else:
+        if 1 not in jornadas_existentes:
+            opciones.append({"valor": 1, "label": "Único"})
 
     return jsonify({"success": True, "opciones": opciones})
 
@@ -2021,8 +2030,9 @@ def crear_partido_playoff():
 
         # ============== NORMALIZAR CATEGORÍA ==============
         categoria = data["categoria"].lower().strip()
-        if categoria not in ("primera", "reserva"):
-            return jsonify(success=False, message="Categoría inválida"), 400
+        categorias_validas = ("primera", "reserva", "quinta", "sexta", "septima")
+        if categoria not in categorias_validas:
+            return jsonify(success=False, message=f"Categoría inválida. Válidas: {', '.join(categorias_validas)}"), 400
 
         if data["club_local_id"] == data["club_visitante_id"]:
             return jsonify(success=False, message="El club local y visitante no pueden ser el mismo"), 400
@@ -2052,19 +2062,20 @@ def crear_partido_playoff():
         equipo_local = Equipo.query.filter_by(club_id=club_local.id, categoria=categoria).first()
         equipo_visitante = Equipo.query.filter_by(club_id=club_visitante.id, categoria=categoria).first()
         if not equipo_local or not equipo_visitante:
-            return jsonify(success=False, message="Alguno de los clubes no tiene equipo cargado para esa categoría"), 400
+            return jsonify(success=False, message=f"Alguno de los clubes no tiene equipo cargado en la categoría {categoria.capitalize()}"), 400
 
         # ============== VALIDAR SECUENCIA DE FASES ==============
         fases_ordenadas = ["Cuartos de Final", "Semifinal", "Final", "Finalísima"]
-        idx = fases_ordenadas.index(fase.nombre)
-        if idx > 0:
-            # Validar que haya partidos cargados en la fase anterior para la misma categoría
-            fase_anterior = Fase.query.filter_by(nombre=fases_ordenadas[idx-1], torneo_id=torneo.id).first()
-            if not fase_anterior:
-                return jsonify(success=False, message=f"No existe la fase anterior: {fases_ordenadas[idx-1]}"), 400
-            partidos_ant = Partido.query.filter_by(fase_id=fase_anterior.id, categoria=categoria).all()
-            if len(partidos_ant) == 0:
-                return jsonify(success=False, message=f"No se pueden cargar partidos de {fase.nombre} antes de completar {fases_ordenadas[idx-1]}"), 400
+        if fase.nombre in fases_ordenadas:
+            idx = fases_ordenadas.index(fase.nombre)
+            if idx > 0:
+                # Validar que haya partidos cargados en la fase anterior para la misma categoría
+                fase_anterior = Fase.query.filter_by(nombre=fases_ordenadas[idx-1], torneo_id=torneo.id).first()
+                if not fase_anterior:
+                    return jsonify(success=False, message=f"No existe la fase anterior: {fases_ordenadas[idx-1]}"), 400
+                partidos_ant = Partido.query.filter_by(fase_id=fase_anterior.id, categoria=categoria).all()
+                if len(partidos_ant) == 0:
+                    return jsonify(success=False, message=f"No se pueden cargar partidos de {fase.nombre} antes de completar {fases_ordenadas[idx-1]}"), 400
 
         # ============== DUPLICADOS ==============
         existe = Partido.query.filter_by(
@@ -2153,6 +2164,7 @@ def crear_partido_playoff():
     
     except Exception as e:
         print("ERROR crear_partido_playoff:", e)
+        db.session.rollback()
         return jsonify(success=False, message="Error interno del servidor"), 500
 
 # ===========================================
@@ -2164,7 +2176,8 @@ def vista_crear_partido_playoff():
     torneos = Torneo.query.order_by(Torneo.id.desc()).all()
 
     clubes = Club.query.order_by(Club.nombre).all()
-    categorias = ["Primera","Reserva"]
+    # Categorías extendidas: Primera, Reserva, Quinta, Sexta, Séptima
+    categorias = ["Primera", "Reserva", "Quinta", "Sexta", "Séptima"]
 
     fases = []
     fases_ordenadas = ["Cuartos de Final","Semifinal","Final","Finalísima"]
@@ -2181,7 +2194,7 @@ def vista_crear_partido_playoff():
             fase_anterior = Fase.query.filter_by(nombre=fases_ordenadas[idx-1]).first()
             if not fase_anterior:
                 continue
-            # Chequear que haya partidos de la fase anterior
+            # Chequear que haya partidos de la fase anterior (sin filtrar por categoría, solo verificar existencia)
             if not Partido.query.filter_by(fase_id=fase_anterior.id).first():
                 continue
 
