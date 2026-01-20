@@ -2234,7 +2234,7 @@ def vista_partidos_playoff():
         .join(Fase)
         .join(Torneo, Partido.torneo_id == Torneo.id)
         .filter(Fase.nombre.in_([
-            "Cuartos de Final", "Semifinal", "Final", "Finalísima"
+            "Cuartos", "Semifinal", "Final", "Finalísima"
         ]))
         .order_by(Torneo.id.desc(), Fase.orden, Partido.jornada)
         .all()
