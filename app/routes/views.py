@@ -2748,3 +2748,90 @@ def cargar_resultados_admin():
         flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
         return redirect(url_for('views.index'))
     return render_template('plantillasAdmin/cargar_resultados.html', usuario=current_user)
+
+# CHEQUEO DE RESULTADOS PLAYOFF
+@views.route('/playoff/chequeo_resultados')
+@login_required
+def chequeo_resultados_playoff():
+    """
+    Endpoint para visualizar todos los partidos de playoff con resultados cargados
+    Muestra goles, tarjetas y resultados de los partidos
+    Solo para chequeo interno
+    """
+    if current_user.rol != 'administrador':
+        flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
+        return redirect(url_for('views.index'))
+    
+    try:
+        # Obtener todas las fases de playoff que tengan partidos
+        fases = db.session.query(Fase).filter(
+            Fase.partidos.any()
+        ).all()
+        
+        partidos_por_fase = {}
+        
+        for fase in fases:
+            # Obtener todos los partidos de esta fase que estén jugados
+            partidos = Partido.query.filter_by(
+                fase_id=fase.id,
+                jugado=True
+            ).options(
+                joinedload(Partido.equipo_local).joinedload(Equipo.club),
+                joinedload(Partido.equipo_visitante).joinedload(Equipo.club),
+                joinedload(Partido.estadisticas_jugadores).joinedload(EstadoJugadorPartido.jugador)
+            ).all()
+            
+            if partidos:
+                datos_partidos = []
+                for partido in partidos:
+                    # Obtener estadísticas de jugadores
+                    stats = {}
+                    for stat in partido.estadisticas_jugadores:
+                        stats[stat.jugador.numero_carnet] = {
+                            'nombre': f"{stat.jugador.nombre} {stat.jugador.apellido}",
+                            'goles': stat.cant_goles,
+                            'amarillas': stat.tarjetas_amarillas,
+                            'rojas': stat.tarjetas_rojas
+                        }
+                    
+                    datos_partidos.append({
+                        'id': partido.id,
+                        'fecha': partido.fecha_partido,
+                        'hora': partido.hora_partido,
+                        'jornada': partido.jornada,
+                        'categoria': partido.categoria,
+                        'equipo_local': {
+                            'nombre': partido.equipo_local.club.nombre,
+                            'id': partido.equipo_local_id
+                        },
+                        'equipo_visitante': {
+                            'nombre': partido.equipo_visitante.club.nombre,
+                            'id': partido.equipo_visitante_id
+                        },
+                        'goles_local': partido.goles_local,
+                        'goles_visitante': partido.goles_visitante,
+                        'estadisticas': stats
+                    })
+                
+                # Agrupar por torneo y categoría para una mejor visualización
+                clave_fase = f"{fase.torneo.nombre} - {fase.nombre}"
+                if clave_fase not in partidos_por_fase:
+                    partidos_por_fase[clave_fase] = {
+                        'fase_id': fase.id,
+                        'fase_nombre': fase.nombre,
+                        'torneo': fase.torneo.nombre,
+                        'ida_vuelta': fase.ida_vuelta,
+                        'partidos': []
+                    }
+                partidos_por_fase[clave_fase]['partidos'].extend(datos_partidos)
+        
+        return render_template(
+            'plantillasAdmin/chequeo_resultados_playoff.html',
+            usuario=current_user,
+            partidos_por_fase=partidos_por_fase
+        )
+    
+    except Exception as e:
+        print(f"❌ ERROR en chequeo_resultados_playoff: {str(e)}")
+        flash(f"❌ Error al cargar los resultados: {str(e)}", 'danger')
+        return redirect(url_for('views.index'))

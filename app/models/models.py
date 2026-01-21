@@ -73,6 +73,7 @@ class Torneo(db.Model):
     temporada = db.relationship('Temporada', back_populates='torneos')
 
     partidos = db.relationship('Partido', back_populates='torneo')
+    fases = db.relationship('Fase', back_populates='torneo')
 
     def __repr__(self):
         return f"<Torneo {self.nombre} - {self.temporada.nombre}>"
@@ -86,6 +87,7 @@ class Fase(db.Model):
     torneo_id = db.Column(db.Integer, db.ForeignKey('torneo.id'), nullable=False)
     ida_vuelta = db.Column(db.Boolean, default=False, nullable=False)
 
+    torneo = db.relationship('Torneo', back_populates='fases')
     partidos = db.relationship('Partido', back_populates='fase')
 
 class Jugador(db.Model):
