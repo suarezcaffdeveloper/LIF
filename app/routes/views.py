@@ -2189,6 +2189,15 @@ def obtener_ganadores_cuartos(torneo_id, categoria):
     try:
         categoria = categoria.lower().strip()
         
+        print(f"\n🎯 === OBTENER GANADORES CUARTOS ===")
+        print(f"   Torneo ID: {torneo_id}")
+        print(f"   Categoría: {categoria}")
+        
+        # Obtener torneo para verificar
+        torneo = Torneo.query.get(torneo_id)
+        if torneo:
+            print(f"   Torneo: {torneo.nombre} ({torneo.temporada.nombre})")
+        
         # Obtener la fase de Cuartos
         fase_cuartos = Fase.query.filter_by(
             nombre="Cuartos",
@@ -2196,8 +2205,14 @@ def obtener_ganadores_cuartos(torneo_id, categoria):
         ).first()
         
         if not fase_cuartos:
-            print("❌ No existe fase de Cuartos")
+            print(f"❌ No existe fase de Cuartos para torneo_id={torneo_id}")
+            print(f"   Fases disponibles para este torneo:")
+            fases_torneo = Fase.query.filter_by(torneo_id=torneo_id).all()
+            for f in fases_torneo:
+                print(f"   - {f.nombre} (ID: {f.id})")
             return []
+        
+        print(f"✅ Fase de Cuartos encontrada: ID={fase_cuartos.id}")
         
         # Obtener todos los partidos de Cuartos (ida y vuelta)
         partidos = Partido.query.filter_by(
@@ -2210,6 +2225,7 @@ def obtener_ganadores_cuartos(torneo_id, categoria):
         
         if not partidos:
             print("❌ No hay partidos jugados en Cuartos")
+            print(f"   (Buscando en fase_id={fase_cuartos.id}, categoria={categoria}, jugado=True)")
             return []
         
         # Agrupar partidos por cruce (ida y vuelta)
@@ -2218,6 +2234,8 @@ def obtener_ganadores_cuartos(torneo_id, categoria):
             # Usar los club_ids para identificar el cruce
             club_local_id = partido.equipo_local.club_id
             club_visitante_id = partido.equipo_visitante.club_id
+            
+            print(f"   - Partido ID={partido.id}: {partido.equipo_local.club.nombre} vs {partido.equipo_visitante.club.nombre} ({partido.goles_local}-{partido.goles_visitante})")
             
             # Crear clave ordenada para el cruce
             clave_cruce = tuple(sorted([club_local_id, club_visitante_id]))
@@ -2302,7 +2320,8 @@ def clubes_clasificados():
         fase_id = request.args.get("fase_id", type=int)
         categoria = request.args.get("categoria", type=str, default="primera")
         
-        print(f"🔍 clubes_clasificados recibido: torneo_id={torneo_id}, fase_id={fase_id}, categoria={categoria}")
+        print(f"\n🔍 === CLUBES_CLASIFICADOS ===")
+        print(f"   torneo_id={torneo_id}, fase_id={fase_id}, categoria={categoria}")
         
         if not torneo_id or not fase_id or not categoria:
             return jsonify(success=False, message="Faltan parámetros"), 400
@@ -2314,7 +2333,15 @@ def clubes_clasificados():
         fase = Fase.query.get(fase_id)
         
         if not torneo or not fase or fase.torneo_id != torneo.id:
+            print(f"❌ Torneo o fase inválidos")
+            print(f"   Torneo encontrado: {torneo}")
+            print(f"   Fase encontrada: {fase}")
+            if fase:
+                print(f"   Fase pertenece a torneo_id={fase.torneo_id}, esperado={torneo_id}")
             return jsonify(success=False, message="Torneo o fase inválidos"), 400
+        
+        print(f"✅ Torneo: {torneo.nombre} ({torneo.temporada.nombre})")
+        print(f"✅ Fase: {fase.nombre} (ID={fase.id})")
         
         fases_ordenadas = ["Cuartos", "Semifinal", "Final", "Finalísima"]
         
@@ -2342,13 +2369,23 @@ def clubes_clasificados():
             # Para fases posteriores, obtener clubes de la fase anterior
             print(f"📍 Fase: {fase.nombre} - Buscando ganadores de la fase anterior")
             idx = fases_ordenadas.index(fase.nombre)
+            nombre_fase_anterior = fases_ordenadas[idx-1]
+            print(f"   Buscando fase anterior: {nombre_fase_anterior}")
+            
             fase_anterior = Fase.query.filter_by(
-                nombre=fases_ordenadas[idx-1], 
+                nombre=nombre_fase_anterior, 
                 torneo_id=torneo.id
             ).first()
             
             if not fase_anterior:
+                print(f"❌ No existe fase {nombre_fase_anterior} para este torneo")
+                print(f"   Fases disponibles en este torneo:")
+                fases_disponibles = Fase.query.filter_by(torneo_id=torneo.id).all()
+                for f in fases_disponibles:
+                    print(f"   - {f.nombre} (ID={f.id})")
                 return jsonify(success=False, message="No existe fase anterior"), 400
+            
+            print(f"✅ Fase anterior encontrada: {fase_anterior.nombre} (ID={fase_anterior.id})")
             
             # Obtener partidos de la fase anterior
             partidos_fase_anterior = Partido.query.filter_by(
