@@ -330,15 +330,16 @@ def recalcular_tabla_posiciones(categoria):
 
     # 2️⃣ Traer partidos jugados de esta categoría, EXCLUYENDO playoff
     fases_playoff = ["Cuartos", "Semifinal", "Final", "Finalísima"]
+    # Incluir partidos de fase regular (fase.nombre == 'Regular' o fase_id == None)
     partidos = (
         Partido.query
-        .join(Fase, Partido.fase_id == Fase.id)
+        .outerjoin(Fase, Partido.fase_id == Fase.id)
         .filter(
             func.lower(Partido.categoria) == categoria,
             Partido.jugado == True,
             or_(
                 Partido.fase_id == None,
-                ~Fase.nombre.in_(fases_playoff)
+                Fase.nombre == "Regular"
             )
         )
         .all()
