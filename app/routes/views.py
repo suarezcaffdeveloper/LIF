@@ -144,9 +144,18 @@ def fixture(bloque, categoria=None):
     categorias_bloque_raw = bloques[bloque]
     categorias_bloque = [c.strip().lower() for c in categorias_bloque_raw]
 
-    # Consulta básica
-    query = Partido.query.filter(
-        Partido.torneo_id == torneo_apertura.id
+    # Consulta básica EXCLUYENDO partidos de playoff
+    fases_playoff = ["Cuartos", "Semifinal", "Final", "Finalísima"]
+    query = (
+        Partido.query
+        .outerjoin(Fase, Partido.fase_id == Fase.id)
+        .filter(
+            Partido.torneo_id == torneo_apertura.id,
+            or_(
+                Partido.fase_id == None,
+                ~Fase.nombre.in_(fases_playoff)
+            )
+        )
     )
 
     if categoria:
@@ -319,11 +328,21 @@ def recalcular_tabla_posiciones(categoria):
 
     equipos_map = {e['id_equipo']: e for e in tabla}
 
-    # 2️⃣ Traer partidos jugados de esta categoría
-    partidos = Partido.query.filter(
-        func.lower(Partido.categoria) == categoria,
-        Partido.jugado == True
-    ).all()
+    # 2️⃣ Traer partidos jugados de esta categoría, EXCLUYENDO playoff
+    fases_playoff = ["Cuartos", "Semifinal", "Final", "Finalísima"]
+    partidos = (
+        Partido.query
+        .join(Fase, Partido.fase_id == Fase.id)
+        .filter(
+            func.lower(Partido.categoria) == categoria,
+            Partido.jugado == True,
+            or_(
+                Partido.fase_id == None,
+                ~Fase.nombre.in_(fases_playoff)
+            )
+        )
+        .all()
+    )
 
     # 3️⃣ Recorrer partidos y calcular estadísticas
     for p in partidos:
