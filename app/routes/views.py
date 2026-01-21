@@ -2337,8 +2337,13 @@ def clubes_clasificados():
             print(f"   Torneo encontrado: {torneo}")
             print(f"   Fase encontrada: {fase}")
             if fase:
-                print(f"   Fase pertenece a torneo_id={fase.torneo_id}, esperado={torneo_id}")
-            return jsonify(success=False, message="Torneo o fase inválidos"), 400
+                print(f"   ⚠️ La fase {fase.nombre} (ID={fase.id}) pertenece a torneo_id={fase.torneo_id}, pero esperabas torneo_id={torneo_id}")
+                print(f"   💡 Deberías usar una fase del torneo {torneo.nombre}")
+                print(f"\n   Fases disponibles para {torneo.nombre} ({torneo.temporada.nombre}):")
+                fases_correctas = Fase.query.filter_by(torneo_id=torneo_id).all()
+                for f in fases_correctas:
+                    print(f"   - {f.nombre} (ID={f.id}, Ida/Vuelta={f.ida_vuelta})")
+            return jsonify(success=False, message=f"La fase {fase.nombre} (ID={fase.id}) no pertenece al torneo {torneo.nombre}. Verifica que hayas seleccionado la fase correcta del torneo {torneo.nombre}."), 400
         
         print(f"✅ Torneo: {torneo.nombre} ({torneo.temporada.nombre})")
         print(f"✅ Fase: {fase.nombre} (ID={fase.id})")
