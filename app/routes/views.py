@@ -2177,6 +2177,119 @@ def guardar_inferiores():
         return jsonify({"success": False, "message": "Error interno del servidor"}), 500
 
 
+# ====================================================
+# FUNCIÓN: OBTENER GANADORES DE CUARTOS DE FINAL
+# ====================================================
+def obtener_ganadores_cuartos(torneo_id, categoria):
+    """
+    Calcula los ganadores de Cuartos de Final sumando ida y vuelta.
+    En caso de empate, usa la tabla de posiciones como desempate.
+    Retorna lista de 4 club_ids ganadores
+    """
+    try:
+        categoria = categoria.lower().strip()
+        
+        # Obtener la fase de Cuartos
+        fase_cuartos = Fase.query.filter_by(
+            nombre="Cuartos",
+            torneo_id=torneo_id
+        ).first()
+        
+        if not fase_cuartos:
+            print("❌ No existe fase de Cuartos")
+            return []
+        
+        # Obtener todos los partidos de Cuartos (ida y vuelta)
+        partidos = Partido.query.filter_by(
+            fase_id=fase_cuartos.id,
+            categoria=categoria,
+            jugado=True
+        ).all()
+        
+        print(f"📊 Partidos de Cuartos encontrados: {len(partidos)}")
+        
+        if not partidos:
+            print("❌ No hay partidos jugados en Cuartos")
+            return []
+        
+        # Agrupar partidos por cruce (ida y vuelta)
+        cruces = {}
+        for partido in partidos:
+            # Usar los club_ids para identificar el cruce
+            club_local_id = partido.equipo_local.club_id
+            club_visitante_id = partido.equipo_visitante.club_id
+            
+            # Crear clave ordenada para el cruce
+            clave_cruce = tuple(sorted([club_local_id, club_visitante_id]))
+            
+            if clave_cruce not in cruces:
+                cruces[clave_cruce] = {
+                    'club_a': clave_cruce[0],
+                    'club_b': clave_cruce[1],
+                    'goles_club_a': 0,
+                    'goles_club_b': 0,
+                    'partidos': []
+                }
+            
+            # Sumar goles
+            if club_local_id == clave_cruce[0]:
+                cruces[clave_cruce]['goles_club_a'] += partido.goles_local
+                cruces[clave_cruce]['goles_club_b'] += partido.goles_visitante
+            else:
+                cruces[clave_cruce]['goles_club_a'] += partido.goles_visitante
+                cruces[clave_cruce]['goles_club_b'] += partido.goles_local
+            
+            cruces[clave_cruce]['partidos'].append(partido)
+        
+        print(f"📍 Cruces encontrados: {len(cruces)}")
+        
+        # Determinar ganadores
+        ganadores_ids = []
+        tabla_posiciones = recalcular_tabla_posiciones(categoria)
+        tabla_map = {equipo['id_equipo']: idx for idx, equipo in enumerate(tabla_posiciones)}
+        
+        for clave_cruce, datos_cruce in cruces.items():
+            club_a = datos_cruce['club_a']
+            club_b = datos_cruce['club_b']
+            goles_a = datos_cruce['goles_club_a']
+            goles_b = datos_cruce['goles_club_b']
+            
+            print(f"🔄 Cruce: {club_a} ({goles_a}) vs {club_b} ({goles_b})")
+            
+            if goles_a > goles_b:
+                ganador = club_a
+                print(f"   ✅ Ganador: {club_a}")
+            elif goles_b > goles_a:
+                ganador = club_b
+                print(f"   ✅ Ganador: {club_b}")
+            else:
+                # EMPATE: usar tabla de posiciones
+                # Obtener equipos para buscar en la tabla
+                equipo_a = Equipo.query.filter_by(
+                    club_id=club_a,
+                    categoria=categoria
+                ).first()
+                equipo_b = Equipo.query.filter_by(
+                    club_id=club_b,
+                    categoria=categoria
+                ).first()
+                
+                posicion_a = tabla_map.get(equipo_a.id, float('inf')) if equipo_a else float('inf')
+                posicion_b = tabla_map.get(equipo_b.id, float('inf')) if equipo_b else float('inf')
+                
+                ganador = club_a if posicion_a < posicion_b else club_b
+                print(f"   ⚽ Empate {goles_a}-{goles_b}. Desempate por tabla: Posición A={posicion_a}, Posición B={posicion_b}. Ganador: {ganador}")
+            
+            ganadores_ids.append(ganador)
+        
+        print(f"🏆 Ganadores finales: {ganadores_ids}")
+        return ganadores_ids
+    
+    except Exception as e:
+        print(f"❌ ERROR en obtener_ganadores_cuartos: {str(e)}")
+        return []
+
+
 @views.route("/api/playoff/clubes_clasificados", methods=["GET"])
 def clubes_clasificados():
     """
@@ -2246,18 +2359,22 @@ def clubes_clasificados():
             print(f"📋 Partidos en fase anterior: {len(partidos_fase_anterior)}")
             
             # LÓGICA DE GANADORES:
-            # Si hay resultados cargados, traer ganadores
-            # Si NO hay resultados, traer todos los clubes que participan en esa fase
             clubes_ids = set()
             hay_resultados = any(p.jugado for p in partidos_fase_anterior)
             
             if hay_resultados:
-                # Traer solo ganadores
-                for partido in partidos_fase_anterior:
-                    if partido.goles_local > partido.goles_visitante:
-                        clubes_ids.add(partido.equipo_local.club_id)
-                    elif partido.goles_visitante > partido.goles_local:
-                        clubes_ids.add(partido.equipo_visitante.club_id)
+                # 🏆 ESPECIAL: Si es Semifinal y fase anterior es Cuartos (ida/vuelta), usar función especial
+                if fase.nombre == "Semifinal" and fase_anterior.nombre == "Cuartos" and fase_anterior.ida_vuelta:
+                    print("🎯 SEMIFINAL: Calculando ganadores de Cuartos (ida/vuelta) con desempate por tabla")
+                    ganadores = obtener_ganadores_cuartos(torneo_id, categoria)
+                    clubes_ids = set(ganadores)
+                else:
+                    # Para otras fases, ganador es el que tiene más goles en un partido
+                    for partido in partidos_fase_anterior:
+                        if partido.goles_local > partido.goles_visitante:
+                            clubes_ids.add(partido.equipo_local.club_id)
+                        elif partido.goles_visitante > partido.goles_local:
+                            clubes_ids.add(partido.equipo_visitante.club_id)
                 print(f"✅ Con resultados. Ganadores: {clubes_ids}")
             else:
                 # Sin resultados, traer todos los clubes que participan
