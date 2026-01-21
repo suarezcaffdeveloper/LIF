@@ -304,12 +304,10 @@ body {
 
         <div class="mb-3">
           <label class="form-label">Selecciona la Fase</label>
-          <select id="fase_id" class="form-select" required>
+          <select id="fase_nombre" class="form-select" required>
             <option value="">-- Seleccionar fase --</option>
             {% for fase in fases %}
-              <option value="{{ fase.id }}">
-                {{ fase.nombre }}
-              </option>
+              <option value="{{ fase }}">{{ fase }}</option>
             {% endfor %}
           </select>
           <div class="info-box">
@@ -429,7 +427,7 @@ const $query = sel => document.querySelector(sel);
 
 // ========== ELEMENTOS DEL FORMULARIO ==========
 const torneo = $id("torneo_id");
-const fase = $id("fase_id");
+const fase = $id("fase_nombre");
 const tipoFase = $id("tipo_fase");
 const jornada = $id("jornada");
 const bloqueIdaVuelta = $id("bloque-ida-vuelta");
@@ -447,12 +445,12 @@ let clubesDisponibles = [];
 // ========== CARGAR CLUBES CLASIFICADOS ==========
 async function cargarClubesClasificados() {
   const torneo_id = torneo.value;
-  const fase_id = fase.value;
+  const fase_nombre = fase.value;
   const categoria = document.querySelector('input[name="categoria"]:checked')?.value;
 
-  console.log("🔄 Cargando clubes clasificados:", { torneo_id, fase_id, categoria });
+  console.log("🔄 Cargando clubes clasificados:", { torneo_id, fase_nombre, categoria });
 
-  if (!torneo_id || !fase_id || !categoria) {
+  if (!torneo_id || !fase_nombre || !categoria) {
     console.warn("⚠️ Faltan parámetros para cargar clubes");
     clubLocal.innerHTML = '<option value="">-- Seleccionar club --</option>';
     clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
@@ -460,7 +458,7 @@ async function cargarClubesClasificados() {
   }
 
   try {
-    const url = `/api/playoff/clubes_clasificados?torneo_id=${torneo_id}&fase_id=${fase_id}&categoria=${categoria}`;
+    const url = `/api/playoff/clubes_clasificados?torneo_id=${torneo_id}&nombre_fase=${encodeURIComponent(fase_nombre)}&categoria=${categoria}`;
     console.log("📡 URL:", url);
     
     const res = await fetch(url);
@@ -583,13 +581,13 @@ function updateMatchInfo() {
 async function guardarPartido() {
   // Validación de campos obligatorios
   const torneo_id = torneo.value;
-  const fase_id = fase.value;
+  const fase_nombre = fase.value;
   const tipo_fase = tipoFase.value;
   const categoria = document.querySelector('input[name="categoria"]:checked')?.value;
   const club_local_id = clubLocal.value;
   const club_visitante_id = clubVisitante.value;
 
-  if (!torneo_id || !fase_id || !tipo_fase || !categoria || !club_local_id || !club_visitante_id) {
+  if (!torneo_id || !fase_nombre || !tipo_fase || !categoria || !club_local_id || !club_visitante_id) {
     Swal.fire({
       icon: "warning",
       title: "Campos incompletos",
@@ -617,7 +615,7 @@ async function guardarPartido() {
 
   const payload = {
     torneo_id: parseInt(torneo_id),
-    fase_id: parseInt(fase_id),
+    fase_nombre: fase_nombre,
     categoria: categoria,
     club_local_id: parseInt(club_local_id),
     club_visitante_id: parseInt(club_visitante_id),
