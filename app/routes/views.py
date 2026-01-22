@@ -403,15 +403,26 @@ def calcular_rachas(tabla, categoria):
 
         tendencia = []
         if equipo_db:
-            # Últimos 5 partidos jugados
-            partidos_ultimos = Partido.query.filter(
-                func.lower(Partido.categoria) == categoria.lower(),
-                Partido.jugado == True,
-                or_(
-                    Partido.equipo_local_id == equipo_db.id,
-                    Partido.equipo_visitante_id == equipo_db.id
+            # Últimos 5 partidos jugados SOLO de fase regular
+            partidos_ultimos = (
+                Partido.query
+                .outerjoin(Fase, Partido.fase_id == Fase.id)
+                .filter(
+                    func.lower(Partido.categoria) == categoria.lower(),
+                    Partido.jugado == True,
+                    or_(
+                        Partido.fase_id == None,
+                        Fase.nombre == "Regular"
+                    ),
+                    or_(
+                        Partido.equipo_local_id == equipo_db.id,
+                        Partido.equipo_visitante_id == equipo_db.id
+                    )
                 )
-            ).order_by(Partido.fecha_partido.desc()).limit(5).all()
+                .order_by(Partido.fecha_partido.desc())
+                .limit(5)
+                .all()
+            )
 
             for p in partidos_ultimos:
                 if p.equipo_local_id == equipo_db.id:
@@ -1413,6 +1424,179 @@ def cargar_estadisticas_mayores():
         fases_playoff=fases_playoff
     )
 
+# ====================================================
+# 2) CRUCES PLAYOFF INFERIORES (NUEVO)
+# ====================================================
+
+@views.route("/api/info_cruce_playoff_inferiores/<int:cruce_id>/<categoria>/<ida_vuelta>")
+def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
+    """
+    Devuelve información detallada de un cruce de playoff de inferiores (por partido, categoría e ida/vuelta)
+    """
+    try:
+        categoria = categoria.lower().strip()
+        if categoria not in ("quinta", "sexta", "septima"):
+            return jsonify({"error": "Categoría inválida"})
+        # Buscar solo en torneo Apertura y temporada activa
+        torneo_apertura = Torneo.query.join(Temporada).filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
+        if not torneo_apertura:
+            return jsonify({"error": "No hay torneo Apertura activo"})
+        partido = Partido.query.filter_by(id=cruce_id, torneo_id=torneo_apertura.id).first()
+        if not partido:
+            print(f"[DEBUG] info_cruce_playoff_inferiores: Partido id={cruce_id} no encontrado o no es de Apertura")
+            return jsonify({"error": "Partido no encontrado"})
+        print(f"[DEBUG] info_cruce_playoff_inferiores: id={partido.id}, jugado={partido.jugado}, local={partido.equipo_local.club.nombre}, visitante={partido.equipo_visitante.club.nombre}")
+        info = {
+            "local_id": partido.equipo_local.club_id,
+            "visitante_id": partido.equipo_visitante.club_id,
+            "local_nombre": partido.equipo_local.club.nombre,
+            "visitante_nombre": partido.equipo_visitante.club.nombre,
+            categoria: {
+                "id": partido.id,
+                "jugado": partido.jugado,
+                "local": partido.equipo_local.id,
+                "visitante": partido.equipo_visitante.id
+            }
+        }
+        return jsonify(info)
+    except Exception as e:
+        print("ERROR info_cruce_playoff_inferiores:", e)
+        return jsonify({"error": "Error interno"})
+@views.route("/api/cruces_playoff_inferiores/<int:fase_id>/<categoria>/<ida_vuelta>")
+def cruces_playoff_inferiores(fase_id, categoria, ida_vuelta):
+    """
+    Devuelve los cruces de playoff para una fase, categoría e ida/vuelta específica (inferiores)
+    """
+    try:
+        categoria = categoria.lower().strip()
+        if categoria not in ("quinta", "sexta", "septima"):
+            return jsonify([])
+        ida_vuelta = ida_vuelta.lower() if isinstance(ida_vuelta, str) else ida_vuelta
+        es_ida = ida_vuelta == "ida" or ida_vuelta is True or ida_vuelta == 1
+        jornada = 1 if es_ida else 2
+        torneo_apertura = Torneo.query.join(Temporada).filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
+        if not torneo_apertura:
+            return jsonify([])
+        partidos = (
+            Partido.query
+            .filter_by(fase_id=fase_id, categoria=categoria, jornada=jornada, torneo_id=torneo_apertura.id)
+            .all()
+        )
+        print(f"[DEBUG] Playoff: fase_id={fase_id}, categoria={categoria}, jornada={jornada}")
+        for p in partidos:
+            print(f"[DEBUG] Partido id={p.id}, jugado={p.jugado}, local={p.equipo_local.club.nombre}, visitante={p.equipo_visitante.club.nombre}")
+        partidos_pendientes = [p for p in partidos if not p.jugado]
+        print(f"[DEBUG] Total partidos pendientes: {len(partidos_pendientes)}")
+        resultado = []
+        for p in partidos_pendientes:
+            resultado.append({
+                "id": p.id,
+                "texto": f"{p.equipo_local.club.nombre} vs {p.equipo_visitante.club.nombre}"
+            })
+        return jsonify(resultado)
+    except Exception as e:
+        print("ERROR cruces_playoff_inferiores:", e)
+        return jsonify([])
+
+@views.route('/playoff/chequeo_resultados_inferiores')
+@login_required
+def chequeo_resultados_playoff_inferiores():
+    """
+    Visualiza todos los partidos de playoff de INFERIORES con resultados cargados
+    """
+    if current_user.rol != 'administrador':
+        return "Acceso denegado", 403
+    try:
+        fases = db.session.query(Fase).filter(
+            Fase.partidos.any()
+        ).all()
+        partidos_por_fase = {}
+        for fase in fases:
+            partidos = Partido.query.filter_by(
+                fase_id=fase.id,
+                jugado=True
+            ).filter(Partido.categoria.in_(['quinta', 'sexta', 'septima'])).options(
+                joinedload(Partido.equipo_local).joinedload(Equipo.club),
+                joinedload(Partido.equipo_visitante).joinedload(Equipo.club),
+                joinedload(Partido.estadisticas_jugadores).joinedload(EstadoJugadorPartido.jugador)
+            ).all()
+            if partidos:
+                datos_partidos = []
+                for partido in partidos:
+                    stats = {}
+                    for stat in partido.estadisticas_jugadores:
+                        stats[stat.jugador.numero_carnet] = {
+                            'nombre': f"{stat.jugador.nombre} {stat.jugador.apellido}",
+                            'goles': stat.cant_goles,
+                            'amarillas': stat.tarjetas_amarillas,
+                            'rojas': stat.tarjetas_rojas
+                        }
+                    datos_partidos.append({
+                        'id': partido.id,
+                        'fecha': partido.fecha_partido,
+                        'hora': partido.hora_partido,
+                        'jornada': partido.jornada,
+                        'categoria': partido.categoria,
+                        'equipo_local': {
+                            'nombre': partido.equipo_local.club.nombre,
+                            'id': partido.equipo_local_id
+                        },
+                        'equipo_visitante': {
+                            'nombre': partido.equipo_visitante.club.nombre,
+                            'id': partido.equipo_visitante_id
+                        },
+                        'goles_local': partido.goles_local,
+                        'goles_visitante': partido.goles_visitante,
+                        'estadisticas': stats
+                    })
+                clave_fase = f"{fase.torneo.nombre} - {fase.nombre}"
+                if clave_fase not in partidos_por_fase:
+                    partidos_por_fase[clave_fase] = {
+                        'fase_id': fase.id,
+                        'fase_nombre': fase.nombre,
+                        'torneo': fase.torneo.nombre,
+                        'ida_vuelta': fase.ida_vuelta,
+                        'partidos': []
+                    }
+                partidos_por_fase[clave_fase]['partidos'].extend(datos_partidos)
+        return render_template(
+            'plantillasAdmin/chequeo_resultado_playoff_inferiores.html',
+            usuario=current_user,
+            partidos_por_fase=partidos_por_fase
+        )
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
+@views.route('/playoff/partidos_inferiores', methods=['GET'])
+def vista_partidos_playoff_inferiores():
+    from app.models.models import Torneo
+    torneos = Torneo.query.order_by(Torneo.id.desc()).all()
+    fases_list = Fase.query.filter(Fase.nombre.in_([
+        "Cuartos", "Semifinal", "Final", "Finalísima"
+    ])).order_by(Fase.orden).all()
+    fases_dict = {}
+    for fase in fases_list:
+        if fase.nombre not in fases_dict:
+            fases_dict[fase.nombre] = fase
+    fases = list(fases_dict.values())
+    partidos = (
+        Partido.query
+        .join(Fase)
+        .join(Torneo, Partido.torneo_id == Torneo.id)
+        .filter(Fase.nombre.in_([
+            "Cuartos", "Semifinal", "Final", "Finalísima"
+        ]))
+        .filter(Partido.categoria.in_(['quinta', 'sexta', 'septima']))
+        .order_by(Torneo.id.desc(), Fase.orden, Partido.jornada)
+        .all()
+    )
+    return render_template(
+        "plantillasAdmin/ver_partidos_playoff_inferiores.html",
+        torneos=torneos,
+        fases=fases,
+        partidos=partidos
+    )
+
 
 # ====================================================
 # 2) CRUCES PLAYOFF MAYORES (NUEVO)
@@ -1846,12 +2030,26 @@ def cargar_estadisticas_inferiores():
         .order_by(Partido.jornada)
         .all()
     )
-
     jornadas = [j[0] for j in jornadas]
+
+    # Obtener fases de playoff que tengan partidos cargados
+    fases_playoff = (
+        Fase.query
+        .join(Torneo)
+        .join(Temporada)
+        .filter(
+            Temporada.activa == True,
+            Torneo.nombre == "Apertura",
+            Fase.nombre.in_(["Cuartos", "Semifinal", "Final", "Finalísima"])
+        )
+        .order_by(Fase.orden)
+        .all()
+    )
 
     return render_template(
         'plantillasAdmin/cargar_estadisticas_inferiores.html',
-        jornadas=jornadas
+        jornadas=jornadas,
+        fases_playoff=fases_playoff
     )
 
 
@@ -1860,12 +2058,36 @@ def cargar_estadisticas_inferiores():
 # ====================================================
 @views.route("/api/cruces_por_jornada_inferiores/<int:jornada>")
 def cruces_por_jornada_inferiores(jornada):
-    categorias = ["quinta", "sexta", "septima"]
 
-    partidos = Partido.query.filter(
-        Partido.jornada == jornada,
-        db.func.lower(Partido.categoria).in_(categorias)
-    ).all()
+
+    from sqlalchemy import or_
+    categorias = ["quinta", "sexta", "septima"]
+    torneo_apertura = Torneo.query.filter_by(nombre="Apertura").first()
+    # Buscar id de fase regular para el torneo apertura
+    fase_regular = Fase.query.filter_by(nombre="Regular", torneo_id=torneo_apertura.id).first()
+
+    if fase_regular is not None:
+        partidos = (
+            Partido.query
+            .filter(
+                Partido.jornada == jornada,
+                db.func.lower(Partido.categoria).in_(categorias),
+                Partido.torneo_id == torneo_apertura.id,
+                or_(Partido.fase_id == None, Partido.fase_id == fase_regular.id)
+            )
+            .all()
+        )
+    else:
+        partidos = (
+            Partido.query
+            .filter(
+                Partido.jornada == jornada,
+                db.func.lower(Partido.categoria).in_(categorias),
+                Partido.torneo_id == torneo_apertura.id,
+                Partido.fase_id == None
+            )
+            .all()
+        )
 
     print("Jornada seleccionada:", jornada)
     print("Partidos encontrados:", [p.id for p in partidos])
@@ -1896,15 +2118,29 @@ def cruces_por_jornada_inferiores(jornada):
 
     respuesta = []
     for c in cruces.values():
-        id_repr = c["id_quinta"] or c["id_sexta"] or c["id_septima"]
-        respuesta.append({
-            "id": id_repr,
-            "local": c["local"],
-            "visitante": c["visitante"],
-            "id_quinta": c["id_quinta"],
-            "id_sexta": c["id_sexta"],
-            "id_septima": c["id_septima"]
-        })
+        ids = [c["id_quinta"], c["id_sexta"], c["id_septima"]]
+        # Buscar si hay al menos un partido no jugado en este cruce
+        partidos_cruce = [pid for pid in ids if pid]
+        partidos_objs = Partido.query.filter(Partido.id.in_(partidos_cruce)).all() if partidos_cruce else []
+        pendientes = [p for p in partidos_objs if not p.jugado]
+        if pendientes:
+            # Solo mostrar cruces con al menos un partido pendiente
+            id_repr = None
+            # Elegir como id el primer partido pendiente
+            for cat in ["id_quinta", "id_sexta", "id_septima"]:
+                if c[cat] and any(p.id == c[cat] and not p.jugado for p in partidos_objs):
+                    id_repr = c[cat]
+                    break
+            if not id_repr:
+                id_repr = pendientes[0].id
+            respuesta.append({
+                "id": id_repr,
+                "local": c["local"],
+                "visitante": c["visitante"],
+                "id_quinta": c["id_quinta"],
+                "id_sexta": c["id_sexta"],
+                "id_septima": c["id_septima"]
+            })
 
     return jsonify(respuesta)
 
@@ -1915,14 +2151,30 @@ def cruces_por_jornada_inferiores(jornada):
 @views.route("/api/info_cruce_inferiores/<int:id_representativo>")
 def info_cruce_inferiores(id_representativo):
     p = Partido.query.get_or_404(id_representativo)
+    # Buscar todos los partidos de esa jornada y esos clubes para las 3 categorías
+    partidos = Partido.query.filter(
+        Partido.jornada == p.jornada,
+        Partido.equipo_local.has(club_id=p.equipo_local.club.id),
+        Partido.equipo_visitante.has(club_id=p.equipo_visitante.club.id),
+        db.func.lower(Partido.categoria).in_(["quinta", "sexta", "septima"])
+    ).all()
 
-    return jsonify({
+    info = {
         "jornada": p.jornada,
         "local_id": p.equipo_local.club.id if p.equipo_local and p.equipo_local.club else None,
         "visitante_id": p.equipo_visitante.club.id if p.equipo_visitante and p.equipo_visitante.club else None,
         "local_nombre": p.equipo_local.club.nombre if p.equipo_local and p.equipo_local.club else "Desconocido",
         "visitante_nombre": p.equipo_visitante.club.nombre if p.equipo_visitante and p.equipo_visitante.club else "Desconocido"
-    })
+    }
+    for partido in partidos:
+        cat = partido.categoria.lower()
+        info[cat] = {
+            "id": partido.id,
+            "jugado": partido.jugado,
+            "local": partido.equipo_local.id if partido.equipo_local else None,
+            "visitante": partido.equipo_visitante.id if partido.equipo_visitante else None
+        }
+    return jsonify(info)
 
 
 # ====================================================
