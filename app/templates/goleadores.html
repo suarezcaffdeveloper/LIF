@@ -42,36 +42,64 @@ body {
 /* ============================================================
    LAYOUT PRINCIPAL
    ============================================================ */
+
 .main-grid {
     max-width: 1300px;
     margin: 40px auto;
     display: grid;
     grid-template-columns: 2.4fr 1fr;
-    gap: 28px;
-    padding: 0 20px;
+    gap: 18px; /* antes 28px, reduce separación entre columnas */
+    padding: 0 6px; /* antes 20px, reduce margen horizontal */
     align-items: start;
 }
 
 @media (max-width: 900px) {
     .main-grid {
         grid-template-columns: 1fr;
-        padding: 0 8px;
+        padding: 0;
     }
+    .left-card, .right-column, .card-panel {
+        border-radius: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        border-left: none !important;
+        border-right: none !important;
+    }
+    .table-goleadores, .panel-table {
+        width: 100vw !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+    .table-goleadores td, .panel-table td {
+        padding-left: 4px !important;
+        padding-right: 4px !important;
+        font-size: 0.98rem !important;
+    }
+    body {
+        overflow-x: hidden;
+    }
+}
 }
 
 /* ============================================================
    LEFT CARD (GOLEADORES)
    ============================================================ */
+
 .left-card {
     background: #fff;
     border-radius: 22px;
-    padding: 28px 28px 22px 28px;
+    padding: 18px 8px 14px 8px; /* reduce padding horizontal y vertical */
     box-shadow: 0 8px 32px rgba(31,41,55,0.10);
     border: 1.5px solid #e0e7ef;
     min-height: 520px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 12px; /* menos espacio entre elementos internos */
     transition: box-shadow 0.2s;
 }
 
@@ -94,10 +122,10 @@ body {
    ============================================================ */
 .table-goleadores-wrapper {
     flex: 1;
-}
 
 
-.table-goleadores {
+
+
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -107,6 +135,29 @@ body {
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(31,41,55,0.04);
+        margin-left: auto;
+        margin-right: auto;
+}
+@media (min-width: 901px) {
+    .table-goleadores-wrapper {
+        padding: 18px 22px 14px 22px;
+        box-sizing: border-box;
+    }
+    .table-goleadores {
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+    .panel-table thead th {
+        background: #e3f0fa !important;
+        color: #1f2937 !important;
+        padding: 14px 12px !important;
+        font-size: 0.82rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        text-align: left !important;
+        border: none !important;
+    }
+    }
 }
 
 /* ENCABEZADO */
@@ -135,8 +186,9 @@ body {
 }
 
 
+
 .table-goleadores td {
-    padding: 12px 10px;
+    padding: 8px 2px; /* aún menos padding horizontal */
     border-bottom: 1px solid #e5e7eb;
     vertical-align: middle;
     font-size: 1.01rem;
@@ -225,7 +277,6 @@ body {
 
 /* TABLAS INTERNAS */
 
-.panel-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -256,10 +307,14 @@ body {
 }
 
 
-.panel-table td {
+ .panel-table td {
     padding: 10px 8px;
     border-bottom: 1px solid #e5e7eb;
     font-size: 1.01em;
+    text-align: left;
+}
+.panel-table td.count {
+    text-align: center !important;
 }
 
 
