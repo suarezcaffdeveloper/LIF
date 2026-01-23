@@ -15,6 +15,24 @@ h1 {
     font-weight: 700;
 }
 
+body {
+    font-family: 'Inter', 'Roboto', Arial, sans-serif;
+    background: #f4f6fb;
+    color: #23272f;
+}
+
+h1 {
+    text-align: center;
+    margin: 38px 0 18px 0;
+    color: #1f2937;
+    font-weight: 900;
+    font-size: 2.1rem;
+    font-family: 'Inter', 'Roboto', Arial, sans-serif;
+    letter-spacing: 0.01em;
+    background: none;
+    text-shadow: 0 1px 0 #fff, 0 2px 8px rgba(31,41,55,0.04);
+}
+
 /* ======== LAYOUT PRINCIPAL ======== */
 .tabla-layout {
     max-width: 1300px;
@@ -30,6 +48,24 @@ h1 {
     }
 }
 
+
+.tabla-layout {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2.8fr 1.15fr;
+    gap: 32px;
+    padding: 0 24px;
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .tabla-layout {
+        grid-template-columns: 1fr;
+        padding: 0 8px;
+    }
+}
+
 /* ======== TABLA ======== */
 .table-container {
     background: white;
@@ -38,10 +74,40 @@ h1 {
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
 }
 
+.table-container {
+    background: #fff;
+    border-radius: 22px;
+    padding: 32px 18px 26px 18px;
+    box-shadow: 0 8px 32px rgba(31,41,55,0.10);
+    border: 1.5px solid #e0e7ef;
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    transition: box-shadow 0.2s;
+    width: 100%;
+    max-width: 100%;
+}
+.table-container:hover {
+    box-shadow: 0 12px 36px rgba(31,41,55,0.13);
+}
+
 table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: auto;
+    font-size: 1rem;
+    background: #f8fafc;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(31,41,55,0.04);
 }
 
 thead th {
@@ -53,6 +119,17 @@ thead th {
     font-size: 0.85rem;
 }
 
+thead th {
+    background: #e3f0fa;
+    color: #1f2937;
+    padding: 14px 12px;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    border: none;
+}
+
 tbody tr {
     background: #ffffff;
     transition: 0.2s ease;
@@ -62,9 +139,30 @@ tbody tr:hover {
     background: #f1f1f1;
 }
 
+tbody tr {
+    background: #fff;
+    transition: background 0.18s;
+}
+tbody tr:nth-child(even) {
+    background: #f3f6fa;
+}
+tbody tr:hover {
+    background: #e0e7ef;
+}
+
 td {
     padding: 12px 10px;
     font-size: 0.95rem;
+}
+
+td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #ececec;
+    vertical-align: middle;
+    font-size: 1.01rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .fila-clasificado {
@@ -73,6 +171,17 @@ td {
 
 .fila-eliminado {
     box-shadow: 0 0 0 2px #f5d0d0 inset;
+}
+
+.fila-clasificado {
+    background: #e8fbe8 !important;
+    border-left: 4px solid #7be87b;
+    box-shadow: none;
+}
+.fila-eliminado {
+    background: #fdeaea !important;
+    border-left: 4px solid #f3bebe;
+    box-shadow: none;
 }
 
 /* Escudo + Nombre */
@@ -89,6 +198,24 @@ td:first-child img {
     object-fit: contain;
 }
 
+td:first-child {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #1d3557;
+    letter-spacing: 0.01em;
+    font-size: 1.04em;
+}
+td:first-child img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 1.5px solid #e0e7ef;
+    background: #fff;
+}
+
 /* ======== ICONOS DE RACHA (G/E/P) ======== */
 .racha {
     display: flex;
@@ -101,6 +228,20 @@ td:first-child img {
     border-radius: 50%;
 }
 
+.G { background: #18c964; }
+.E { background: #f5a623; }
+.P { background: #d63031; }
+
+.racha {
+    display: flex;
+    gap: 4px;
+}
+.circulo {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(31,41,55,0.10);
+}
 .G { background: #18c964; }
 .E { background: #f5a623; }
 .P { background: #d63031; }
@@ -126,6 +267,37 @@ td:first-child img {
     color: #1f2d3d;
 }
 
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    min-width: 320px;
+    max-width: 420px;
+}
+.panel-box {
+    background: #fff;
+    border-radius: 18px;
+    padding: 24px 22px 18px 22px;
+    box-shadow: 0 8px 32px rgba(31,41,55,0.10);
+    border: 1.5px solid #e0e7ef;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    transition: box-shadow 0.2s;
+}
+.panel-box:hover {
+    box-shadow: 0 12px 36px rgba(31,41,55,0.13);
+}
+.panel-box h3 {
+    margin-bottom: 14px;
+    font-size: 1.13rem;
+    font-weight: 800;
+    color: #1f2937;
+    letter-spacing: 0.01em;
+    background: none;
+    font-family: 'Inter', 'Roboto', Arial, sans-serif;
+}
+
 .stat-item {
     margin-bottom: 12px;
     border-bottom: 1px solid #eee;
@@ -138,6 +310,21 @@ td:first-child img {
 
 .stat-item strong {
     color: #333;
+}
+
+.stat-item {
+    margin-bottom: 12px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    font-family: 'Inter', 'Roboto', Arial, sans-serif;
+    font-size: 1.01em;
+}
+.stat-item:last-child {
+    border-bottom: none;
+}
+.stat-item strong {
+    color: #1f2937;
+    font-weight: 700;
 }
 
 .cruce {
@@ -155,6 +342,25 @@ td:first-child img {
 .cruce strong {
     color: #1f2d3d;
 }
+
+.cruce {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 8px;
+    border-bottom: 1px solid #ededed;
+    font-size: 1.01em;
+    font-family: 'Inter', 'Roboto', Arial, sans-serif;
+}
+.cruce:last-child {
+    border-bottom: none;
+}
+.cruce strong {
+    color: #1f2937;
+    font-weight: 700;
+}
+</style>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </style>
 {% endblock %}
 

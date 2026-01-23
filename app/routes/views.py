@@ -172,8 +172,28 @@ def fixture(bloque, categoria=None):
 
     partidos = query.order_by(Partido.jornada, Partido.fecha_partido).all()
     # Agrupar partidos por jornada
+
     fechas_partidos = {}
     for partido in partidos:
+        # Obtener goleadores local
+        goleadores_local = []
+        goleadores_visitante = []
+        for est in partido.estadisticas_jugadores:
+            if est.cant_goles > 0:
+                nombre_jugador = f"{est.jugador.nombre} {est.jugador.apellido}"
+                if est.jugador.club_id == partido.equipo_local.club_id:
+                    goleadores_local.append({
+                        "nombre": nombre_jugador,
+                        "goles": est.cant_goles
+                    })
+                elif est.jugador.club_id == partido.equipo_visitante.club_id:
+                    goleadores_visitante.append({
+                        "nombre": nombre_jugador,
+                        "goles": est.cant_goles
+                    })
+        # Adjuntar los goleadores al partido
+        partido.goleadores_local = goleadores_local
+        partido.goleadores_visitante = goleadores_visitante
         fecha_key = f"Jornada {partido.jornada}"
         fechas_partidos.setdefault(fecha_key, []).append(partido)
 
