@@ -6,6 +6,162 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+                /* ======== HAMBURGER MENU ======== */
+                .navbar-toggle {
+                    display: none;
+                    background: none;
+                    border: none;
+                    outline: none;
+                    cursor: pointer;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    transition: background 0.2s;
+                }
+                .navbar-toggle:focus, .navbar-toggle:hover {
+                    background: rgba(75,137,220,0.12);
+                }
+                .navbar-toggle .hamburger {
+                    width: 28px;
+                    height: 28px;
+                    display: block;
+                    position: relative;
+                }
+                .navbar-toggle .hamburger span {
+                    display: block;
+                    position: absolute;
+                    height: 3px;
+                    width: 100%;
+                    background: linear-gradient(90deg, #4b89dc, #3a6ea5);
+                    border-radius: 2px;
+                    opacity: 1;
+                    left: 0;
+                    transition: all 0.3s cubic-bezier(.4,0,.2,1);
+                }
+                .navbar-toggle .hamburger span:nth-child(1) { top: 6px; }
+                .navbar-toggle .hamburger span:nth-child(2) { top: 13px; }
+                .navbar-toggle .hamburger span:nth-child(3) { top: 20px; }
+
+                @media (max-width: 600px) {
+                    .navbar-links {
+                        display: none !important;
+                    }
+                    .navbar-toggle {
+                        display: block;
+                    }
+                    .navbar-dropdown {
+                        display: none;
+                        position: absolute;
+                        top: 60px;
+                        right: 20px;
+                        background: #fff;
+                        box-shadow: 0 8px 20px rgba(75,137,220,0.10);
+                        border-radius: 12px;
+                        min-width: 260px;
+                        z-index: 999;
+                        padding: 18px 0 10px 0;
+                        animation: fadeIn 0.3s cubic-bezier(.4,0,.2,1);
+                    }
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(-10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    .navbar-dropdown a, .navbar-dropdown .dropdown-group > button {
+                        color: #23272f !important;
+                        background: none;
+                        padding: 12px 24px;
+                        display: block;
+                        font-weight: 600;
+                        font-size: 1.08rem;
+                        border: none;
+                        text-align: left;
+                        width: 100%;
+                        border-radius: 8px;
+                        transition: background 0.18s, color 0.18s, padding 0.18s;
+                    }
+                    .navbar-dropdown a:hover, .navbar-dropdown .dropdown-group > button:hover {
+                        background: linear-gradient(90deg, #e3eaf7 0%, #f2f6fb 100%);
+                        color: #3a6ea5;
+                        padding-left: 32px;
+                    }
+                    .navbar-dropdown .dropdown-group > button {
+                        color: #23272f;
+                        font-weight: 700;
+                        padding-left: 32px;
+                    }
+                    .navbar-dropdown .dropdown-group > button:hover {
+                        background: linear-gradient(90deg, #e3eaf7 0%, #f2f6fb 100%);
+                        color: #3a6ea5;
+                        padding-left: 40px;
+                    }
+                    .navbar-dropdown .dropdown-group {
+                        margin-bottom: 2px;
+                    }
+                    .navbar-dropdown .dropdown-options {
+                        display: none;
+                        background: #f8fbff;
+                        border-radius: 8px;
+                        margin: 0 12px 8px 12px;
+                        box-shadow: 0 2px 8px rgba(75,137,220,0.07);
+                        padding: 6px 0;
+                        animation: slideDown 0.3s cubic-bezier(.4,0,.2,1);
+                        overflow: hidden;
+                    }
+                    @keyframes slideDown {
+                        from { opacity: 0; max-height: 0; transform: translateY(-8px); }
+                        to { opacity: 1; max-height: 400px; transform: translateY(0); }
+                    }
+                    .navbar-dropdown .dropdown-options a {
+                        padding: 10px 44px;
+                        font-size: 0.98rem;
+                        font-weight: 500;
+                        border-radius: 6px;
+                        color: #23272f;
+                        transition: background 0.18s, color 0.18s, padding 0.18s;
+                    }
+                    .navbar-dropdown .dropdown-options a:hover {
+                        background: linear-gradient(90deg, #e3eaf7 0%, #dbe6fa 100%);
+                        color: #3a6ea5;
+                        padding-left: 56px;
+                    }
+                    .navbar-dropdown .dropdown-group {
+                        position: relative;
+                    }
+                    .navbar-dropdown .dropdown-options {
+                        display: none;
+                        background: #f8fbff;
+                        border-radius: 8px;
+                        margin: 0 12px 8px 12px;
+                        box-shadow: 0 2px 8px rgba(75,137,220,0.07);
+                        padding: 6px 0;
+                        animation: slideDown 0.3s cubic-bezier(.4,0,.2,1);
+                    }
+                    @keyframes slideDown {
+                        from { opacity: 0; transform: translateY(-8px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    .navbar-dropdown .dropdown-options a {
+                        padding: 10px 32px;
+                        font-size: 0.98rem;
+                        font-weight: 500;
+                        border-radius: 6px;
+                        transition: background 0.2s, color 0.2s;
+                    }
+                    .navbar-dropdown .dropdown-options a:hover {
+                        background: linear-gradient(90deg, #e3eaf7 0%, #dbe6fa 100%);
+                        color: #3a6ea5;
+                    }
+                }
+                @media (min-width: 601px) {
+                    .navbar-toggle {
+                        display: none !important;
+                    }
+                    .navbar-dropdown {
+                        display: none !important;
+                    }
+                    .navbar-links {
+                        display: flex !important;
+                    }
+                }
         /* ======== NAVBAR (MODERNO) ======== */
         .navbar {
             background: linear-gradient(90deg, #4b89dc, #3a6ea5);
@@ -120,34 +276,35 @@
 <body>
 
     <!-- NAVBAR -->
-    <div class="navbar">
+    <nav class="navbar">
         <div class="navbar-logo">
             <img src="{{ url_for('static', filename='escudos/logolif.png') }}" alt="Logo LIF">
             <span>LIF</span>
         </div>
-
+        <button class="navbar-toggle" onclick="toggleNavbar()">
+            <span class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </button>
         <div class="navbar-links">
             <a href="/">Inicio</a>
-
             <div class="dropdown">
                 <button class="dropbtn">Fixture Mayores</button>
                 <div class="dropdown-content">
                     <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
                     <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
-
                 </div>
             </div>
-
             <div class="dropdown">
                 <button class="dropbtn">Fixture Inferiores</button>
                 <div class="dropdown-content">
                     <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
                     <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
                     <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
-
                 </div>
             </div>
-
             <div class="dropdown">
                 <button class="dropbtn">Goleadores</button>
                 <div class="dropdown-content">
@@ -158,7 +315,6 @@
                     <a href="/goleadores/septima">Séptima</a>
                 </div>
             </div>
-
             <div class="dropdown">
                 <button class="dropbtn">Tabla de Posiciones</button>
                 <div class="dropdown-content">
@@ -169,25 +325,110 @@
                     <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
                 </div>
             </div>
-
-            <div class="navbar-links">
-                {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('views.logout') }}">Log-Out</a>
-
-                    {% if current_user.rol == 'administrador' %}
-                        <a href="{{ url_for('views.adminview') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Admin</a>
-                    {% endif %}
-
-                    {% if current_user.rol == 'periodista' %}
-                        <a href="{{ url_for('views.panelperiodista') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Periodista</a>
-                    {% endif %}
-
-                {% else %}
-                    <a href="{{ url_for('views.login') }}">Log-In</a>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('views.logout') }}">Log-Out</a>
+                {% if current_user.rol == 'administrador' %}
+                    <a href="{{ url_for('views.adminview') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Admin</a>
                 {% endif %}
-            </div>
+                {% if current_user.rol == 'periodista' %}
+                    <a href="{{ url_for('views.panelperiodista') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Periodista</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('views.login') }}">Log-In</a>
+            {% endif %}
         </div>
-    </div>
+        <div class="navbar-dropdown" id="navbarDropdown" style="display:none;">
+            <a href="/">Inicio</a>
+            <div class="dropdown-group">
+                <button onclick="toggleDropdownOptions('mayores')">Fixture Mayores</button>
+                <div class="dropdown-options" id="dropdown-mayores">
+                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Primera') }}">Primera</a>
+                    <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
+                </div>
+            </div>
+            <div class="dropdown-group">
+                <button onclick="toggleDropdownOptions('inferiores')">Fixture Inferiores</button>
+                <div class="dropdown-options" id="dropdown-inferiores">
+                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
+                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Sexta') }}">Sexta</a>
+                    <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
+                </div>
+            </div>
+            <div class="dropdown-group">
+                <button onclick="toggleDropdownOptions('goleadores')">Goleadores</button>
+                <div class="dropdown-options" id="dropdown-goleadores">
+                    <a href="/goleadores/primera">Primera</a>
+                    <a href="/goleadores/reserva">Reserva</a>
+                    <a href="/goleadores/quinta">Quinta</a>
+                    <a href="/goleadores/sexta">Sexta</a>
+                    <a href="/goleadores/septima">Séptima</a>
+                </div>
+            </div>
+            <div class="dropdown-group">
+                <button onclick="toggleDropdownOptions('tabla')">Tabla de Posiciones</button>
+                <div class="dropdown-options" id="dropdown-tabla">
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Quinta') }}">Quinta</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Sexta') }}">Sexta</a>
+                    <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
+                </div>
+            </div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('views.logout') }}">Log-Out</a>
+                {% if current_user.rol == 'administrador' %}
+                    <a href="{{ url_for('views.adminview') }}">Panel Admin</a>
+                {% endif %}
+                {% if current_user.rol == 'periodista' %}
+                    <a href="{{ url_for('views.panelperiodista') }}">Panel Periodista</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('views.login') }}">Log-In</a>
+            {% endif %}
+                    
+        </div>
+    </nav>
+    <script>
+    function toggleNavbar() {
+        var dropdown = document.getElementById('navbarDropdown');
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            dropdown.style.display = 'block';
+        } else {
+            dropdown.style.display = 'none';
+        }
+        // Close all nested dropdowns when opening main menu
+        var groups = document.querySelectorAll('.dropdown-options');
+        groups.forEach(function(opt){ opt.style.display = 'none'; });
+    }
+
+    function toggleDropdownOptions(group) {
+        var el = document.getElementById('dropdown-' + group);
+        if (el.style.display === 'block') {
+            el.style.display = 'none';
+        } else {
+            // Hide others
+            var groups = document.querySelectorAll('.dropdown-options');
+            groups.forEach(function(opt){ opt.style.display = 'none'; });
+            el.style.display = 'block';
+        }
+    }
+
+    window.addEventListener('resize', function() {
+        if(window.innerWidth > 900){
+            document.getElementById('navbarDropdown').style.display = 'none';
+        }
+    });
+    // Hide dropdown if click outside
+    document.addEventListener('click', function(e) {
+        var nav = document.getElementById('navbarDropdown');
+        var toggle = document.querySelector('.navbar-toggle');
+        if (nav.style.display === 'block' && !nav.contains(e.target) && !toggle.contains(e.target)) {
+            nav.style.display = 'none';
+            var groups = document.querySelectorAll('.dropdown-options');
+            groups.forEach(function(opt){ opt.style.display = 'none'; });
+        }
+    });
+    </script>
 
     <!-- BLOQUE DE CONTENIDO -->
     <div class="main-container">

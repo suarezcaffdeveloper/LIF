@@ -249,15 +249,35 @@ td:first-child img {
 /* ======== PANEL LATERAL ======== */
 .side-panel {
     display: flex;
-    flex-direction: column;
-    gap: 25px;
+    flex-direction: row;
+    gap: 18px;
+    width: 100%;
+    justify-content: center;
 }
+@media (max-width: 600px) {
+    .side-panel {
+        flex-direction: row;
+        gap: 12px;
+        width: 100%;
+    }
+    .panel-box {
+        min-width: 0;
+        max-width: 100%;
+        flex: 1 1 50%;
+        margin: 0;
+        padding: 12px 8px 10px 8px;
+    }
+}
+
 
 .panel-box {
     background: white;
     border-radius: 14px;
     padding: 20px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    min-width: 0;
+    max-width: 100%;
+    flex: 1 1 50%;
 }
 
 .panel-box h3 {
