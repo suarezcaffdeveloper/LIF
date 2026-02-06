@@ -113,6 +113,35 @@
     .login-link:hover {
       color: #146c43;
     }
+    /* Responsive form width for mobile */
+    .register-form-responsive {
+      width: 400px;
+      max-width: 100vw;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    @media (max-width: 576px) {
+      .register-form-responsive {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+
+        margin: 0 !important;
+        border-radius: 0 !important;
+
+        padding: 2rem 1.25rem !important;
+
+        box-shadow: none !important;
+      }
+       body {
+        align-items: flex-start;   /* deja de centrar vertical */
+        padding: 0;
+      }
+      form.register-form-responsive {
+        border-radius: 16px;
+        margin: 0;
+      }
+    }
 
   </style>
 </head>
@@ -169,35 +198,6 @@
 
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <style>
-    /* Responsive form width for mobile */
-    .register-form-responsive {
-      width: 400px;
-      max-width: 100vw;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    @media (max-width: 576px) {
-      .register-form-responsive {
-        width: calc(100vw - 32px);
-        max-width: calc(100vw - 32px);
-        min-width: 0;
-        border-radius: 16px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-        padding: 2rem 0.5rem;
-        margin: 0 auto;
-      }
-      body {
-        padding: 0;
-        margin: 0;
-      }
-      form.register-form-responsive {
-        border-radius: 16px;
-        margin: 0;
-      }
-    }
-  </style>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {

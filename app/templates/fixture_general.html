@@ -5,202 +5,198 @@
 {% block extra_styles %}
 <style>
 
-
-    /* ======== TÍTULO ======== */
-    h1 {
-        text-align: center;
-        margin: 30px 0 18px;
-        color: #1f2937;
-        font-weight: 900;
-        font-size: 2.1rem;
-        font-family: 'Inter', 'Roboto', Arial, sans-serif;
-        letter-spacing: 0.01em;
-        background: none;
-        text-shadow: 0 1px 0 #fff, 0 2px 8px rgba(31,41,55,0.04);
-    }
-
-
-    /* ======== LAYOUT PRINCIPAL ======== */
-    .fixture-layout {
-        display: grid;
-        grid-template-columns: 1fr 2.2fr;
-        gap: 32px;
-        max-width: 1100px;
-        margin: 0 auto 32px auto;
-        align-items: flex-start;
-    }
-    @media (max-width: 900px) {
-        .fixture-layout {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* ======== TABS VERTICALES ======== */
-    .tabs-fixture {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        background: #f8fafc;
-        border-radius: 16px;
-        padding: 18px 0;
-        box-shadow: 0 2px 8px rgba(31,41,55,0.04);
-        border: 1.5px solid #e0e7ef;
-        min-width: 180px;
-        max-width: 260px;
-        position: fixed;
-        left: 0;
-        top: 140px;
-        margin-left: 0;
-        margin-right: 0;
-        z-index: 10;
-    }
-/* ======== CRUCES EN DOS COLUMNAS ======== */
-.cruces-main-card {
-    background: #f8fafc;
-    border-radius: 18px;
-    padding: 28px 28px 18px 28px;
-    margin: 32px auto 0 auto;
-    box-shadow: 0 4px 18px rgba(31,41,55,0.07);
-    border: 1.5px solid #e0e7ef;
-    max-width: 600px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.cruces-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(3, 1fr);
-    gap: 22px 32px;
-    margin: 0;
-    width: 100%;
-}
-.cruce-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 16px 10px 12px 10px;
-    box-shadow: 0 2px 8px rgba(31,41,55,0.07);
-    border: 1px solid #e0e7ef;
+/* ======== TÍTULO ======== */
+h1 {
     text-align: center;
-    font-family: 'Inter', 'Roboto', Arial, sans-serif;
-    font-size: 1.01em;
+    margin: 30px 0 20px;
     color: #1f2937;
+    font-weight: 900;
+    font-size: 2.1rem;
+    font-family: 'Inter', 'Roboto', Arial, sans-serif;
+}
+
+/* ======== LAYOUT ======== */
+.fixture-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    max-width: 1200px;
+    margin: 0 auto 40px;
+}
+
+@media (max-width: 900px) {
+    .fixture-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ======== TABS DESKTOP ======== */
+.tabs-fixture {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+    border-radius: 18px;
+    padding: 18px 0;
+    border: 1px solid #e2e8f0;
+}
+
+.tab-fixture {
+    background: none;
+    border: none;
+    padding: 12px 22px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 0 18px 18px 0;
+    transition: all 0.2s ease;
+    color: #1f2937;
+}
+
+.tab-fixture.active,
+.tab-fixture:hover {
+    background: #3a6ea5;
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .tabs-fixture {
+        display: none;
+    }
+}
+
+/* ======== SLIDER ======== */
+.fixture-slider {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ======== CARD JORNADA ======== */
+.fixture-card {
+    background: linear-gradient(180deg, #ffffff, #f8fafc);
+    border-radius: 22px;
+    border: 1px solid #e2e8f0;
+    box-shadow:
+        0 20px 40px rgba(31,41,55,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    max-width: 900px;
+    margin: 0 auto;
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: all 0.35s ease;
+}
+
+.fixture-card.active {
+    position: relative;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ======== HEADER JORNADA ======== */
+.fixture-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: linear-gradient(180deg, #f8fafc, #eef2f7);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* ======== FLECHAS MODERNAS ======== */
+.fixture-nav-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(31,41,55,0.12);
+    display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 0;
-    min-height: 90px;
-}
-.cruce-equipos {
-    font-weight: 700;
-    margin-bottom: 6px;
-}
-.cruce-resultado {
-    font-weight: 800;
+    font-size: 1.3rem;
+    font-weight: 900;
     color: #3a6ea5;
-    font-size: 1.08rem;
-    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
-.cruce-goleadores {
-    font-size: 0.95em;
+
+.fixture-nav-btn:hover {
+    background: #3a6ea5;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(58,110,165,0.35);
+}
+
+.fixture-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1f2937;
+}
+
+/* ======== GRID PARTIDOS ======== */
+.partidos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 24px;
+}
+
+@media (max-width: 768px) {
+    .partidos-grid {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+}
+
+/* ======== CARD PARTIDO ======== */
+.partido {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px 14px;
+    border: 1px solid #e5e7eb;
+    box-shadow:
+        0 6px 16px rgba(31,41,55,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.partido:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(31,41,55,0.12);
+}
+
+.equipo {
+    width: 42%;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.equipo img {
+    width: 42px;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.goleadores {
+    font-size: 0.8rem;
     color: #3a6ea5;
     margin-top: 4px;
+    line-height: 1.2;
 }
-    .tab-fixture {
-        background: none;
-        color: #1f2937;
-        border: none;
-        border-radius: 0 16px 16px 0;
-        padding: 12px 18px 12px 24px;
-        font-size: 1.01rem;
-        font-family: 'Inter', 'Roboto', Arial, sans-serif;
-        font-weight: 700;
-        cursor: pointer;
-        text-align: left;
-        transition: background 0.18s, color 0.18s;
-        outline: none;
-        margin-right: 0;
-    }
-    .tab-fixture.active, .tab-fixture:hover {
-        background: #3a6ea5;
-        color: #fff;
-    }
 
-    /* ======== CARD ÚNICA ======== */
-    .fixture-card {
-        background: #fff;
-        border-radius: 18px;
-        box-shadow: 0 8px 32px rgba(31,41,55,0.10);
-        border: 1.5px solid #e0e7ef;
-        margin-bottom: 0;
-        padding: 0 0 18px 0;
-        transition: box-shadow 0.2s;
-        min-width: 320px;
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .fixture-card:hover {
-        box-shadow: 0 12px 36px rgba(31,41,55,0.13);
-    }
-    .fixture-card h2 {
-        margin: 0;
-        padding: 18px 0 12px 0;
-        text-align: center;
-        font-size: 1.18rem;
-        font-weight: 800;
-        color: #1f2937;
-        border-bottom: 1px solid #e3e9f0;
-        background: none;
-        font-family: 'Inter', 'Roboto', Arial, sans-serif;
-    }
-
-    /* ======== PARTIDOS ======== */
-    .partidos-lista {
-        padding: 18px 24px 0 24px;
-        max-height: 520px;
-        overflow-y: auto;
-    }
-    .partido {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid #e8e8e8;
-    }
-    .partido:last-child {
-        border-bottom: none;
-    }
-    .equipo {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 45%;
-        text-align: center;
-        font-family: 'Inter', 'Roboto', Arial, sans-serif;
-    }
-    .equipo img {
-        width: 50px;
-        height: auto;
-        margin-bottom: 5px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-    }
-    .vs {
-        font-weight: 800;
-        color: #3a6ea5;
-        font-size: 1.08rem;
-        white-space: nowrap;
-        font-family: 'Inter', 'Roboto', Arial, sans-serif;
-    }
-    .goleadores-partido {
-        font-size: 0.95em;
-        color: #3a6ea5;
-        margin-top: 2px;
-        text-align: center;
-    }
+.vs {
+    font-weight: 900;
+    font-size: 1.15rem;
+    color: #3a6ea5;
+    white-space: nowrap;
+}
 
 </style>
 {% endblock %}
@@ -210,97 +206,110 @@
 <h1>{{ titulo }}</h1>
 
 {% if fechas_partidos %}
-<div class="fixture-layout" style="position:relative;">
+<div class="fixture-layout">
+
+    <!-- TABS DESKTOP -->
     <div class="tabs-fixture">
         {% for jornada, partidos in fechas_partidos.items() %}
-            <button class="tab-fixture{% if loop.first %} active{% endif %}" type="button" onclick="showFixture('{{ loop.index0 }}')">{{ jornada }}</button>
+            <button class="tab-fixture" onclick="showFixture({{ loop.index0 }})">
+                {{ jornada }}
+            </button>
         {% endfor %}
     </div>
-    <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+
+    <!-- SLIDER -->
+    <div class="fixture-slider">
         {% for jornada, partidos in fechas_partidos.items() %}
-        <div class="fixture-card" id="fixture-{{ loop.index0 }}" style="display: {% if loop.first %}block{% else %}none{% endif %};">
-            <h2>{{ jornada }}</h2>
-            <div class="partidos-lista">
+        <div class="fixture-card" data-index="{{ loop.index0 }}">
+
+            <div class="fixture-header">
+                <button class="fixture-nav-btn" onclick="prevFixture()">‹</button>
+                <h2>{{ jornada }}</h2>
+                <button class="fixture-nav-btn" onclick="nextFixture()">›</button>
+            </div>
+
+            <div class="partidos-grid">
                 {% for partido in partidos %}
                 <div class="partido">
+
                     <div class="equipo">
                         <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}">
-                        <span>{{ partido.equipo_local.club.nombre }}</span>
-                    </div>
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:80px;">
-                        {% if mostrar_resultados and partido.jugado %}
-                            <span class="vs">{{ partido.goles_local }} - {{ partido.goles_visitante }}</span>
-                            {% if partido.goleadores_local or partido.goleadores_visitante %}
-                                <div class="goleadores-partido">
-                                    {% if partido.goleadores_local %}
-                                        <span><b>{{ partido.equipo_local.club.nombre }}:</b>
-                                            {% for g in partido.goleadores_local %}
-                                                {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                        </span><br>
-                                    {% endif %}
-                                    {% if partido.goleadores_visitante %}
-                                        <span><b>{{ partido.equipo_visitante.club.nombre }}:</b>
-                                            {% for g in partido.goleadores_visitante %}
-                                                {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                        </span>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        {% else %}
-                            <span class="vs">vs</span>
+                        <div>{{ partido.equipo_local.club.nombre }}</div>
+                        {% if partido.goleadores_local %}
+                        <div class="goleadores">
+                            {% for g in partido.goleadores_local %}
+                                {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
                         {% endif %}
                     </div>
+
+                    <div class="vs">
+                        {% if mostrar_resultados and partido.jugado %}
+                            {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                        {% else %}
+                            vs
+                        {% endif %}
+                    </div>
+
                     <div class="equipo">
                         <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}">
-                        <span>{{ partido.equipo_visitante.club.nombre }}</span>
+                        <div>{{ partido.equipo_visitante.club.nombre }}</div>
+                        {% if partido.goleadores_visitante %}
+                        <div class="goleadores">
+                            {% for g in partido.goleadores_visitante %}
+                                {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
+
                 </div>
                 {% endfor %}
             </div>
-            {% if cruces %}
-            <div class="cruces-main-card">
-                <div class="cruces-grid">
-                    {% for cruce in cruces|slice(0,6) %}
-                        <div class="cruce-card">
-                            <div class="cruce-equipos">{{ cruce.equipo_a }} vs {{ cruce.equipo_b }}</div>
-                            {% if cruce.resultado %}
-                                <div class="cruce-resultado">{{ cruce.resultado }}</div>
-                            {% endif %}
-                            {% if cruce.goleadores %}
-                                <div class="cruce-goleadores">Goleadores: {{ cruce.goleadores|join(', ') }}</div>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
         </div>
         {% endfor %}
     </div>
 </div>
-{% else %}
-    <p class="text-center">Todavía no hay partidos cargados.</p>
 {% endif %}
 
 <script>
-function showFixture(idx) {
-    const tabs = document.querySelectorAll('.tab-fixture');
-    const cards = document.querySelectorAll('.fixture-card');
-    tabs.forEach((tab, i) => {
-        if (i == idx) {
-            tab.classList.add('active');
-            cards[i].style.display = 'block';
-        } else {
-            tab.classList.remove('active');
-            cards[i].style.display = 'none';
-        }
+const cards = document.querySelectorAll('.fixture-card');
+const tabs = document.querySelectorAll('.tab-fixture');
+let current = 0;
+
+function detectLastPlayed() {
+    let last = 0;
+    cards.forEach((card, i) => {
+        if (card.innerHTML.includes('-')) last = i;
     });
+    return last;
 }
+
+function showFixture(idx) {
+    cards.forEach((c, i) => {
+        c.classList.toggle('active', i === idx);
+    });
+    tabs.forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+    });
+    current = idx;
+}
+
+function nextFixture() {
+    if (current < cards.length - 1) showFixture(current + 1);
+}
+
+function prevFixture() {
+    if (current > 0) showFixture(current - 1);
+}
+
+showFixture(detectLastPlayed());
 </script>
 
 {% endblock %}
+
+
 
 
 
