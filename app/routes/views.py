@@ -140,62 +140,78 @@ def fixture(bloque, categoria=None):
         flash("Bloque inválido", "danger")
         return redirect(url_for("views.index"))
 
-    # Normalizamos categorías
-    categorias_bloque_raw = bloques[bloque]
-    categorias_bloque = [c.strip().lower() for c in categorias_bloque_raw]
-
-    # Consulta básica EXCLUYENDO partidos de playoff
-    fases_playoff = ["Cuartos", "Semifinal", "Final", "Finalísima"]
-    query = (
-        Partido.query
-        .outerjoin(Fase, Partido.fase_id == Fase.id)
-        .filter(
-            Partido.torneo_id == torneo_apertura.id,
-            or_(
-                Partido.fase_id == None,
-                ~Fase.nombre.in_(fases_playoff)
-            )
-        )
-    )
+    categorias_bloque = [c.strip().lower() for c in bloques[bloque]]
 
     if categoria:
         categoria_db = categoria.strip().lower()
         if categoria_db not in categorias_bloque:
             flash("Categoría inválida", "danger")
             return redirect(url_for("views.index"))
-
-        query = query.filter(func.lower(func.trim(Partido.categoria)) == categoria_db)
+        categorias_filtradas = [categoria_db]
         titulo = f"Fixture {categoria.capitalize()}"
     else:
-        query = query.filter(func.lower(func.trim(Partido.categoria)).in_(categorias_bloque))
+        categorias_filtradas = categorias_bloque
         titulo = f"Fixture {bloque.capitalize()}"
 
-    partidos = query.order_by(Partido.jornada, Partido.fecha_partido).all()
-    # Agrupar partidos por jornada
-
     fechas_partidos = {}
-    for partido in partidos:
-        # Obtener goleadores local
-        goleadores_local = []
-        goleadores_visitante = []
+
+    # ====================================================
+    # 1️⃣ FASE REGULAR (EXCLUYE PLAYOFFS)
+    # ====================================================
+    fases_playoff = ["Cuartos", "Semifinal", "Final", "Finalísima"]
+
+    partidos_fase_regular = (
+        Partido.query
+        .outerjoin(Fase, Partido.fase_id == Fase.id)
+        .filter(
+            Partido.torneo_id == torneo_apertura.id,
+            func.lower(Partido.categoria).in_(categorias_filtradas),
+            or_(
+                Partido.fase_id == None,
+                ~Fase.nombre.in_(fases_playoff)
+            )
+        )
+        .order_by(Partido.jornada, Partido.fecha_partido)
+        .all()
+    )
+
+    def agregar_goleadores(partido):
+        partido.goleadores_local = []
+        partido.goleadores_visitante = []
         for est in partido.estadisticas_jugadores:
             if est.cant_goles > 0:
-                nombre_jugador = f"{est.jugador.nombre} {est.jugador.apellido}"
+                nombre = f"{est.jugador.nombre} {est.jugador.apellido}"
                 if est.jugador.club_id == partido.equipo_local.club_id:
-                    goleadores_local.append({
-                        "nombre": nombre_jugador,
-                        "goles": est.cant_goles
-                    })
+                    partido.goleadores_local.append({"nombre": nombre, "goles": est.cant_goles})
                 elif est.jugador.club_id == partido.equipo_visitante.club_id:
-                    goleadores_visitante.append({
-                        "nombre": nombre_jugador,
-                        "goles": est.cant_goles
-                    })
-        # Adjuntar los goleadores al partido
-        partido.goleadores_local = goleadores_local
-        partido.goleadores_visitante = goleadores_visitante
-        fecha_key = f"Jornada {partido.jornada}"
-        fechas_partidos.setdefault(fecha_key, []).append(partido)
+                    partido.goleadores_visitante.append({"nombre": nombre, "goles": est.cant_goles})
+
+    for partido in partidos_fase_regular:
+        agregar_goleadores(partido)
+        partido.es_ida_vuelta = False  # 👈 SIEMPRE false
+        key = f"Jornada {partido.jornada}"
+        fechas_partidos.setdefault(key, []).append(partido)
+
+    # ====================================================
+    # 2️⃣ PLAYOFFS
+    # ====================================================
+    partidos_playoff = (
+        Partido.query
+        .join(Fase)
+        .filter(
+            Partido.torneo_id == torneo_apertura.id,
+            func.lower(Partido.categoria).in_(categorias_filtradas),
+            Fase.nombre.in_(fases_playoff)
+        )
+        .order_by(Fase.orden, Partido.jornada)
+        .all()
+    )
+
+    for partido in partidos_playoff:
+        agregar_goleadores(partido)
+        partido.es_ida_vuelta = partido.fase.ida_vuelta  # 👈 CLAVE
+        key = partido.fase.nombre
+        fechas_partidos.setdefault(key, []).append(partido)
 
     return render_template(
         "fixture_general.html",
@@ -1482,6 +1498,8 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
     except Exception as e:
         print("ERROR info_cruce_playoff_inferiores:", e)
         return jsonify({"error": "Error interno"})
+    
+    
 @views.route("/api/cruces_playoff_inferiores/<int:fase_id>/<categoria>/<ida_vuelta>")
 def cruces_playoff_inferiores(fase_id, categoria, ida_vuelta):
     """

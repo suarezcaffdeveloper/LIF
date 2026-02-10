@@ -229,43 +229,139 @@ h1 {
             </div>
 
             <div class="partidos-grid">
+
+            {# ================= SI ES IDA / VUELTA ================= #}
+            {% if partidos and partidos[0].es_ida_vuelta %}
+
+                {# ---------- IDA ---------- #}
+                {% set partidos_ida = partidos | selectattr("jornada", "equalto", 1) | list %}
+                {% if partidos_ida %}
+                    <div style="grid-column: 1 / -1; margin-top: 10px;">
+                        <strong style="color:#1f2937;">Partidos de ida</strong>
+                        <hr style="margin:6px 0 14px;">
+                    </div>
+
+                    {% for partido in partidos_ida %}
+                        <div class="partido">
+                            <div class="equipo">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}">
+                                <div>{{ partido.equipo_local.club.nombre }}</div>
+                                {% if partido.goleadores_local %}
+                                <div class="goleadores">
+                                    {% for g in partido.goleadores_local %}
+                                        {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="vs">
+                                {% if mostrar_resultados and partido.jugado %}
+                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                {% else %}
+                                    vs
+                                {% endif %}
+                            </div>
+
+                            <div class="equipo">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}">
+                                <div>{{ partido.equipo_visitante.club.nombre }}</div>
+                                {% if partido.goleadores_visitante %}
+                                <div class="goleadores">
+                                    {% for g in partido.goleadores_visitante %}
+                                        {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {# ---------- VUELTA ---------- #}
+                {% set partidos_vuelta = partidos | selectattr("jornada", "equalto", 2) | list %}
+                {% if partidos_vuelta %}
+                    <div style="grid-column: 1 / -1; margin-top: 22px;">
+                        <strong style="color:#1f2937;">Partidos de vuelta</strong>
+                        <hr style="margin:6px 0 14px;">
+                    </div>
+
+                    {% for partido in partidos_vuelta %}
+                        <div class="partido">
+                            <div class="equipo">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}">
+                                <div>{{ partido.equipo_local.club.nombre }}</div>
+                                {% if partido.goleadores_local %}
+                                <div class="goleadores">
+                                    {% for g in partido.goleadores_local %}
+                                        {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="vs">
+                                {% if mostrar_resultados and partido.jugado %}
+                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                {% else %}
+                                    vs
+                                {% endif %}
+                            </div>
+
+                            <div class="equipo">
+                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}">
+                                <div>{{ partido.equipo_visitante.club.nombre }}</div>
+                                {% if partido.goleadores_visitante %}
+                                <div class="goleadores">
+                                    {% for g in partido.goleadores_visitante %}
+                                        {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+            {# ================= PARTIDO ÚNICO (REGULAR o PLAYOFF) ================= #}
+            {% else %}
                 {% for partido in partidos %}
-                <div class="partido">
-
-                    <div class="equipo">
-                        <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}">
-                        <div>{{ partido.equipo_local.club.nombre }}</div>
-                        {% if partido.goleadores_local %}
-                        <div class="goleadores">
-                            {% for g in partido.goleadores_local %}
-                                {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
-                            {% endfor %}
+                    <div class="partido">
+                        <div class="equipo">
+                            <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}">
+                            <div>{{ partido.equipo_local.club.nombre }}</div>
+                            {% if partido.goleadores_local %}
+                            <div class="goleadores">
+                                {% for g in partido.goleadores_local %}
+                                    {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
-                    </div>
 
-                    <div class="vs">
-                        {% if mostrar_resultados and partido.jugado %}
-                            {{ partido.goles_local }} - {{ partido.goles_visitante }}
-                        {% else %}
-                            vs
-                        {% endif %}
-                    </div>
-
-                    <div class="equipo">
-                        <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}">
-                        <div>{{ partido.equipo_visitante.club.nombre }}</div>
-                        {% if partido.goleadores_visitante %}
-                        <div class="goleadores">
-                            {% for g in partido.goleadores_visitante %}
-                                {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
-                            {% endfor %}
+                        <div class="vs">
+                            {% if mostrar_resultados and partido.jugado %}
+                                {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                            {% else %}
+                                vs
+                            {% endif %}
                         </div>
-                        {% endif %}
-                    </div>
 
-                </div>
+                        <div class="equipo">
+                            <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}">
+                            <div>{{ partido.equipo_visitante.club.nombre }}</div>
+                            {% if partido.goleadores_visitante %}
+                            <div class="goleadores">
+                                {% for g in partido.goleadores_visitante %}
+                                    {{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 {% endfor %}
+            {% endif %}
+
             </div>
         </div>
         {% endfor %}
@@ -281,7 +377,8 @@ let current = 0;
 function detectLastPlayed() {
     let last = 0;
     cards.forEach((card, i) => {
-        if (card.innerHTML.includes('-')) last = i;
+        // Busca al menos un resultado real (ej: 2 - 1, 0 - 0) en la jornada
+        if (card.innerHTML.match(/\b\d+\s*-\s*\d+\b/)) last = i;
     });
     return last;
 }
