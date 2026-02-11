@@ -3339,3 +3339,41 @@ def chequeo_resultados_playoff():
         print(f"❌ ERROR en chequeo_resultados_playoff: {str(e)}")
         flash(f"❌ Error al cargar los resultados: {str(e)}", 'danger')
         return redirect(url_for('views.index'))
+    
+    
+import os
+import cloudinary.uploader
+from flask import current_app
+
+@views.route("/migrar_escudos")
+def migrar_escudos():
+    clubes = Club.query.all()
+    carpeta_escudos = os.path.join(current_app.root_path, "static/escudos")
+
+    migrados = 0
+
+    for club in clubes:
+        # Solo migrar si no tiene escudo en Cloudinary
+        if not club.escudo_url:
+            nombre_archivo = club.nombre.replace(" ", "_") + ".jpg"
+            ruta_imagen = os.path.join(carpeta_escudos, nombre_archivo)
+
+            if os.path.exists(ruta_imagen):
+                try:
+                    resultado = cloudinary.uploader.upload(
+                        ruta_imagen,
+                        folder="escudosclubes",
+                        public_id=club.nombre.replace(" ", "_"),
+                        overwrite=True
+                    )
+
+                    club.escudo_url = resultado.get("secure_url")
+                    db.session.add(club)
+                    migrados += 1
+
+                except Exception as e:
+                    print(f"Error migrando {club.nombre}: {e}")
+
+    db.session.commit()
+
+    return f"✅ Migración completa. Escudos migrados: {migrados}"    
