@@ -780,7 +780,7 @@ def cargar_clubes():
         if archivo and archivo.filename != "":
             resultado = cloudinary.uploader.upload(
                 archivo,
-                folder="escudos_clubes"  # opcional pero recomendado
+                folder="escudosclubes"  # opcional pero recomendado
             )
             escudo_url = resultado.get("secure_url")
 
