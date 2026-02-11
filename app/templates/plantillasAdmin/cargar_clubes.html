@@ -132,7 +132,7 @@
   <h1>CARGAR CLUBES</h1>
 
   <div class="form-card">
-    <form action="/cargar_clubes" method="POST">
+    <form action="{{ url_for('views.cargar_clubes') }}" method="POST" enctype="multipart/form-data">
 
       <div class="mb-3">
         <label for="nombre" class="form-label">Nombre del Club</label>
@@ -145,18 +145,23 @@
       </div>
 
       <div class="mb-3">
-        <label for="escudo_url" class="form-label">URL del Escudo (opcional)</label>
-        <input type="text" class="form-control" id="escudo_url" name="escudo_url" placeholder="https://...">
+        <label for="escudo" class="form-label">Escudo del Club (Imagen)</label>
+        <input type="file" class="form-control" id="escudo" name="escudo" accept="image/*">
+        <small class="text-muted">Formatos permitidos: JPG, PNG, WEBP</small>
       </div>
 
-      <button type="submit" class="btn btn-primary w-100 mt-3">Guardar Club</button>
+      <button type="submit" class="btn btn-primary w-100 mt-3">
+        Guardar Club
+      </button>
 
     </form>
 
-    <div class="text-center mt-4">
-      <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
-    </div>
+  <div class="text-center mt-4">
+    <a href="{{ url_for('views.adminview') }}" class="back-link">
+      ← Volver al panel de administrador
+    </a>
   </div>
+</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {

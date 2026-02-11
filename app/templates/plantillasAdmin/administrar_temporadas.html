@@ -103,8 +103,8 @@
                 {% for t in temporadas %}
                     <tr>
                         <td>{{ t.nombre }}</td>
-                        <td class="{{ 'active-true' if t.active else 'active-false' }}">
-                            {{ 'Sí' if t.active else 'No' }}
+                        <td class="{{ 'active-true' if t.activa else 'active-false' }}">
+                            {{ 'Sí' if t.activa else 'No' }}
                         </td>
                     </tr>
                 {% endfor %}

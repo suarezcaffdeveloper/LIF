@@ -762,18 +762,27 @@ def adminview():
 
 
 
-#-------------------------CARGAR CLUBES-----------------------#
 @views.route("/cargar_clubes", methods=["GET", "POST"])
 def cargar_clubes():
     if request.method == "POST":
         nombre = request.form.get("nombre")
         localidad = request.form.get("localidad")
-        escudo_url = request.form.get("escudo_url") or None
+        archivo = request.files.get("escudo")
 
         club_existente = Club.query.filter_by(nombre=nombre).first()
         if club_existente:
             flash("El club ya existe en la base de datos.", "danger")
             return redirect(url_for("views.cargar_clubes"))
+
+        escudo_url = None
+
+        # Si se subió un archivo
+        if archivo and archivo.filename != "":
+            resultado = cloudinary.uploader.upload(
+                archivo,
+                folder="escudos_clubes"  # opcional pero recomendado
+            )
+            escudo_url = resultado.get("secure_url")
 
         nuevo_club = Club(
             nombre=nombre,
