@@ -282,22 +282,33 @@
 
             <div class="mb-3">
                 <label class="form-label">Carnet Nº</label>
-                <input type="number" id="numeroCarnet" name="numeroCarnet" class="form-control" required>
+                <input type="number" id="numeroCarnet" name="numeroCarnet"
+                    class="form-control"
+                    value="{{ form_data.get('numeroCarnet', '') }}"
+                    required>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Nombre</label>
-                <input type="text" id="nombre" name="nombre" class="form-control" required>
+                <input type="text" id="nombre" name="nombre"
+                    class="form-control"
+                    value="{{ form_data.get('nombre', '') }}"
+                    required>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Apellido</label>
-                <input type="text" id="apellido" name="apellido" class="form-control" required>
+                <input type="text" id="apellido" name="apellido"
+                    class="form-control"
+                    value="{{ form_data.get('apellido', '') }}"
+                    required>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">Fecha de nacimiento</label>
-                <input type="date" id="fechaNacimiento" name="fechaNacimiento" class="form-control">
+                <input type="date" id="fechaNacimiento" name="fechaNacimiento"
+                    class="form-control"
+                    value="{{ form_data.get('fechaNacimiento', '') }}">
             </div>
 
             <div class="mb-3">
@@ -305,7 +316,13 @@
                 <select id="club_id" name="club_id" class="form-select" required>
                     <option value="">Seleccionar club...</option>
                     {% for club in clubes %}
-                        <option value="{{ club.id }}">{{ club.nombre }}</option>
+                        <option value="{{ club.id }}"
+                            {% if form_data.get('club_id') == club.id|string %}
+                                selected
+                            {% endif %}
+                        >
+                            {{ club.nombre }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -363,49 +380,61 @@
      JS: ACTUALIZACIÓN EN VIVO
 =========================== -->
 <script>
-    document.getElementById("nombre").addEventListener("input", () => {
-        document.getElementById("carnetNombre").textContent = nombre.value || "—";
-    });
+document.addEventListener("DOMContentLoaded", () => {
 
-    document.getElementById("apellido").addEventListener("input", () => {
-        document.getElementById("carnetApellido").textContent = apellido.value || "—";
-    });
+    const inputNombre = document.getElementById("nombre");
+    const inputApellido = document.getElementById("apellido");
+    const inputCarnet = document.getElementById("numeroCarnet");
+    const inputFecha = document.getElementById("fechaNacimiento");
+    const selectClub = document.getElementById("club_id");
 
-    document.getElementById("numeroCarnet").addEventListener("input", () => {
-        document.getElementById("carnetNumero").textContent = numeroCarnet.value || "—";
-    });
+    const carnetNombre = document.getElementById("carnetNombre");
+    const carnetApellido = document.getElementById("carnetApellido");
+    const carnetNumero = document.getElementById("carnetNumero");
+    const carnetFecha = document.getElementById("carnetFecha");
+    const carnetClub = document.getElementById("carnetClub");
 
-    document.getElementById("fechaNacimiento").addEventListener("change", () => {
-        document.getElementById("carnetFecha").textContent = fechaNacimiento.value || "—";
-    });
+    function actualizarCarnet() {
+        carnetNombre.textContent = inputNombre.value || "—";
+        carnetApellido.textContent = inputApellido.value || "—";
+        carnetNumero.textContent = inputCarnet.value || "—";
+        carnetFecha.textContent = inputFecha.value || "—";
 
-    document.getElementById("club_id").addEventListener("change", () => {
-        let texto = club_id.options[club_id.selectedIndex].text;
-        document.getElementById("carnetClub").textContent =
-            texto !== "Seleccionar club..." ? texto : "—";
-    });
+        let textoClub = selectClub.options[selectClub.selectedIndex]?.text;
+        carnetClub.textContent =
+            (textoClub && textoClub !== "Seleccionar club...") ? textoClub : "—";
+    }
+
+    // Actualizar cuando el usuario escribe
+    inputNombre.addEventListener("input", actualizarCarnet);
+    inputApellido.addEventListener("input", actualizarCarnet);
+    inputCarnet.addEventListener("input", actualizarCarnet);
+    inputFecha.addEventListener("change", actualizarCarnet);
+    selectClub.addEventListener("change", actualizarCarnet);
+
+    // 🔥 CLAVE: actualizar al cargar la página
+    actualizarCarnet();
 
     // =========================
     // FLASH SLIDE + FADE
     // =========================
-    document.addEventListener("DOMContentLoaded", () => {
-        const flashes = document.querySelectorAll(".flash-message");
-        flashes.forEach(flash => {
-            // Fade + slide in
-            setTimeout(() => {
-                flash.style.opacity = 1;
-                flash.style.transform = "translateY(0)";
-            }, 100);
+    const flashes = document.querySelectorAll(".flash-message");
+    flashes.forEach(flash => {
+        setTimeout(() => {
+            flash.style.opacity = 1;
+            flash.style.transform = "translateY(0)";
+        }, 100);
 
-            // Desaparece después de 3 segundos
-            setTimeout(() => {
-                flash.style.opacity = 0;
-                flash.style.transform = "translateY(-20px)";
-                setTimeout(() => flash.remove(), 500);
-            }, 3000);
-        });
+        setTimeout(() => {
+            flash.style.opacity = 0;
+            flash.style.transform = "translateY(-20px)";
+            setTimeout(() => flash.remove(), 500);
+        }, 3000);
     });
+
+});
 </script>
+
 
 </body>
 </html>

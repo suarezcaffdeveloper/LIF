@@ -121,16 +121,20 @@
         <form method="POST" action="{{ url_for('views.cargar_equipos') }}">
 
             <!-- CLUB -->
-            <div class="mb-3">
-                <label for="club_id" class="form-label">Club</label>
-                <select class="form-select" id="club_id" name="club_id" required>
-                    <option value="">Seleccione un club...</option>
-                    {% for c in clubes %}
-                        <option value="{{ c.id }}">{{ c.nombre }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
+            <label for="club_id" class="form-label">Club</label>
+            <select class="form-select" id="club_id" name="club_id" required>
+                <option value="">Seleccione un club...</option>
+                {% for c in clubes %}
+                    <option value="{{ c.id }}"
+                        {% if club_seleccionado and club_seleccionado == c.id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ c.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+            <br>
             <!-- CATEGORIA -->
             <div class="mb-3">
                 <label for="categoria" class="form-label">Categoría</label>
@@ -152,52 +156,64 @@
 
     <!-- JS PARA OCULTAR O DESHABILITAR CATEGORÍAS YA CARGADAS -->
     <script>
-        document.getElementById("club_id").addEventListener("change", function () {
-            const clubId = this.value;
-            const categoriaSelect = document.getElementById("categoria");
+document.addEventListener("DOMContentLoaded", function () {
 
-            // Resetear todas las categorías visibles/habilitadas
-            for (let opt of categoriaSelect.options) {
-                opt.hidden = false;
-                opt.disabled = false;
-            }
+    const clubSelect = document.getElementById("club_id");
+    const categoriaSelect = document.getElementById("categoria");
 
-            if (!clubId) return;
+    function filtrarCategorias(clubId) {
 
-            fetch(`/categorias_cargadas/${clubId}`)
-                .then(response => response.json())
-                .then(cargadas => {
+        // Resetear todas las categorías
+        for (let opt of categoriaSelect.options) {
+            opt.hidden = false;
+            opt.disabled = false;
+        }
 
-                    for (let opt of categoriaSelect.options) {
-                        if (cargadas.includes(opt.value)) {
-                            // Ocultar categoría ya cargada
-                            opt.hidden = true;
-                        }
+        if (!clubId) return;
+
+        fetch(`/categorias_cargadas/${clubId}`)
+            .then(response => response.json())
+            .then(cargadas => {
+
+                for (let opt of categoriaSelect.options) {
+                    if (cargadas.includes(opt.value)) {
+                        opt.hidden = true;   // Oculta categorías ya cargadas
                     }
+                }
 
-                    categoriaSelect.value = "";
-                });
-        });
-
-        // JS para mostrar flash con slide y desaparecer
-        document.addEventListener("DOMContentLoaded", () => {
-            const flashes = document.querySelectorAll(".flash-message");
-            flashes.forEach(flash => {
-                // Fade + slide in
-                setTimeout(() => {
-                    flash.style.opacity = 1;
-                    flash.style.transform = "translateY(0)";
-                }, 100);
-
-                // Desaparece después de 3 segundos
-                setTimeout(() => {
-                    flash.style.opacity = 0;
-                    flash.style.transform = "translateY(-20px)";
-                    setTimeout(() => flash.remove(), 500);
-                }, 3000);
+                // Siempre limpiar selección
+                categoriaSelect.value = "";
             });
-        });
-    </script>
+    }
+
+    // Cuando cambia el club manualmente
+    clubSelect.addEventListener("change", function () {
+        filtrarCategorias(this.value);
+    });
+
+    // 🔥 CLAVE: si el club ya viene seleccionado al recargar
+    if (clubSelect.value) {
+        filtrarCategorias(clubSelect.value);
+    }
+
+    // Flash con animación
+    const flashes = document.querySelectorAll(".flash-message");
+    flashes.forEach(flash => {
+        setTimeout(() => {
+            flash.style.opacity = 1;
+            flash.style.transform = "translateY(0)";
+        }, 100);
+
+        setTimeout(() => {
+            flash.style.opacity = 0;
+            flash.style.transform = "translateY(-20px)";
+            setTimeout(() => flash.remove(), 500);
+        }, 3000);
+    });
+
+});
+</script>
+
 
 </body>
 </html>

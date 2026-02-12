@@ -221,16 +221,7 @@
         {% for club in clubes %}
         <div class="card-equipo">
             <h3>{{ club.nombre }}</h3>
-
-            {% if club.escudo_url %}
-                <!-- Escudos nuevos (Cloudinary) -->
-                <img src="{{ club.escudo_url }}" alt="Escudo {{ club.nombre }}">
-            {% else %}
-                <!-- Escudos viejos (static) -->
-                <img src="{{ url_for('static', filename='escudos/' + club.nombre|replace(' ', '_') + '.jpg') }}"
-                    alt="Escudo {{ club.nombre }}">
-            {% endif %}
-
+            <img src="{{ club.escudo_url }}" alt="Escudo {{ club.nombre }}">
         </div>
         {% endfor %}
     </div>
