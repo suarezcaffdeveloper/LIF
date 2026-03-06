@@ -105,7 +105,7 @@ def crear_temporada():
         db.session.add(temporada_activa)
 
     # Crear la nueva temporada y activarla
-    nueva_temporada = Temporada(nombre=nombre_int, activa=True)
+    nueva_temporada = Temporada(nombre=str(nombre_int), activa=True)
     db.session.add(nueva_temporada)
     db.session.commit()  # Necesitamos commit para obtener el ID de la temporada
 
@@ -146,18 +146,19 @@ def activar_torneo(torneo_id):
     torneo = Torneo.query.get_or_404(torneo_id)
 
     # desactivar todos los torneos de la temporada
-    Torneo.query.filter_by(temporada_id=torneo.temporada_id).update({
-        "activo": False
-    })
+    torneos = Torneo.query.filter_by(temporada_id=torneo.temporada_id).all()
+
+    for t in torneos:
+        t.activo = False
 
     # activar el seleccionado
     torneo.activo = True
 
     db.session.commit()
 
-    if torneo.activo:
-        flash(f"El torneo {torneo.nombre} ya está activo.", "info")
-        return redirect(url_for("views.administrar_temporadas_view"))
+    flash(f"Torneo {torneo.nombre} activado correctamente.", "success")
+
+    return redirect(url_for("views.administrar_temporadas_view"))
 
 # ============================
 @views.route('/fixture/<bloque>')
