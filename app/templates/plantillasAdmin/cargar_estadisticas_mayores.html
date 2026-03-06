@@ -217,6 +217,115 @@
     .small-input { width: 100%; }
     .muted { color: #bfc9d9; font-size: 0.9rem; }
 
+/*    .penales-box {
+  border-left: 3px solid #f5b041;
+  background: rgba(245, 176, 65, 0.05);
+  text-align: center;
+}
+
+.penales-box:hover {
+  background: rgba(245, 176, 65, 0.1);
+  border-color: #f5b041;
+}
+
+.penales-box h5 {
+  color: #f5b041;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.form-check-input {
+  background-color: #2a2a3f;
+  border: 1px solid rgba(93, 173, 226, 0.4);
+}
+
+.form-check-input:checked {
+  background-color: #f5b041;
+  border-color: #f5b041;
+}*/
+
+/* HEADER FLEX */
+.penales-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.penales-box {
+  border-left: 3px solid #f5b041;
+  background: rgba(245, 176, 65, 0.05);
+}
+
+.penales-box h5 {
+  color: #f5b041;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* SLIDE ANIMADO */
+.penales-slide {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.penales-slide.active {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+/* SWITCH PERSONALIZADO */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a3f;
+  border: 1px solid rgba(93, 173, 226, 0.4);
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 3px;
+  background-color: #5dade2;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: rgba(245, 176, 65, 0.3);
+  border-color: #f5b041;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+  background-color: #f5b041;
+}
+
     /* Responsive */
     @media (max-width: 768px) {
       body {
@@ -330,8 +439,15 @@
       <!-- PRIMERA -->
       <div id="bloque-primera" style="display:none;">
         <h3 class="subtitulo">Primera División</h3>
+        <div id="primera_partido_data"
+          data-jornada="{{ partido_primera.jornada if partido_primera else 0 }}"
+          data-ida-vuelta="{{ 1 if partido_primera and partido_primera.fase and partido_primera.fase.ida_vuelta else 0 }}"
+          data-ida-local="{{ partido_ida_primera.goles_local if partido_ida_primera else 0 }}"
+          data-ida-visitante="{{ partido_ida_primera.goles_visitante if partido_ida_primera else 0 }}"
+          style="display:none;">
+      </div>
 
-        <div class="row" style="margin:0;">
+          <div class="row" style="margin:0;">
           <!-- LOCAL -->
           <div class="col-md-6" style="padding:10px;">
             <div class="side-box">
@@ -369,14 +485,64 @@
           </div>
         </div>
 
+        <!-- PENALES -->
+<div class="row justify-content-center">
+  <div class="col-md-8" style="padding:10px;">
+    <div class="side-box penales-box">
+
+      <!-- Header con toggle -->
+      <div class="penales-header">
+        <h5>Definición por Penales</h5>
+
+        <label class="switch">
+          <input type="checkbox" id="primera_penales_toggle" onchange="togglePenalesSlide('primera')">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Contenido deslizable -->
+      <div id="primera_penales_inputs" class="penales-slide">
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Local
+            </label>
+            <input type="number" id="primera_penales_local"
+              class="form-control text-center"
+              min="0" value="0">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Visitante
+            </label>
+            <input type="number" id="primera_penales_visitante"
+              class="form-control text-center"
+              min="0" value="0">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
         <button id="btn_guardar_primera" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('primera')">Guardar Primera</button>
       </div>
 
       <!-- RESERVA -->
       <div id="bloque-reserva" style="display:none;">
         <h3 class="subtitulo">Reserva</h3>
+          <div id="reserva_partido_data"
+            data-jornada="{{ partido_reserva.jornada if partido_reserva else 0 }}"
+            data-ida-vuelta="{{ 1 if partido_reserva and partido_reserva.fase and partido_reserva.fase.ida_vuelta else 0 }}"
+            data-ida-local="{{ partido_ida_reserva.goles_local if partido_ida_reserva else 0 }}"
+            data-ida-visitante="{{ partido_ida_reserva.goles_visitante if partido_ida_reserva else 0 }}"
+            style="display:none;">
+          </div>
 
-        <div class="row" style="margin:0;">
+          <div class="row" style="margin:0;">
           <!-- LOCAL -->
           <div class="col-md-6" style="padding:10px;">
             <div class="side-box">
@@ -413,6 +579,48 @@
             </div>
           </div>
         </div>
+
+        <!-- PENALES -->
+<div class="row justify-content-center">
+  <div class="col-md-8" style="padding:10px;">
+    <div class="side-box penales-box">
+
+      <!-- Header con toggle -->
+      <div class="penales-header">
+        <h5>Definición por Penales</h5>
+
+        <label class="switch">
+          <input type="checkbox" id="reserva_penales_toggle" onchange="togglePenalesSlide('reserva')">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Contenido deslizable -->
+      <div id="reserva_penales_inputs" class="penales-slide">
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Local
+            </label>
+            <input type="number" id="reserva_penales_local"
+              class="form-control text-center"
+              min="0" value="0">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Visitante
+            </label>
+            <input type="number" id="reserva_penales_visitante"
+              class="form-control text-center"
+              min="0" value="0">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
 
         <button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
       </div>
@@ -607,17 +815,50 @@ $id("select-cruce").addEventListener("change", async e=>{
   try{
     // Determinar si es playoff o regular
     const esPlayoff = current.fase_id ? true : false;
-    
+
     let info;
-    if(esPlayoff) {
-      const categoria = $id("select-categoria-playoff").value;
-      const idaVuelta = current.ida_vuelta;
-      info = await fetch(`/api/info_cruce_playoff/${id}/${categoria}/${idaVuelta}`).then(r=>r.json());
-    } else {
-      info = await fetch(`/api/info_cruce/${id}`).then(r=>r.json());
+    try {
+      if(esPlayoff) {
+        const categoria = $id("select-categoria-playoff").value;
+        const idaVuelta = current.ida_vuelta;
+        const resp = await fetch(`/api/info_cruce_playoff/${id}/${categoria}/${idaVuelta}`);
+        info = await resp.json();
+        console.log("[DEBUG] Respuesta API /api/info_cruce_playoff:", info);
+      } else {
+        const resp = await fetch(`/api/info_cruce/${id}`);
+        info = await resp.json();
+        console.log("[DEBUG] Respuesta API /api/info_cruce:", info);
+      }
+    } catch(fetchErr) {
+      console.error("[DEBUG] Error al hacer fetch de la API:", fetchErr);
+      Swal.fire("Error","No se pudo cargar la info del cruce (fetch error)","error");
+      return;
     }
 
+    // 👇 NUEVO: determinar si mostrar penales (después de tener info)
+    let mostrarPenales = false;
+    if (esPlayoff && info.fase_nombre) {
+      mostrarPenales = fasePermitePenales(info.fase_nombre);
+    }
+
+    // Mostrar u ocultar bloques de penales según corresponda
+    CATS.forEach(cat => {
+      const bloquePenales = document.querySelector(`#bloque-${cat} .penales-box`);
+      if (bloquePenales) {
+        bloquePenales.style.display = mostrarPenales ? "block" : "none";
+
+        // Resetear toggle si no corresponde
+        if (!mostrarPenales) {
+          const toggle = document.getElementById(`${cat}_penales_toggle`);
+          const slide = document.getElementById(`${cat}_penales_inputs`);
+          if (toggle) toggle.checked = false;
+          if (slide) slide.classList.remove("active");
+        }
+      }
+    });
+
     if(info.error) {
+      console.error("[DEBUG] Error recibido de la API:", info.error);
       Swal.fire("Error", info.error, "error");
       return;
     }
@@ -629,6 +870,7 @@ $id("select-cruce").addEventListener("change", async e=>{
 
     CATS.forEach(cat=>{
       const data = info[cat];
+      console.log(`[DEBUG] Estado categoria ${cat}:`, data);
       if(!data || data.jugado || !data.id) return;
 
       // En playoff, solo mostrar la categoría seleccionada
@@ -654,9 +896,12 @@ $id("select-cruce").addEventListener("change", async e=>{
 
     $id("formularios-estadisticas").style.display = hayPendiente ? "block" : "none";
 
-    if(!hayPendiente) Swal.fire("Info","Este cruce no tiene categorías pendientes","info");
+    if(!hayPendiente) {
+      console.warn("[DEBUG] No hay categorías pendientes para este cruce. info:", info);
+      Swal.fire("Info","Este cruce no tiene categorías pendientes","info");
+    }
   }catch(err){
-    console.error(err);
+    console.error("[DEBUG] Error general en el handler de cruce:", err);
     Swal.fire("Error","No se pudo cargar la info del cruce","error");
   }
 });
@@ -734,17 +979,28 @@ function construirPayload(cat){
    .map(r=>safeInt(r.querySelector(".tarjeta-player").value))
    .filter(id=>id);
 
-  return {
-    partido_id:partidoId,
-    goles_local:golesLocal,
-    goles_visitante:golesVisitante,
-    goleadores_local:leerGoleadores("local"),
-    goleadores_visitante:leerGoleadores("visitante"),
-    amarillas_local:leerTarjetas("local","amarilla"),
-    amarillas_visitante:leerTarjetas("visitante","amarilla"),
-    rojas_local:leerTarjetas("local","roja"),
-    rojas_visitante:leerTarjetas("visitante","roja")
+  const payload = {
+    partido_id: partidoId,
+    goles_local: golesLocal,
+    goles_visitante: golesVisitante,
+    goleadores_local: leerGoleadores("local"),
+    goleadores_visitante: leerGoleadores("visitante"),
+    amarillas_local: leerTarjetas("local","amarilla"),
+    amarillas_visitante: leerTarjetas("visitante","amarilla"),
+    rojas_local: leerTarjetas("local","roja"),
+    rojas_visitante: leerTarjetas("visitante","roja")
   };
+
+  // -------- PENALTES --------
+  const togglePenales = $id(`${cat}_penales_toggle`);
+  if(togglePenales && togglePenales.checked){
+    payload.penales = {
+      local: safeInt($id(`${cat}_penales_local`).value),
+      visitante: safeInt($id(`${cat}_penales_visitante`).value)
+    };
+  }
+
+  return payload;
 }
 
 function validarFormulario(cat){
@@ -770,8 +1026,61 @@ function validarFormulario(cat){
   return true;
 }
 
+function validarPenalesGlobal(cat){
+
+  const golesLocal = safeInt($id(`${cat}_goles_local`).value);
+  const golesVisitante = safeInt($id(`${cat}_goles_visitante`).value);
+
+  const toggle = $id(`${cat}_penales_toggle`);
+  if(!toggle || !toggle.checked) return true;
+
+  const data = $id(`${cat}_partido_data`);
+
+  if(!data){
+    console.error("No se encontró el elemento de datos del partido");
+    return true;
+  }
+
+  const jornada = safeInt(data.dataset.jornada);
+  const idaVuelta = data.dataset.idaVuelta === "1";
+
+  const idaLocal = safeInt(data.dataset.idaLocal);
+  const idaVisitante = safeInt(data.dataset.idaVisitante);
+
+  // PARTIDO UNICO
+  if(!idaVuelta){
+    if(golesLocal !== golesVisitante){
+      Swal.fire("Error","No puede haber penales si el partido no terminó empatado","error");
+      return false;
+    }
+    return true;
+  }
+
+  // PARTIDO DE IDA
+  if(jornada === 1){
+    Swal.fire("Error","No se pueden cargar penales en el partido de ida","error");
+    return false;
+  }
+
+  // PARTIDO DE VUELTA → calcular global
+  const globalLocal = golesLocal + idaLocal;
+  const globalVisitante = golesVisitante + idaVisitante;
+
+  if(globalLocal !== globalVisitante){
+    Swal.fire(
+      "Error",
+      "No puede haber penales porque el resultado global no está empatado",
+      "error"
+    );
+    return false;
+  }
+
+  return true;
+}
+
 async function guardarCategoria(cat){
   if(!validarFormulario(cat)) return;
+  if(!validarPenalesGlobal(cat)) return;
   const payload = construirPayload(cat);
   const endpoint = cat==="primera"?"/api/guardar_primera":"/api/guardar_reserva";
 
@@ -797,6 +1106,29 @@ function finalizarCruce(cruceId){
   sel.querySelector(`option[value="${cruceId}"]`)?.remove();
   sel.value="";
   Swal.fire("Cruce completo","Primera y Reserva cargadas","success");
+}
+
+function togglePenales(categoria) {
+  const check = document.getElementById(`${categoria}_hubo_penales`);
+  const div = document.getElementById(`${categoria}_penales_inputs`);
+  div.style.display = check.checked ? "block" : "none";
+}
+function togglePenalesSlide(categoria) {
+  const check = document.getElementById(`${categoria}_penales_toggle`);
+  const div = document.getElementById(`${categoria}_penales_inputs`);
+
+  if (check.checked) {
+    div.classList.add("active");
+  } else {
+    div.classList.remove("active");
+  }
+}
+
+function fasePermitePenales(nombreFase) {
+  if (!nombreFase) return false;
+
+  const fasesConPenales = ["Semifinal", "Final", "Finalísima"];
+  return fasesConPenales.includes(nombreFase);
 }
 </script>
 </body>

@@ -144,6 +144,10 @@ class Partido(db.Model):
     goles_local = db.Column(db.Integer, default=0, nullable=False)
     goles_visitante = db.Column(db.Integer, default=0, nullable=False)
     jugado = db.Column(db.Boolean, default=False, nullable=False)
+    
+    penales_local = db.Column(db.Integer, nullable=True)
+    penales_visitante = db.Column(db.Integer, nullable=True)
+    definido_por_penales = db.Column(db.Boolean, default=False, nullable=False)
 
     equipo_local = db.relationship(
         'Equipo',

@@ -239,6 +239,88 @@
         gap: 8px;
       }
     }
+
+  /* HEADER FLEX */
+.penales-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.penales-box {
+  border-left: 3px solid #f5b041;
+  background: rgba(245, 176, 65, 0.05);
+}
+
+.penales-box h5 {
+  color: #f5b041;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* SLIDE ANIMADO */
+.penales-slide {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.penales-slide.active {
+  max-height: 300px;
+  opacity: 1;
+  margin-top: 10px;
+}
+
+/* SWITCH PERSONALIZADO */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2a2a3f;
+  border: 1px solid rgba(93, 173, 226, 0.4);
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 3px;
+  background-color: #5dade2;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: rgba(245, 176, 65, 0.3);
+  border-color: #f5b041;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(22px);
+  background-color: #f5b041;
+}
         
   </style>
 </head>
@@ -373,6 +455,52 @@
           </div>
         </div>
 
+                <!-- PENALES -->
+              
+        <div class="row justify-content-center">
+  <div class="col-md-8" style="padding:10px;">
+    <div class="side-box penales-box" style="display:none;">
+
+      <div class="penales-header">
+        <h5>Definición por Penales</h5>
+
+        <label class="switch">
+          <input type="checkbox" id="quinta_penales_toggle" onchange="togglePenalesSlide('quinta')">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="quinta_penales_inputs" class="penales-slide">
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Local
+            </label>
+            <input type="number"
+                   id="quinta_penales_local"
+                   class="form-control text-center"
+                   min="0"
+                   value="0">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Visitante
+            </label>
+            <input type="number"
+                   id="quinta_penales_visitante"
+                   class="form-control text-center"
+                   min="0"
+                   value="0">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+        
+
         <button id="btn_guardar_quinta" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('quinta')">Guardar Quinta</button>
       </div>
 
@@ -418,6 +546,53 @@
           </div>
         </div>
 
+                <!-- PENALES -->
+              
+        <div class="row justify-content-center">
+  <div class="col-md-8" style="padding:10px;">
+    <div class="side-box penales-box" style="display:none;">
+
+      <div class="penales-header">
+        <h5>Definición por Penales</h5>
+
+        <label class="switch">
+          <input type="checkbox" id="sexta_penales_toggle" onchange="togglePenalesSlide('sexta')">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="sexta_penales_inputs" class="penales-slide">
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Local
+            </label>
+            <input type="number"
+                   id="sexta_penales_local"
+                   class="form-control text-center"
+                   min="0"
+                   value="0">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Visitante
+            </label>
+            <input type="number"
+                   id="sexta_penales_visitante"
+                   class="form-control text-center"
+                   min="0"
+                   value="0">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+        
+
+
         <button id="btn_guardar_sexta" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('sexta')">Guardar Sexta</button>
       </div>
 
@@ -462,6 +637,52 @@
             </div>
           </div>
         </div>
+
+                <!-- PENALES -->
+        
+        <div class="row justify-content-center">
+  <div class="col-md-8" style="padding:10px;">
+    <div class="side-box penales-box" style="display:none;">
+
+      <div class="penales-header">
+        <h5>Definición por Penales</h5>
+
+        <label class="switch">
+          <input type="checkbox" id="septima_penales_toggle" onchange="togglePenalesSlide('septima')">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="septima_penales_inputs" class="penales-slide">
+        <div class="row">
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Local
+            </label>
+            <input type="number"
+                   id="septima_penales_local"
+                   class="form-control text-center"
+                   min="0"
+                   value="0">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label text-center w-100">
+              Penales Convertidos Visitante
+            </label>
+            <input type="number"
+                   id="septima_penales_visitante"
+                   class="form-control text-center"
+                   min="0"
+                   value="0">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+        
 
         <button id="btn_guardar_septima" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('septima')">Guardar Séptima</button>
       </div>
@@ -749,6 +970,8 @@ if (selectCruce) {
         const categoria = $id("select-categoria-playoff").value;
         const idaVuelta = current.ida_vuelta;
         info = await fetch(`/api/info_cruce_playoff_inferiores/${id}/${categoria}/${idaVuelta}`).then(r=>r.json());
+        console.log("INFO COMPLETA DEL BACKEND:", info);
+        console.log("FASE RECIBIDA:", info.fase_nombre);
       } else {
         info = await fetch(`/api/info_cruce_inferiores/${id}`).then(r=>r.json());
       }
@@ -773,6 +996,29 @@ if (selectCruce) {
           $id(`${categoriaSeleccionada}_local_nombre`).innerText = info.local_nombre;
           $id(`${categoriaSeleccionada}_visitante_nombre`).innerText = info.visitante_nombre;
           await cargarJugadoresInferiores(categoriaSeleccionada);
+            // Mostrar/ocultar panel de penales dinámicamente según la fase
+            let mostrarPenales = false;
+
+            console.log("FASE RECIBIDA:", info.fase_nombre);
+
+            if (info.fase_nombre && fasePermitePenales(info.fase_nombre)) {
+              mostrarPenales = fasePermitePenales(info.fase_nombre);
+            }
+
+            console.log("RESULTADO fasePermitePenales:", mostrarPenales);
+            const bloquePenales = document.querySelector(`#bloque-${categoriaSeleccionada} .penales-box`);
+            console.log("BLOQUE PENALES ENCONTRADO:", bloquePenales);
+            if (bloquePenales) {
+              console.log("MOSTRAR PENALES:", mostrarPenales);
+              bloquePenales.style.display = mostrarPenales ? "block" : "none";
+              // Resetear toggle si no corresponde
+              if (!mostrarPenales) {
+                const toggle = document.getElementById(`${categoriaSeleccionada}_penales_toggle`);
+                const slide = document.getElementById(`${categoriaSeleccionada}_penales_inputs`);
+                if (toggle) toggle.checked = false;
+                if (slide) slide.classList.remove("active");
+              }
+            }
         }
       } else {
         estadoCruces[id] = {};
@@ -958,7 +1204,8 @@ function validarTarjetasVsJugadores(cat) {
 /* ====================================================
    Construcción del payload
    ==================================================== */
-function construirPayload(cat) {
+async function construirPayload(cat) {
+
   const partidMap = {
     quinta: current.id_quinta,
     sexta: current.id_sexta,
@@ -966,6 +1213,7 @@ function construirPayload(cat) {
   };
 
   const pid = partidMap[cat];
+
   if (!pid) {
     throw new Error("Partido inexistente para la categoría");
   }
@@ -976,6 +1224,35 @@ function construirPayload(cat) {
   const tarjetasLocal = collectTarjetasAsObj(cat, "local");
   const tarjetasVisita = collectTarjetasAsObj(cat, "visitante");
 
+  // =============================
+  // PENALES
+  // =============================
+  let penales = null;
+
+  const toggle = document.getElementById(`${cat}_penales_toggle`);
+
+  if (toggle?.checked) {
+
+    const penLocalInput = document.getElementById(`${cat}_penales_local`);
+    const penVisitaInput = document.getElementById(`${cat}_penales_visitante`);
+
+    const penLocal = safeParseInt(penLocalInput?.value, 0);
+    const penVisita = safeParseInt(penVisitaInput?.value, 0);
+
+    // Si ambos son 0 no se envían penales
+    if (!(penLocal === 0 && penVisita === 0)) {
+      penales = {
+        local: penLocal,
+        visitante: penVisita
+      };
+    }
+  }
+
+  console.log("PENALES CAPTURADOS:", penales);
+
+  // =============================
+  // PAYLOAD FINAL
+  // =============================
   return {
     partido_id: pid,
     categoria: cat,
@@ -986,57 +1263,82 @@ function construirPayload(cat) {
     amarillas_local: tarjetasLocal.amarillas,
     rojas_local: tarjetasLocal.rojas,
     amarillas_visitante: tarjetasVisita.amarillas,
-    rojas_visitante: tarjetasVisita.rojas
+    rojas_visitante: tarjetasVisita.rojas,
+    penales
   };
+
 }
 
 /* ====================================================
    Guardar categoría (se llama por cada botón)
    ==================================================== */
 async function guardarCategoria(cat) {
+
   const cruceId = selectCruce.value;
   if (!cruceId) return;
 
-  // 🚫 Si ya fue guardada, no permitir
   if (estadoCruces[cruceId]?.[cat]) {
     Swal.fire("Atención", "Esta categoría ya fue cargada", "warning");
     return;
   }
 
-    if (
-      !validarGolesVsGoleadores(cat) ||
-      !validarGoleadores(cat) ||
-      !validarTarjetasVsJugadores(cat)
-    ) {
-      return;
-    }
+  if (
+    !validarGolesVsGoleadores(cat) ||
+    !validarGoleadores(cat) ||
+    !validarTarjetasVsJugadores(cat)
+  ) {
+    return;
+  }
 
-  const payload = construirPayload(cat);
+  const payload = await construirPayload(cat);
   console.log("PAYLOAD ENVIADO =>", payload);
 
   try {
+
     const res = await fetch("/api/guardar_inferiores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
+    let data;
 
-    if (!res.ok || !data.success) {
+    try {
+      data = await res.json();
+    } catch {
+      console.error("Respuesta no JSON del servidor");
+    }
+
+    console.log("RESPUESTA BACKEND =>", data);
+
+    if (!res.ok) {
+      Swal.fire(
+        "Error backend",
+        data?.message || "El servidor devolvió error",
+        "error"
+      );
+      return;
+    }
+
+    if (!data.success) {
       Swal.fire("Error", data.message || "Error al guardar", "error");
       return;
     }
 
-    // ✅ Marcar categoría como guardada
     estadoCruces[cruceId][cat] = true;
 
-    // 🔒 Bloquear botón
-    $id(`btn_guardar_${cat}`).disabled = true;
+    const btn = $id(`btn_guardar_${cat}`);
+    btn.disabled = true;
+    btn.classList.remove("btn-primary");
+    btn.classList.add("btn-success");
+    btn.textContent = "Guardado ✓";
 
-    Swal.fire("Guardado", `${cat.toUpperCase()} guardada correctamente`, "success");
+    Swal.fire(
+      "Guardado",
+      `${cat.toUpperCase()} guardada correctamente`,
+      "success"
+    );
 
-    // ✅ Verificar si el cruce está completo
     const completo = Object.values(estadoCruces[cruceId]).every(v => v);
 
     if (completo) {
@@ -1128,6 +1430,58 @@ setTimeout(() => {
     setTimeout(() => a.remove(), 800);
   });
 }, 3500);
+
+function togglePenales(categoria) {
+  const check = document.getElementById(`${categoria}_hubo_penales`);
+  const div = document.getElementById(`${categoria}_penales_inputs`);
+  div.style.display = check.checked ? "block" : "none";
+}
+function togglePenalesSlide(categoria) {
+  const check = document.getElementById(`${categoria}_penales_toggle`);
+  const div = document.getElementById(`${categoria}_penales_inputs`);
+
+  if (check.checked) {
+    div.classList.add("active");
+  } else {
+    div.classList.remove("active");
+  }
+}
+
+function fasePermitePenales(nombreFase) {
+
+  if (!nombreFase) return false;
+
+  const normal = nombreFase
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  return normal.includes("semifinal") || normal.includes("final");
+}
+
+async function puedeHaberPenales(cruceId, categoria) {
+
+  // si es ida nunca
+  if (current.ida_vuelta === "ida") {
+    return false;
+  }
+
+  try {
+
+    const res = await fetch(`/api/global_cruce/${cruceId}/${categoria}`);
+    const data = await res.json();
+
+    if (!data.success) return false;
+
+    return data.global_empate;
+
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
+
 </script>
 
 </body>

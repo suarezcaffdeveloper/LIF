@@ -1704,22 +1704,47 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
     """
     try:
         categoria = categoria.lower().strip()
+
         if categoria not in ("quinta", "sexta", "septima"):
             return jsonify({"error": "Categoría inválida"})
+
         # Buscar solo en torneo Apertura y temporada activa
-        torneo_apertura = Torneo.query.join(Temporada).filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
+        torneo_apertura = Torneo.query.join(Temporada).filter(
+            Temporada.activa == True,
+            Torneo.nombre == "Apertura"
+        ).first()
+
         if not torneo_apertura:
             return jsonify({"error": "No hay torneo Apertura activo"})
-        partido = Partido.query.filter_by(id=cruce_id, torneo_id=torneo_apertura.id).first()
+
+        partido = Partido.query.filter_by(
+            id=cruce_id,
+            torneo_id=torneo_apertura.id
+        ).first()
+
         if not partido:
             print(f"[DEBUG] info_cruce_playoff_inferiores: Partido id={cruce_id} no encontrado o no es de Apertura")
             return jsonify({"error": "Partido no encontrado"})
-        print(f"[DEBUG] info_cruce_playoff_inferiores: id={partido.id}, jugado={partido.jugado}, local={partido.equipo_local.club.nombre}, visitante={partido.equipo_visitante.club.nombre}")
+
+        print(
+            f"[DEBUG] info_cruce_playoff_inferiores: "
+            f"id={partido.id}, jugado={partido.jugado}, "
+            f"local={partido.equipo_local.club.nombre}, "
+            f"visitante={partido.equipo_visitante.club.nombre}"
+        )
+
+        # 🔹 Obtener nombre de la fase si existe
+        fase_nombre = None
+        if hasattr(partido, "fase") and partido.fase:
+            fase_nombre = partido.fase.nombre
+
         info = {
+            "fase_nombre": fase_nombre,  # 👈 IMPORTANTE PARA EL JS
             "local_id": partido.equipo_local.club_id,
             "visitante_id": partido.equipo_visitante.club_id,
             "local_nombre": partido.equipo_local.club.nombre,
             "visitante_nombre": partido.equipo_visitante.club.nombre,
+
             categoria: {
                 "id": partido.id,
                 "jugado": partido.jugado,
@@ -1727,7 +1752,9 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
                 "visitante": partido.equipo_visitante.id
             }
         }
+
         return jsonify(info)
+
     except Exception as e:
         print("ERROR info_cruce_playoff_inferiores:", e)
         return jsonify({"error": "Error interno"})
@@ -2041,7 +2068,8 @@ def info_cruce_playoff(cruce_id, categoria, ida_vuelta):
             "local_nombre": partido.equipo_local.club.nombre,
             "visitante_id": visitante_club_id,
             "visitante_nombre": partido.equipo_visitante.club.nombre,
-            "jornada": partido.jornada
+            "jornada": partido.jornada,
+            "fase_nombre": partido.fase.nombre if partido.fase else None,
         })
     
     except Exception as e:
@@ -2194,6 +2222,128 @@ def validar_y_guardar_estadisticas(data, categoria):
     if total_local != goles_local or total_visitante != goles_visitante:
         return {"success": False, "message": "Los goles no coinciden con los goleadores."}, 400
 
+    # Guardar penales y definido_por_penales solo si el global está empatado (ida/vuelta)
+    penales = data.get("penales")
+    print("PENALES RECIBIDOS:", penales)
+    print("TIPO:", type(penales))
+    from app.routes.views import fase_requiere_ganador
+    requiere_ganador = fase_requiere_ganador(partido)
+    
+    empate = goles_local == goles_visitante
+    es_ida_vuelta = getattr(partido.fase, "ida_vuelta", False)
+
+    if requiere_ganador:
+        if es_ida_vuelta:
+            # Permitir empate en la ida (jornada 1)
+            if partido.jornada == 1:
+                partido.penales_local = None
+                partido.penales_visitante = None
+                partido.definido_por_penales = False
+            else:
+                # En la vuelta (jornada 2), buscar el partido de ida y calcular el global
+                from sqlalchemy import or_, and_
+                partido_ida = Partido.query.filter(
+                    Partido.fase_id == partido.fase_id,
+                    Partido.jornada == 1,
+                    Partido.categoria == partido.categoria,
+                    or_(
+                        and_(
+                            Partido.equipo_local_id == partido.equipo_local_id,
+                            Partido.equipo_visitante_id == partido.equipo_visitante_id
+                        ),
+                        and_(
+                            Partido.equipo_local_id == partido.equipo_visitante_id,
+                            Partido.equipo_visitante_id == partido.equipo_local_id
+                        )
+                    )
+                ).first()
+                if not partido_ida or not partido_ida.jugado:
+                    # Si la ida no está jugada, no se puede cargar la vuelta
+                    return {"success": False, "message": "Debe cargar primero el partido de ida"}, 400
+                goles_global_local = goles_local + partido_ida.goles_local
+                goles_global_visitante = goles_visitante + partido_ida.goles_visitante
+                global_empate = goles_global_local == goles_global_visitante
+                if global_empate:
+                    # Robustecer validación de penales (acepta dict, str, list, int)
+                    print(f"[DEBUG] Penales recibidos: {penales} ({type(penales)})")
+                    pl = pv = None
+                    if isinstance(penales, dict):
+                        pl = penales.get("local") or penales.get("l") or penales.get("0")
+                        pv = penales.get("visitante") or penales.get("v") or penales.get("1")
+                    elif isinstance(penales, str):
+                        partes = penales.replace(",", "-").replace(" ", "").split("-")
+                        if len(partes) == 2:
+                            pl, pv = partes
+                    elif isinstance(penales, list):
+                        if len(penales) == 2:
+                            pl, pv = penales
+                    elif isinstance(penales, int):
+                        pl = penales
+                        pv = None
+                    # Si viene como None, string vacío, etc
+                    if pl is None or pv is None:
+                        print(f"[ERROR] Penales incompletos: pl={pl}, pv={pv}")
+                        return {"success": False, "message": "Debe cargar los penales para definir el cruce"}, 400
+                    try:
+                        pl = int(pl)
+                        pv = int(pv)
+                    except Exception:
+                        print(f"[ERROR] Penales mal formateados: pl={pl}, pv={pv}")
+                        return {"success": False, "message": "Penales mal formateados"}, 400
+                    if pl == pv:
+                        print(f"[ERROR] Penales empatados: pl={pl}, pv={pv}")
+                        return {"success": False, "message": "Los penales no pueden empatar"}, 400
+                    print(f"[DEBUG] Penales OK: local={pl}, visitante={pv}")
+                    partido.penales_local = pl
+                    partido.penales_visitante = pv
+                    partido.definido_por_penales = True
+                else:
+                    partido.penales_local = None
+                    partido.penales_visitante = None
+                    partido.definido_por_penales = False
+        else:
+            if empate:
+                # Robustecer validación de penales (acepta dict, str, list, int)
+                print(f"[DEBUG] Penales recibidos: {penales} ({type(penales)})")
+                pl = pv = None
+                if isinstance(penales, dict):
+                    pl = penales.get("local") or penales.get("l") or penales.get("0")
+                    pv = penales.get("visitante") or penales.get("v") or penales.get("1")
+                elif isinstance(penales, str):
+                    partes = penales.replace(",", "-").replace(" ", "").split("-")
+                    if len(partes) == 2:
+                        pl, pv = partes
+                elif isinstance(penales, list):
+                    if len(penales) == 2:
+                        pl, pv = penales
+                elif isinstance(penales, int):
+                    pl = penales
+                    pv = None
+                if pl is None or pv is None:
+                    print(f"[ERROR] Penales incompletos: pl={pl}, pv={pv}")
+                    return {"success": False, "message": "Debe cargar los penales para definir el partido"}, 400
+                try:
+                    pl = int(pl)
+                    pv = int(pv)
+                except Exception:
+                    print(f"[ERROR] Penales mal formateados: pl={pl}, pv={pv}")
+                    return {"success": False, "message": "Penales mal formateados"}, 400
+                if pl == pv:
+                    print(f"[ERROR] Penales empatados: pl={pl}, pv={pv}")
+                    return {"success": False, "message": "Los penales no pueden empatar"}, 400
+                print(f"[DEBUG] Penales OK: local={pl}, visitante={pv}")
+                partido.penales_local = pl
+                partido.penales_visitante = pv
+                partido.definido_por_penales = True
+            else:
+                partido.penales_local = None
+                partido.penales_visitante = None
+                partido.definido_por_penales = False
+    else:
+        partido.penales_local = None
+        partido.penales_visitante = None
+        partido.definido_por_penales = False
+
     partido.goles_local = goles_local
     partido.goles_visitante = goles_visitante
     partido.jugado = True
@@ -2322,8 +2472,7 @@ def cargar_estadisticas_inferiores():
         jornadas=jornadas,
         fases_playoff=fases_playoff
     )
-
-
+    
 # ====================================================
 # CRUCES POR JORNADA
 # ====================================================
@@ -2333,7 +2482,18 @@ def cruces_por_jornada_inferiores(jornada):
 
     from sqlalchemy import or_
     categorias = ["quinta", "sexta", "septima"]
-    torneo_apertura = Torneo.query.filter_by(nombre="Apertura").first()
+    temporada_activa = Temporada.query.filter_by(activa=True).first()
+
+    if not temporada_activa:
+        return jsonify([])
+
+    torneo_apertura = Torneo.query.filter_by(
+        nombre="Apertura",
+        temporada_id=temporada_activa.id
+    ).first()
+
+    if not torneo_apertura:
+        return jsonify([])
     # Buscar id de fase regular para el torneo apertura
     fase_regular = Fase.query.filter_by(nombre="Regular", torneo_id=torneo_apertura.id).first()
 
@@ -2543,18 +2703,77 @@ def cruces_pendientes(jornada):
     return jsonify(list(cruces.values()))
 
 
+def fase_requiere_ganador(partido):
+    if not partido.fase:
+        return False
+
+    fases_decisivas = ["Semifinal", "Final", "Finalísima"]
+    return partido.fase.nombre in fases_decisivas
+
+@views.route("/api/global_cruce/<int:cruce_id>/<categoria>")
+def global_cruce(cruce_id, categoria):
+
+    try:
+
+        partidos = Partido.query.filter_by(cruce_id=cruce_id).all()
+
+        if len(partidos) < 2:
+            return jsonify({
+                "success": True,
+                "global_empate": False
+            })
+
+        ida = partidos[0]
+        vuelta = partidos[1]
+
+        goles_ida_local = ida.goles_local or 0
+        goles_ida_visita = ida.goles_visitante or 0
+
+        goles_vuelta_local = vuelta.goles_local or 0
+        goles_vuelta_visita = vuelta.goles_visitante or 0
+
+        global_a = goles_ida_local + goles_vuelta_visita
+        global_b = goles_ida_visita + goles_vuelta_local
+
+        empate = global_a == global_b
+
+        return jsonify({
+            "success": True,
+            "global_empate": empate,
+            "global_a": global_a,
+            "global_b": global_b
+        })
+
+    except Exception as e:
+
+        print("ERROR global_cruce:", e)
+
+        return jsonify({
+            "success": False
+        })
+
 # ====================================================
 # GUARDAR ESTADÍSTICAS INFERIORES
 # ====================================================
 @views.route('/api/guardar_inferiores', methods=['POST'])
 def guardar_inferiores():
-    data = request.get_json()
+
+    data = request.get_json(force=True)
     print("DATA RECIBIDA =>", data)
+    penales = data.get("penales") or {}
+    print("JSON COMPLETO RECIBIDO:")
+    print(data)
+    print(type(data))
 
     try:
+
+        # =====================================================
+        # DATOS BÁSICOS
+        # =====================================================
         partido_id = int(data["partido_id"])
         goles_local = int(data.get("goles_local", 0))
         goles_visitante = int(data.get("goles_visitante", 0))
+        penales = data.get("penales")
 
         goleadores_local = data.get("goleadores_local", [])
         goleadores_visitante = data.get("goleadores_visitante", [])
@@ -2564,7 +2783,9 @@ def guardar_inferiores():
         amarillas_visitante = data.get("amarillas_visitante", [])
         rojas_visitante = data.get("rojas_visitante", [])
 
-        # -------------------- HELPERS --------------------
+        # =====================================================
+        # HELPERS
+        # =====================================================
         def validar_tarjetas(datos, label=""):
             if not datos:
                 return
@@ -2588,7 +2809,9 @@ def guardar_inferiores():
                         resultado[str(item)] = resultado.get(str(item), 0) + 1
             return resultado
 
-        # -------------------- VALIDACIONES --------------------
+        # =====================================================
+        # VALIDACIONES TARJETAS
+        # =====================================================
         validar_tarjetas(amarillas_local, "amarillas local")
         validar_tarjetas(rojas_local, "rojas local")
         validar_tarjetas(amarillas_visitante, "amarillas visitante")
@@ -2599,126 +2822,170 @@ def guardar_inferiores():
         amarillas_visitante = normalizar_tarjetas(amarillas_visitante)
         rojas_visitante = normalizar_tarjetas(rojas_visitante)
 
+        # =====================================================
+        # VALIDAR GOLES VS GOLEADORES
+        # =====================================================
         total_gl = sum(int(j.get("goles", 0)) for j in goleadores_local)
         total_gv = sum(int(j.get("goles", 0)) for j in goleadores_visitante)
 
         if total_gl != goles_local:
-            return jsonify({"success": False, "message": "Los goles del local no coinciden"}), 400
+            return jsonify(success=False, message="Los goles del local no coinciden"), 400
+
         if total_gv != goles_visitante:
-            return jsonify({"success": False, "message": "Los goles del visitante no coinciden"}), 400
+            return jsonify(success=False, message="Los goles del visitante no coinciden"), 400
 
-        # -------------------- VALIDACIÓN: PARTIDO YA CARGADO --------------------
-        # 🔥 Verificar que el partido NO haya sido cargado anteriormente
+        # =====================================================
+        # PARTIDO
+        # =====================================================
         partido = Partido.query.get_or_404(partido_id)
-        
+
         if partido.jugado:
-            return jsonify({
-                "success": False, 
-                "message": f"Este partido ya fue cargado anteriormente con resultado {partido.goles_local} - {partido.goles_visitante}"
-            }), 409
+            return jsonify(
+                success=False,
+                message=f"Este partido ya fue cargado anteriormente con resultado "
+                        f"{partido.goles_local} - {partido.goles_visitante}"
+            ), 409
 
-        # -------------------- UNIFICAR JUGADORES --------------------
-        jugadores_local = set(j.get("id") or j.get("jugador_id") or j.get("numero_carnet") 
-                              for j in goleadores_local if j.get("id") or j.get("jugador_id") or j.get("numero_carnet"))
-        jugadores_local.update(map(int, amarillas_local.keys()))
-        jugadores_local.update(map(int, rojas_local.keys()))
+        empate = goles_local == goles_visitante
 
-        jugadores_visitante = set(j.get("id") or j.get("jugador_id") or j.get("numero_carnet") 
-                                  for j in goleadores_visitante if j.get("id") or j.get("jugador_id") or j.get("numero_carnet"))
-        jugadores_visitante.update(map(int, amarillas_visitante.keys()))
-        jugadores_visitante.update(map(int, rojas_visitante.keys()))
+        fase_ida_vuelta = partido.fase.ida_vuelta
+        jornada = partido.jornada
 
-        # -------------------- ELIMINAR REGISTROS EXISTENTES --------------------
-        db.session.query(EstadoJugadorPartido).filter_by(id_partido=partido_id).delete()
-        db.session.flush()
+        # =====================================================
+        # FASE IDA / VUELTA
+        # =====================================================
+        if fase_ida_vuelta:
 
-        # -------------------- GUARDAR ESTADO --------------------
-        for jugador_id in jugadores_local:
-            goles = next((int(j.get("goles", 0)) for j in goleadores_local
-                         if int(j.get("id") or j.get("jugador_id") or j.get("numero_carnet")) == jugador_id), 0)
-            estado = EstadoJugadorPartido(
-                id_jugador=jugador_id,
-                id_partido=partido_id,
-                cant_goles=goles,
-                tarjetas_amarillas=int(amarillas_local.get(str(jugador_id), 0)),
-                tarjetas_rojas=int(rojas_local.get(str(jugador_id), 0))
-            )
-            db.session.add(estado)
+            # =========================
+            # PARTIDO DE IDA
+            # =========================
+            if jornada == 1:
 
-        for jugador_id in jugadores_visitante:
-            goles = next((int(j.get("goles", 0)) for j in goleadores_visitante
-                         if int(j.get("id") or j.get("jugador_id") or j.get("numero_carnet")) == jugador_id), 0)
-            estado = EstadoJugadorPartido(
-                id_jugador=jugador_id,
-                id_partido=partido_id,
-                cant_goles=goles,
-                tarjetas_amarillas=int(amarillas_visitante.get(str(jugador_id), 0)),
-                tarjetas_rojas=int(rojas_visitante.get(str(jugador_id), 0))
-            )
-            db.session.add(estado)
+                if penales:
+                    return jsonify(
+                        success=False,
+                        message="No se permiten penales en el partido de ida"
+                    ), 400
 
-        # -------------------- MARCAR PARTIDO JUGADO --------------------
-        # 🔥 Validar que el partido pertenezca al torneo activo
-        temporada_activa = Temporada.query.filter_by(activa=True).first()
-        if not temporada_activa:
-            db.session.rollback()
-            return jsonify({"success": False, "message": "No hay temporada activa"}), 400
-        
-        torneo_activo = Torneo.query.filter_by(
-            nombre="Apertura",
-            temporada_id=temporada_activa.id
-        ).first()
-        
-        if not torneo_activo or partido.torneo_id != torneo_activo.id:
-            db.session.rollback()
-            return jsonify({"success": False, "message": "El partido no pertenece al torneo activo"}), 400
-        
+                partido.penales_local = None
+                partido.penales_visitante = None
+                partido.definido_por_penales = False
+
+            # =========================
+            # PARTIDO DE VUELTA
+            # =========================
+            elif jornada == 2:
+
+                ida = Partido.query.filter_by(
+                    fase_id=partido.fase_id,
+                    categoria=partido.categoria,
+                    jornada=1,
+                    equipo_local_id=partido.equipo_visitante_id,
+                    equipo_visitante_id=partido.equipo_local_id
+                ).first()
+
+                # ❌ No se cargó el partido de ida
+                if not ida or not ida.jugado:
+                    return jsonify(
+                        success=False,
+                        message="Primero debe cargarse el partido de ida antes de registrar la vuelta."
+                    ), 400
+
+                goles_ida_local = ida.goles_local or 0
+                goles_ida_visita = ida.goles_visitante or 0
+
+                global_local = goles_ida_local + goles_visitante
+                global_visita = goles_ida_visita + goles_local
+
+                global_empate = global_local == global_visita
+
+                if global_empate:
+
+                    if not penales:
+                        return jsonify(
+                            success=False,
+                            message="El global está empatado. Debe definir por penales."
+                        ), 400
+
+                    pl = int(penales.get("local", 0))
+                    pv = int(penales.get("visitante", 0))
+
+                    if pl == pv:
+                        return jsonify(
+                            success=False,
+                            message="Los penales no pueden terminar empatados"
+                        ), 400
+
+                    partido.penales_local = pl
+                    partido.penales_visitante = pv
+                    partido.definido_por_penales = True
+
+                else:
+
+                    if penales:
+                        return jsonify(
+                            success=False,
+                            message="El global no está empatado. No corresponde penales."
+                        ), 400
+
+                    partido.penales_local = None
+                    partido.penales_visitante = None
+                    partido.definido_por_penales = False
+
+
+        # =====================================================
+        # PARTIDOS A UN SOLO PARTIDO (FINAL / SEMI)
+        # =====================================================
+        else:
+
+            requiere_ganador = fase_requiere_ganador(partido)
+
+            if requiere_ganador and empate:
+
+                if penales is None:
+                    return jsonify(
+                        success=False,
+                        message="Debe cargar penales para definir el partido"
+                    ), 400
+
+                pl = int(penales.get("local", 0))
+                pv = int(penales.get("visitante", 0))
+
+                if pl == pv:
+                    return jsonify(
+                        success=False,
+                        message="Los penales no pueden empatar"
+                    ), 400
+
+                partido.penales_local = pl
+                partido.penales_visitante = pv
+                partido.definido_por_penales = True
+
+            else:
+
+                partido.penales_local = None
+                partido.penales_visitante = None
+                partido.definido_por_penales = False
+                
+        # =====================================================
+        # GUARDAR RESULTADO
+        # =====================================================
         partido.goles_local = goles_local
         partido.goles_visitante = goles_visitante
         partido.jugado = True
 
-        db.session.flush()
         db.session.commit()
 
-        # -------------------- ENVÍO AUTOMÁTICO DE MAIL --------------------
-        try:
-            if jornada_completa(partido.jornada, categoria="Inferiores"):
-                usuarios = Usuario.query.filter_by(rol="usuario").all()
-                
-                if usuarios:
-                    enviar_mail_jornada(usuarios, partido.jornada, categoria="Inferiores")
-                    return jsonify({
-                        "success": True, 
-                        "message": f"Jornada {partido.jornada} completa. Estadísticas actualizadas y mails enviados",
-                        "jornada_completa": True
-                    })
-                else:
-                    print("⚠️ No hay usuarios con rol 'usuario' para notificar")
-                    return jsonify({
-                        "success": True,
-                        "message": f"Jornada {partido.jornada} completa pero no hay usuarios para notificar",
-                        "jornada_completa": True
-                    })
-            else:
-                return jsonify({
-                    "success": True, 
-                    "message": "Partido guardado correctamente",
-                    "jornada_completa": False
-                })
-        except Exception as e:
-            print(f"❌ Error en envío de mails: {e}")
-            return jsonify({
-                "success": True,
-                "message": "Partido guardado pero hubo error enviando mails",
-                "error_mail": str(e),
-                "jornada_completa": False
-            })
+        return jsonify(
+            success=True,
+            message="Partido guardado correctamente",
+            jornada_completa=False
+        )
 
     except Exception as e:
         db.session.rollback()
         print("ERROR REAL:", e)
-        return jsonify({"success": False, "message": "Error interno del servidor"}), 500
-
+        return jsonify(success=False, message="Error interno del servidor"), 500
 
 # ====================================================
 # FUNCIÓN: OBTENER GANADORES DE CUARTOS DE FINAL
@@ -2853,6 +3120,8 @@ def obtener_ganadores_cuartos(torneo_id, categoria):
 
 @views.route("/api/playoff/clubes_clasificados", methods=["GET"])
 def clubes_clasificados():
+    
+    from app.utils.playoff_utils import obtener_ganador_partido
     """
     Retorna los clubes clasificados para una fase específica.
     Acepta:
@@ -2964,12 +3233,17 @@ def clubes_clasificados():
                     ganadores = obtener_ganadores_cuartos(torneo_id, categoria)
                     clubes_ids = set(ganadores)
                 else:
-                    # Para otras fases, ganador es el que tiene más goles en un partido
+                    
+                    print("🏆 Calculando ganadores usando lógica playoff")
+
                     for partido in partidos_fase_anterior:
-                        if partido.goles_local > partido.goles_visitante:
-                            clubes_ids.add(partido.equipo_local.club_id)
-                        elif partido.goles_visitante > partido.goles_local:
-                            clubes_ids.add(partido.equipo_visitante.club_id)
+                        if not partido.jugado:
+                            continue
+
+                        ganador = obtener_ganador_partido(partido)
+
+                        if ganador:
+                            clubes_ids.add(ganador.club_id)
                 print(f"✅ Con resultados. Ganadores: {clubes_ids}")
             else:
                 # Sin resultados, traer todos los clubes que participan

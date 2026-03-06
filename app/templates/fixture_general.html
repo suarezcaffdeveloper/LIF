@@ -191,11 +191,27 @@ h1 {
     line-height: 1.2;
 }
 
-.vs {
-    font-weight: 900;
-    font-size: 1.15rem;
-    color: #3a6ea5;
-    white-space: nowrap;
+.vs{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    font-weight:600;
+}
+
+.vs .goles-local,
+.vs .goles-visitante{
+    font-size:18px;
+}
+
+.vs .penales{
+    font-size:14px;
+    color:#777;
+    font-weight:500;
+}
+
+.vs .guion{
+    font-size:16px;
 }
 
 </style>
@@ -257,7 +273,23 @@ h1 {
 
                             <div class="vs">
                                 {% if mostrar_resultados and partido.jugado %}
-                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+
+                                    <span class="goles-local">
+                                        {{ partido.goles_local }}
+                                        {% if partido.definido_por_penales %}
+                                            <span class="penales">({{ partido.penales_local }})</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <span class="guion">vs</span>
+
+                                    <span class="goles-visitante">
+                                        {{ partido.goles_visitante }}
+                                        {% if partido.definido_por_penales %}
+                                            <span class="penales">({{ partido.penales_visitante }})</span>
+                                        {% endif %}
+                                    </span>
+
                                 {% else %}
                                     vs
                                 {% endif %}
@@ -302,7 +334,23 @@ h1 {
 
                             <div class="vs">
                                 {% if mostrar_resultados and partido.jugado %}
-                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+
+                                    <span class="goles-local">
+                                        {{ partido.goles_local }}
+                                        {% if partido.definido_por_penales %}
+                                            <span class="penales">({{ partido.penales_local }})</span>
+                                        {% endif %}
+                                    </span>
+
+                                    <span class="guion">vs</span>
+
+                                    <span class="goles-visitante">
+                                        {{ partido.goles_visitante }}
+                                        {% if partido.definido_por_penales %}
+                                            <span class="penales">({{ partido.penales_visitante }})</span>
+                                        {% endif %}
+                                    </span>
+
                                 {% else %}
                                     vs
                                 {% endif %}
@@ -341,11 +389,21 @@ h1 {
 
                         <div class="vs">
                             {% if mostrar_resultados and partido.jugado %}
-                                {{ partido.goles_local }} - {{ partido.goles_visitante }}
+
+                                {% if partido.definido_por_penales %}
+                                    {{ partido.goles_local }}
+                                    ({{ partido.penales_local }})
+                                    -
+                                    ({{ partido.penales_visitante }})
+                                    {{ partido.goles_visitante }}
+                                {% else %}
+                                    {{ partido.goles_local }} - {{ partido.goles_visitante }}
+                                {% endif %}
+
                             {% else %}
                                 vs
                             {% endif %}
-                        </div>
+                            </div>
 
                         <div class="equipo">
                             <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}">
