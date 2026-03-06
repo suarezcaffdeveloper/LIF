@@ -71,6 +71,8 @@ class Torneo(db.Model):
 
     temporada_id = db.Column(db.Integer, db.ForeignKey('temporada.id'), nullable=False)
     temporada = db.relationship('Temporada', back_populates='torneos')
+    
+    activo = db.Column(db.Boolean, default=False)  # 👈 torneo visible en la web
 
     partidos = db.relationship('Partido', back_populates='torneo')
     fases = db.relationship('Fase', back_populates='torneo')

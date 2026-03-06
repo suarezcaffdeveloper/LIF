@@ -76,11 +76,61 @@
         .back-link:hover {
             color: #4fc3f7;
         }
+
+    /* Contenedor flotante para flashes */
+    #flash-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      pointer-events: none; /* Para que no interfiera con clicks */
+    }
+
+    /* Estilo para flash messages */
+    .flash-message {
+      display: inline-block;          /* tamaño según el texto */
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;                     /* inicial invisible */
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      margin-bottom: 0.5rem;
+      transform: translateY(-20px);   /* slide inicial hacia arriba */
+      pointer-events: auto;           /* permite interacción con toast si fuera necesario */
+    }
+
+    /* Colores por categoría */
+    .flash-success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .flash-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
     </style>
 </head>
 <body>
 
 <div class="container-form">
+    <!-- Contenedor de flashes flotante -->
+    <div id="flash-container">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
     <h2>Administrar Temporadas</h2>
 
     <form method="POST" action="{{ url_for('views.crear_temporada') }}">
@@ -112,10 +162,61 @@
         </table>
     {% endif %}
 
+    {% if torneos %}
+        <hr>
+
+        <h4 class="text-center mt-4">Torneo Activo</h4>
+
+        <div class="d-flex justify-content-center gap-3 mt-3">
+
+        {% for torneo in torneos %}
+
+        <form method="POST" action="{{ url_for('views.activar_torneo', torneo_id=torneo.id) }}">
+            
+            <button class="btn 
+                {% if torneo.activo %}
+                    btn-success
+                {% else %}
+                    btn-outline-light
+                {% endif %}
+            ">
+                {{ torneo.nombre }}
+            </button>
+
+        </form>
+
+        {% endfor %}
+
+        </div>
+        {% endif %}
+
     <a href="{{ url_for('views.adminview') }}" class="back-link">
         ← Volver al panel de administrador
     </a>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const flashes = document.querySelectorAll(".flash-message");
+
+    flashes.forEach((flash) => {
+
+        // cerrar con botón
+        flash.querySelector(".flash-close").addEventListener("click", () => {
+            flash.remove();
+        });
+
+        // auto cerrar después de 4s
+        setTimeout(() => {
+            flash.style.opacity = "0";
+            setTimeout(() => flash.remove(), 400);
+        }, 4000);
+
+    });
+
+});
+</script>
 
 </body>
 </html>

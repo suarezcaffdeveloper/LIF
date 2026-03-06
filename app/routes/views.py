@@ -70,8 +70,22 @@ def cargar_parametros_view():
 
 @views.route('/admin/temporadas', methods=['GET'])
 def administrar_temporadas_view():
+
     temporadas = Temporada.query.order_by(Temporada.nombre.desc()).all()
-    return render_template("plantillasAdmin/administrar_temporadas.html", temporadas=temporadas)
+
+    temporada_activa = Temporada.query.filter_by(activa=True).first()
+
+    torneos = []
+    if temporada_activa:
+        torneos = Torneo.query.filter_by(
+            temporada_id=temporada_activa.id
+        ).all()
+
+    return render_template(
+        "plantillasAdmin/administrar_temporadas.html",
+        temporadas=temporadas,
+        torneos=torneos
+    )
 
 @views.route('/admin/temporadas', methods=['POST'])
 def crear_temporada():
@@ -98,7 +112,11 @@ def crear_temporada():
     # Crear torneos automáticamente
     torneos = []
     for torneo_nombre in ["Apertura", "Clausura"]:
-        torneo = Torneo(nombre=torneo_nombre, temporada_id=nueva_temporada.id)
+        torneo = Torneo(
+            nombre=torneo_nombre,
+            temporada_id=nueva_temporada.id,
+            activo=(torneo_nombre == "Apertura")  # 👈 Apertura activo
+        )
         db.session.add(torneo)
         torneos.append(torneo)
 
@@ -122,6 +140,25 @@ def crear_temporada():
     flash(f"Temporada {nombre} creada y activada correctamente.", "success")
     return redirect(url_for("views.administrar_temporadas_view"))
 
+@views.route("/admin/activar_torneo/<int:torneo_id>", methods=["POST"])
+def activar_torneo(torneo_id):
+
+    torneo = Torneo.query.get_or_404(torneo_id)
+
+    # desactivar todos los torneos de la temporada
+    Torneo.query.filter_by(temporada_id=torneo.temporada_id).update({
+        "activo": False
+    })
+
+    # activar el seleccionado
+    torneo.activo = True
+
+    db.session.commit()
+
+    if torneo.activo:
+        flash(f"El torneo {torneo.nombre} ya está activo.", "info")
+        return redirect(url_for("views.administrar_temporadas_view"))
+
 # ============================
 @views.route('/fixture/<bloque>')
 @views.route('/fixture/<bloque>/<categoria>')
@@ -135,7 +172,7 @@ def fixture(bloque, categoria=None):
 
     # ✅ Traer Apertura de la temporada activa
     torneo_apertura = Torneo.query.filter_by(
-        nombre="Apertura",
+        activo = True,
         temporada_id=temporada_activa.id
     ).first()
 
@@ -393,7 +430,8 @@ def recalcular_tabla_posiciones(categoria):
 
     # 1️⃣ Obtener temporada activa
     temporada_activa = Temporada.query.filter_by(activa=True).first()
-    if not temporada_activa:
+    torneo_activo = Torneo.query.filter_by(activo=True).first()
+    if not temporada_activa or not torneo_activo:
         return []
 
     # 2️⃣ Traer equipos de la categoría (podrías filtrarlos por torneo si querés ser más estricto)
@@ -429,12 +467,11 @@ def recalcular_tabla_posiciones(categoria):
     partidos = (
         db.session.query(Partido)
         .join(Torneo, Partido.torneo_id == Torneo.id)
-        .join(Temporada, Torneo.temporada_id == Temporada.id)
         .outerjoin(Fase, Partido.fase_id == Fase.id)
         .filter(
             func.lower(Partido.categoria) == categoria,
             Partido.jugado == True,
-            Temporada.id == temporada_activa.id,
+            Partido.torneo_id == torneo_activo.id,   # 🔥 FILTRO CLAVE
             or_(
                 Partido.fase_id == None,
                 Fase.nombre == "Regular"
@@ -497,7 +534,11 @@ def calcular_rachas(tabla, categoria):
     Devuelve un diccionario con rachas de los últimos 5 partidos
     de cada equipo SOLO de la temporada activa.
     """
+    torneo_activo = Torneo.query.filter_by(activo=True).first()
 
+    if not torneo_activo:
+        return {}
+    
     rachas = {}
 
     for equipo in tabla:
@@ -514,12 +555,11 @@ def calcular_rachas(tabla, categoria):
             partidos_ultimos = (
                 db.session.query(Partido)
                 .join(Torneo, Partido.torneo_id == Torneo.id)
-                .join(Temporada, Torneo.temporada_id == Temporada.id)
                 .outerjoin(Fase, Partido.fase_id == Fase.id)
                 .filter(
                     func.lower(Partido.categoria) == categoria.lower(),
                     Partido.jugado == True,
-                    Temporada.activa == True,  # 🔥 filtro clave
+                    Partido.torneo_id == torneo_activo.id,  # 🔥 FILTRO CLAVE
                     or_(
                         Partido.fase_id == None,
                         Fase.nombre == "Regular"
@@ -1159,24 +1199,21 @@ def cargar_fixture_mayores_view():
 
     # Traer equipos de mayores normalizando la categoría (trim + lower)
     equipos = Equipo.query.filter(
-        func.lower(func.trim(Equipo.categoria)).in_( ["primera", "reserva"] )
+        func.lower(func.trim(Equipo.categoria)).in_(["primera", "reserva"])
     ).all()
 
     equipos_por_club = {}
     for e in equipos:
-        # Guardamos la categoría normalizada para evitar inconsistencias
         categoria_key = e.categoria.strip().lower() if e.categoria else ""
         equipos_por_club.setdefault(e.club_id, {})[categoria_key] = e.id
 
     # =========================
     # JORNADAS MAYORES
     # =========================
-    # Contar equipos de primera normalizando
     total_equipos = Equipo.query.filter(func.lower(func.trim(Equipo.categoria)) == "primera").count()
     jornadas_disponibles = []
 
     if total_equipos >= 2:
-        # En round-robin: si la cantidad es par -> n-1 jornadas; si es impar -> n jornadas (con bye)
         if total_equipos % 2 == 0:
             total_jornadas = total_equipos - 1
         else:
@@ -1184,14 +1221,19 @@ def cargar_fixture_mayores_view():
 
         partidos_por_jornada = total_equipos // 2
 
-        torneo_apertura = Torneo.query.filter_by(
-            nombre="Apertura",
+        # Tomar torneo activo de la temporada activa
+        torneo_activo = Torneo.query.filter_by(
+            activo=True,
             temporada_id=temporada_activa.id
         ).first()
+        if not torneo_activo:
+            flash("No hay torneo activo en la temporada activa.", "danger")
+            return redirect(url_for("views.administrar_temporadas_view"))
 
+        # Contar partidos cargados solo en el torneo activo
         for j in range(1, total_jornadas + 1):
             partidos_cargados = Partido.query.filter(
-                Partido.torneo_id == torneo_apertura.id,
+                Partido.torneo_id == torneo_activo.id,
                 func.lower(func.trim(Partido.categoria)) == "primera",
                 Partido.jornada == j
             ).count()
@@ -1229,57 +1271,32 @@ def guardar_partido_mayores():
         fecha = datetime.strptime(data.get("fecha"), "%Y-%m-%d").date() if data.get("fecha") else None
         hora = datetime.strptime(data.get("hora"), "%H:%M").time() if data.get("hora") else None
 
-        torneo_apertura = (
-            Torneo.query
-            .join(Torneo.temporada)
-            .filter(
-                Torneo.nombre == "Apertura",
-                Temporada.activa == True
-            )
-            .first()
-        )
-
-        torneo_clausura = (
-            Torneo.query
-            .join(Torneo.temporada)
-            .filter(
-                Torneo.nombre == "Clausura",
-                Temporada.activa == True
-            )
-            .first()
-        )
-
-        if not torneo_apertura:
-            return jsonify({"error": "No se encontró el torneo Apertura."}), 400
-
         # =========================
-        # VALIDAR JORNADA COMPLETA
+        # TORNEO ACTIVO
         # =========================
-        # Normalizar conteo de equipos
-        total_equipos = Equipo.query.filter(func.lower(func.trim(Equipo.categoria)) == "primera").count()
-        partidos_por_jornada = total_equipos // 2
+        torneo_activo = Torneo.query.join(Temporada)\
+            .filter(Temporada.activa == True, Torneo.activo == True)\
+            .first()
+        print(torneo_activo)
+        if not torneo_activo:
+            return jsonify({"error": "No hay torneo activo en la temporada activa."}), 400
 
-        partidos_existentes = (
-            Partido.query
-            .join(Partido.torneo)          # Partido → Torneo
-            .join(Torneo.temporada)        # Torneo → Temporada
-            .filter(
-                Partido.torneo_id == torneo_apertura.id,
-                Temporada.activa == True,  # ← filtro nuevo
-                func.lower(func.trim(Partido.categoria)) == "primera",
-                Partido.jornada == jornada
-            )
-            .count()
-        )
 
-        if partidos_existentes >= partidos_por_jornada:
-            return jsonify({"error": "La jornada ya está completa."}), 400
-
+        if torneo_activo.nombre == "Clausura":
+            torneo_invertido = Torneo.query.join(Temporada)\
+                .filter(Temporada.activa == True, Torneo.nombre == "Apertura")\
+                .first()
+            print("Torneo invertido para carga:", torneo_invertido)
+        else:
+            torneo_invertido = Torneo.query.join(Temporada)\
+                .filter(Temporada.activa == True, Torneo.nombre == "Clausura")\
+                .first()
+            print("Torneo invertido para carga:", torneo_invertido)
         categorias = ["primera", "reserva"]
         generados = []
 
         for cat in categorias:
-            # Buscar equipos normalizando la categoría (trim + lower)
+            # Traer equipos de cada club para la categoría
             eq_local = Equipo.query.filter(
                 Equipo.club_id == local_id,
                 func.lower(func.trim(Equipo.categoria)) == cat
@@ -1292,32 +1309,41 @@ def guardar_partido_mayores():
             if not eq_local or not eq_visit:
                 return jsonify({"error": f"Faltan equipos de {cat} para uno de los clubes."}), 400
 
+            # Evitar duplicados
             ya_enfrentados = Partido.query.filter(
-                Partido.torneo_id.in_([torneo_apertura.id, torneo_clausura.id if torneo_clausura else -1]),
+                Partido.torneo_id.in_([torneo_activo.id, torneo_invertido.id if torneo_invertido else -1]),
                 func.lower(func.trim(Partido.categoria)) == cat,
                 ((Partido.equipo_local_id == eq_local.id) & (Partido.equipo_visitante_id == eq_visit.id)) |
                 ((Partido.equipo_local_id == eq_visit.id) & (Partido.equipo_visitante_id == eq_local.id))
             ).first()
-
             if ya_enfrentados:
                 continue
 
-            # Apertura
-            p_ap = Partido(
+            # =========================
+            # CREAR PARTIDO TORNEO ACTIVO
+            # =========================
+            p_activo = Partido(
                 jornada=jornada,
                 fecha_partido=fecha,
                 hora_partido=hora,
                 categoria=cat,
                 equipo_local_id=eq_local.id,
                 equipo_visitante_id=eq_visit.id,
-                torneo_id=torneo_apertura.id,
+                torneo_id=torneo_activo.id,
                 jugado=False
             )
-            db.session.add(p_ap)
-            generados.append({"categoria": cat, "local": eq_local.club.nombre, "visitante": eq_visit.club.nombre, "torneo": "Apertura"})
+            db.session.add(p_activo)
+            generados.append({
+                "categoria": cat,
+                "local": eq_local.club.nombre,
+                "visitante": eq_visit.club.nombre,
+                "torneo": torneo_activo.nombre
+            })
 
-            # Clausura invertido
-            if torneo_clausura:
+            # =========================
+            # CREAR PARTIDO INVERTIDO
+            # =========================
+            if torneo_invertido:
                 p_cl = Partido(
                     jornada=jornada,
                     fecha_partido=fecha,
@@ -1325,11 +1351,16 @@ def guardar_partido_mayores():
                     categoria=cat,
                     equipo_local_id=eq_visit.id,
                     equipo_visitante_id=eq_local.id,
-                    torneo_id=torneo_clausura.id,
+                    torneo_id=torneo_invertido.id,
                     jugado=False
                 )
                 db.session.add(p_cl)
-                generados.append({"categoria": cat, "local": eq_visit.club.nombre, "visitante": eq_local.club.nombre, "torneo": "Clausura"})
+                generados.append({
+                    "categoria": cat,
+                    "local": eq_visit.club.nombre,
+                    "visitante": eq_local.club.nombre,
+                    "torneo": torneo_invertido.nombre
+                })
 
         if not generados:
             return jsonify({"error": "No se generaron partidos nuevos."}), 400
@@ -1349,6 +1380,14 @@ def guardar_partido_mayores():
 @views.route('/fixture/ocupados/<int:jornada>', methods=['GET'])
 def fixture_ocupados(jornada):
 
+    # 🔹 Obtener torneo activo de la temporada activa
+    torneo_activo = Torneo.query.join(Temporada)\
+        .filter(Temporada.activa == True, Torneo.activo == True)\
+        .first()
+
+    if not torneo_activo:
+        return jsonify({"ocupados": [], "partidos": [], "msg": "No hay torneo activo"}), 400
+
     partidos = (
         Partido.query
         .join(Partido.torneo)              # Partido → Torneo
@@ -1356,7 +1395,7 @@ def fixture_ocupados(jornada):
         .outerjoin(Partido.fase)           # Partido → Fase (puede ser null)
         .filter(
             Partido.jornada == jornada,
-            Temporada.activa == True,      # ← filtro por temporada activa
+            Partido.torneo_id == torneo_activo.id,    # 🔥 filtro por torneo activo
             func.lower(func.trim(Partido.categoria)).in_(["primera", "reserva"])
         )
         .all()
@@ -1447,11 +1486,15 @@ def fixture_ocupados_inferiores(jornada):
 
         categorias_validas = {c.lower() for c in CATEGORIAS_INFERIORES}
 
+        # 🔥 Traer torneo activo
+        torneo_activo = Torneo.query.filter_by(activo=True).first()
+        if not torneo_activo:
+            return jsonify({"ok": False, "ocupados": [], "partidos": [], "msg": "No hay torneo activo"}), 400
+
         partidos = (
             Partido.query
-            .join(Partido.torneo)
             .filter(
-                Torneo.temporada_id == temporada_activa.id,
+                Partido.torneo_id == torneo_activo.id,  # <- filtro por torneo activo
                 Partido.jornada == jornada,
                 func.lower(Partido.categoria).in_(categorias_validas)
             )
@@ -1522,18 +1565,14 @@ def guardar_partido_inferiores():
         if not temporada_activa:
             return jsonify({"error": "No hay temporada activa"}), 400
 
-        torneo_apertura = Torneo.query.filter_by(
-            nombre="Apertura",
-            temporada_id=temporada_activa.id
-        ).first()
-
-        torneo_clausura = Torneo.query.filter_by(
-            nombre="Clausura",
-            temporada_id=temporada_activa.id
-        ).first()
-
-        if not torneo_apertura:
-            return jsonify({"error": "No se encontró el torneo Apertura en la temporada activa"}), 400
+        # 🔥 Tomar torneo activo
+        """torneo_activo = Torneo.query.filter_by(activo=True, temporada_id=temporada_activa.id).first()
+        if not torneo_activo:
+            return jsonify({"error": "No hay torneo activo en la temporada activa"}), 400"""
+        
+        torneos_temporada = Torneo.query.filter_by(temporada_id=temporada_activa.id).all()
+        torneo_activo = next((t for t in torneos_temporada if t.activo), None)
+        torneo_inactivo = next((t for t in torneos_temporada if not t.activo), None)
 
         # =========================
         # DATOS
@@ -1599,45 +1638,45 @@ def guardar_partido_inferiores():
                 continue
 
             # Apertura
-            p_apertura = Partido(
+            # Partido normal
+            p = Partido(
                 jornada=jornada,
                 fecha_partido=fecha,
                 hora_partido=hora,
                 categoria=eq_local.categoria,
                 equipo_local_id=eq_local.id,
                 equipo_visitante_id=eq_visit.id,
-                torneo_id=torneo_apertura.id,
+                torneo_id=torneo_activo.id,  # <- usamos torneo activo
                 jugado=False
             )
-            db.session.add(p_apertura)
+            db.session.add(p)
 
             generados.append({
                 "categoria": eq_local.categoria,
                 "local": eq_local.club.nombre,
                 "visitante": eq_visit.club.nombre,
-                "torneo": "Apertura"
+                "torneo": torneo_activo.nombre
             })
 
-            # Clausura invertido
-            if torneo_clausura:
-                p_clausura = Partido(
-                    jornada=jornada,
-                    fecha_partido=fecha,
-                    hora_partido=hora,
-                    categoria=eq_local.categoria,
-                    equipo_local_id=eq_visit.id,
-                    equipo_visitante_id=eq_local.id,
-                    torneo_id=torneo_clausura.id,
-                    jugado=False
-                )
-                db.session.add(p_clausura)
+            # Partido invertido (opcional, si querés ida y vuelta en el mismo torneo)
+            p_invertido = Partido(
+                jornada=jornada,
+                fecha_partido=fecha,
+                hora_partido=hora,
+                categoria=eq_local.categoria,
+                equipo_local_id=eq_visit.id,
+                equipo_visitante_id=eq_local.id,
+                torneo_id=torneo_inactivo.id,  # <- mismo torneo inactivo
+                jugado=False
+            )
+            db.session.add(p_invertido)
 
-                generados.append({
-                    "categoria": eq_local.categoria,
-                    "local": eq_visit.club.nombre,
-                    "visitante": eq_local.club.nombre,
-                    "torneo": "Clausura"
-                })
+            generados.append({
+                "categoria": eq_local.categoria,
+                "local": eq_visit.club.nombre,
+                "visitante": eq_local.club.nombre,
+                "torneo": torneo_inactivo.nombre
+            })
 
         if not generados:
             return jsonify({"error": "No se generaron partidos nuevos."}), 400
@@ -1666,7 +1705,7 @@ def cargar_estadisticas_mayores():
         db.session.query(Partido.jornada)
         .join(Torneo)
         .join(Temporada)
-        .filter(Temporada.activa == True, Torneo.nombre == "Apertura")
+        .filter(Temporada.activa == True, Torneo.activo == True)
         .distinct()
         .order_by(Partido.jornada)
         .all()
@@ -1680,7 +1719,7 @@ def cargar_estadisticas_mayores():
         .join(Temporada)
         .filter(
             Temporada.activa == True,
-            Torneo.nombre == "Apertura",
+            Torneo.activo == True,
             Fase.nombre.in_(["Cuartos", "Semifinal", "Final", "Finalísima"])
         )
         .order_by(Fase.orden)
@@ -1701,6 +1740,7 @@ def cargar_estadisticas_mayores():
 def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
     """
     Devuelve información detallada de un cruce de playoff de inferiores (por partido, categoría e ida/vuelta)
+    Solo considera el torneo activo de la temporada activa.
     """
     try:
         categoria = categoria.lower().strip()
@@ -1708,22 +1748,23 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
         if categoria not in ("quinta", "sexta", "septima"):
             return jsonify({"error": "Categoría inválida"})
 
-        # Buscar solo en torneo Apertura y temporada activa
-        torneo_apertura = Torneo.query.join(Temporada).filter(
+        # 🔹 Obtener torneo activo de la temporada activa
+        torneo_activo = Torneo.query.join(Temporada).filter(
             Temporada.activa == True,
-            Torneo.nombre == "Apertura"
+            Torneo.activo == True
         ).first()
 
-        if not torneo_apertura:
-            return jsonify({"error": "No hay torneo Apertura activo"})
+        if not torneo_activo:
+            return jsonify({"error": "No hay torneo activo en la temporada activa"})
 
+        # 🔹 Buscar partido en el torneo activo
         partido = Partido.query.filter_by(
             id=cruce_id,
-            torneo_id=torneo_apertura.id
+            torneo_id=torneo_activo.id
         ).first()
 
         if not partido:
-            print(f"[DEBUG] info_cruce_playoff_inferiores: Partido id={cruce_id} no encontrado o no es de Apertura")
+            print(f"[DEBUG] info_cruce_playoff_inferiores: Partido id={cruce_id} no encontrado o no pertenece al torneo activo")
             return jsonify({"error": "Partido no encontrado"})
 
         print(
@@ -1734,9 +1775,7 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
         )
 
         # 🔹 Obtener nombre de la fase si existe
-        fase_nombre = None
-        if hasattr(partido, "fase") and partido.fase:
-            fase_nombre = partido.fase.nombre
+        fase_nombre = partido.fase.nombre if partido.fase else None
 
         info = {
             "fase_nombre": fase_nombre,  # 👈 IMPORTANTE PARA EL JS
@@ -1744,7 +1783,6 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
             "visitante_id": partido.equipo_visitante.club_id,
             "local_nombre": partido.equipo_local.club.nombre,
             "visitante_nombre": partido.equipo_visitante.club.nombre,
-
             categoria: {
                 "id": partido.id,
                 "jugado": partido.jugado,
@@ -1759,39 +1797,58 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
         print("ERROR info_cruce_playoff_inferiores:", e)
         return jsonify({"error": "Error interno"})
     
-    
 @views.route("/api/cruces_playoff_inferiores/<int:fase_id>/<categoria>/<ida_vuelta>")
 def cruces_playoff_inferiores(fase_id, categoria, ida_vuelta):
     """
     Devuelve los cruces de playoff para una fase, categoría e ida/vuelta específica (inferiores)
+    Solo considera partidos del torneo activo de la temporada activa.
     """
     try:
         categoria = categoria.lower().strip()
         if categoria not in ("quinta", "sexta", "septima"):
             return jsonify([])
+
         ida_vuelta = ida_vuelta.lower() if isinstance(ida_vuelta, str) else ida_vuelta
         es_ida = ida_vuelta == "ida" or ida_vuelta is True or ida_vuelta == 1
         jornada = 1 if es_ida else 2
-        torneo_apertura = Torneo.query.join(Temporada).filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
-        if not torneo_apertura:
+
+        # 🔹 Obtener torneo activo de la temporada activa
+        torneo_activo = Torneo.query.join(Temporada).filter(
+            Temporada.activa == True,
+            Torneo.activo == True
+        ).first()
+
+        if not torneo_activo:
             return jsonify([])
+
+        # 🔹 Filtrar partidos por torneo activo
         partidos = (
             Partido.query
-            .filter_by(fase_id=fase_id, categoria=categoria, jornada=jornada, torneo_id=torneo_apertura.id)
+            .filter_by(
+                fase_id=fase_id,
+                categoria=categoria,
+                jornada=jornada,
+                torneo_id=torneo_activo.id
+            )
             .all()
         )
+
         print(f"[DEBUG] Playoff: fase_id={fase_id}, categoria={categoria}, jornada={jornada}")
         for p in partidos:
             print(f"[DEBUG] Partido id={p.id}, jugado={p.jugado}, local={p.equipo_local.club.nombre}, visitante={p.equipo_visitante.club.nombre}")
+
         partidos_pendientes = [p for p in partidos if not p.jugado]
         print(f"[DEBUG] Total partidos pendientes: {len(partidos_pendientes)}")
+
         resultado = []
         for p in partidos_pendientes:
             resultado.append({
                 "id": p.id,
                 "texto": f"{p.equipo_local.club.nombre} vs {p.equipo_visitante.club.nombre}"
             })
+
         return jsonify(resultado)
+
     except Exception as e:
         print("ERROR cruces_playoff_inferiores:", e)
         return jsonify([])
@@ -1911,7 +1968,7 @@ def cruces_playoff_mayores(fase_id, categoria, ida_vuelta):
     """
     try:
         torneo_activo = Torneo.query.join(Temporada)\
-            .filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
+            .filter(Temporada.activa == True, Torneo.activo == True).first()
         if not torneo_activo:
             return jsonify([])
         
@@ -1994,7 +2051,7 @@ def info_cruce_playoff(cruce_id, categoria, ida_vuelta):
         partido = Partido.query.get_or_404(cruce_id)
         
         torneo_activo = Torneo.query.join(Temporada)\
-            .filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
+            .filter(Temporada.activa == True, Torneo.activo == True).first()
         if not torneo_activo or partido.torneo_id != torneo_activo.id:
             return jsonify({"error": "Cruce no válido"}), 400
         
@@ -2076,13 +2133,13 @@ def info_cruce_playoff(cruce_id, categoria, ida_vuelta):
         print(f"❌ ERROR info_cruce_playoff: {e}")
         return jsonify({"error": str(e)}), 500
 
-
-# 2.5) CRUCES PENDIENTES MAYORES
+# ====================================================
+# 1) CRUCES PENDIENTES MAYORES
 # ====================================================
 @views.route("/api/cruces_pendientes_mayores/<int:jornada>")
 def cruces_pendientes_mayores(jornada):
-    torneo_activo = Torneo.query.join(Temporada)\
-        .filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
+    # Obtener torneo activo directamente
+    torneo_activo = Torneo.query.filter_by(activo=True).first()
     if not torneo_activo:
         return jsonify([])
 
@@ -2128,15 +2185,15 @@ def cruces_pendientes_mayores(jornada):
 
 
 # ====================================================
-# 3) INFO CRUCE MAYORES
+# 2) INFO CRUCE MAYORES
 # ====================================================
 @views.route("/api/info_cruce/<int:cruce_id>")
 def info_cruce(cruce_id):
     try:
         partido_base = Partido.query.get_or_404(cruce_id)
 
-        torneo_activo = Torneo.query.join(Temporada)\
-            .filter(Temporada.activa == True, Torneo.nombre == "Apertura").first()
+        # 🔥 Usar torneo activo en vez de "Apertura"
+        torneo_activo = Torneo.query.filter_by(activo=True).first()
         if not torneo_activo or partido_base.torneo_id != torneo_activo.id:
             return jsonify({"error": "Este cruce no pertenece al torneo activo"}), 400
 
@@ -2206,7 +2263,7 @@ def validar_y_guardar_estadisticas(data, categoria):
     partido = Partido.query.get_or_404(id_partido)
 
     torneo_activo = Torneo.query.join(Temporada).filter(
-        Temporada.activa == True, Torneo.nombre == "Apertura"
+        Temporada.activa == True, Torneo.activo == True
     ).first()
     if not torneo_activo or partido.torneo_id != torneo_activo.id:
         return {"success": False, "message": "Este endpoint solo guarda partidos del Apertura."}, 400
@@ -2460,7 +2517,7 @@ def cargar_estadisticas_inferiores():
         .join(Temporada)
         .filter(
             Temporada.activa == True,
-            Torneo.nombre == "Apertura",
+            Torneo.activo == True,
             Fase.nombre.in_(["Cuartos", "Semifinal", "Final", "Finalísima"])
         )
         .order_by(Fase.orden)
@@ -2488,7 +2545,7 @@ def cruces_por_jornada_inferiores(jornada):
         return jsonify([])
 
     torneo_apertura = Torneo.query.filter_by(
-        nombre="Apertura",
+        activo = True,
         temporada_id=temporada_activa.id
     ).first()
 
@@ -2760,10 +2817,6 @@ def guardar_inferiores():
 
     data = request.get_json(force=True)
     print("DATA RECIBIDA =>", data)
-    penales = data.get("penales") or {}
-    print("JSON COMPLETO RECIBIDO:")
-    print(data)
-    print(type(data))
 
     try:
 
@@ -2848,7 +2901,7 @@ def guardar_inferiores():
 
         empate = goles_local == goles_visitante
 
-        fase_ida_vuelta = partido.fase.ida_vuelta
+        fase_ida_vuelta = getattr(partido.fase, "ida_vuelta", False)
         jornada = partido.jornada
 
         # =====================================================
@@ -2856,9 +2909,6 @@ def guardar_inferiores():
         # =====================================================
         if fase_ida_vuelta:
 
-            # =========================
-            # PARTIDO DE IDA
-            # =========================
             if jornada == 1:
 
                 if penales:
@@ -2871,9 +2921,6 @@ def guardar_inferiores():
                 partido.penales_visitante = None
                 partido.definido_por_penales = False
 
-            # =========================
-            # PARTIDO DE VUELTA
-            # =========================
             elif jornada == 2:
 
                 ida = Partido.query.filter_by(
@@ -2884,7 +2931,6 @@ def guardar_inferiores():
                     equipo_visitante_id=partido.equipo_local_id
                 ).first()
 
-                # ❌ No se cargó el partido de ida
                 if not ida or not ida.jugado:
                     return jsonify(
                         success=False,
@@ -2932,10 +2978,6 @@ def guardar_inferiores():
                     partido.penales_visitante = None
                     partido.definido_por_penales = False
 
-
-        # =====================================================
-        # PARTIDOS A UN SOLO PARTIDO (FINAL / SEMI)
-        # =====================================================
         else:
 
             requiere_ganador = fase_requiere_ganador(partido)
@@ -2966,13 +3008,77 @@ def guardar_inferiores():
                 partido.penales_local = None
                 partido.penales_visitante = None
                 partido.definido_por_penales = False
-                
+
         # =====================================================
         # GUARDAR RESULTADO
         # =====================================================
         partido.goles_local = goles_local
         partido.goles_visitante = goles_visitante
         partido.jugado = True
+
+        # =====================================================
+        # GUARDAR GOLEADORES
+        # =====================================================
+        for g in goleadores_local:
+            jugador_id = int(g["jugador_id"])
+            goles = int(g["goles"])
+
+            est = EstadoJugadorPartido.query.filter_by(
+                id_jugador=jugador_id,
+                id_partido=partido.id
+            ).first()
+
+            if not est:
+                est = EstadoJugadorPartido(
+                    id_jugador=jugador_id,
+                    id_partido=partido.id
+                )
+                db.session.add(est)
+
+            est.cant_goles = goles
+
+        for g in goleadores_visitante:
+            jugador_id = int(g["jugador_id"])
+            goles = int(g["goles"])
+
+            est = EstadoJugadorPartido.query.filter_by(
+                id_jugador=jugador_id,
+                id_partido=partido.id
+            ).first()
+
+            if not est:
+                est = EstadoJugadorPartido(
+                    id_jugador=jugador_id,
+                    id_partido=partido.id
+                )
+                db.session.add(est)
+
+            est.cant_goles = goles
+
+        # =====================================================
+        # GUARDAR TARJETAS
+        # =====================================================
+        def guardar_tarjetas(datos, campo):
+            for jugador_id, cantidad in datos.items():
+
+                est = EstadoJugadorPartido.query.filter_by(
+                    id_jugador=int(jugador_id),
+                    id_partido=partido.id
+                ).first()
+
+                if not est:
+                    est = EstadoJugadorPartido(
+                        id_jugador=int(jugador_id),
+                        id_partido=partido.id
+                    )
+                    db.session.add(est)
+
+                setattr(est, campo, cantidad)
+
+        guardar_tarjetas(amarillas_local, "tarjetas_amarillas")
+        guardar_tarjetas(amarillas_visitante, "tarjetas_amarillas")
+        guardar_tarjetas(rojas_local, "tarjetas_rojas")
+        guardar_tarjetas(rojas_visitante, "tarjetas_rojas")
 
         db.session.commit()
 
