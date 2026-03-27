@@ -2,267 +2,261 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Panel del Periodista</title>
+  <title>Panel del Periodista — LIF</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --verde: #00e676;
+      --verde-dim: rgba(0,230,118,.1);
+      --oscuro: #0a0e14;
+      --panel: #111720;
+      --panel-2: #161d28;
+      --borde: rgba(255,255,255,0.07);
+      --texto: #e8edf5;
+      --texto-dim: #7a8a9e;
     }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
-      color: #f5f6fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Barlow', sans-serif;
+      background: var(--oscuro);
+      color: var(--texto);
       min-height: 100vh;
-      padding-bottom: 40px;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 50px;
-      margin-bottom: 60px;
-      font-weight: 800;
-      color: #5dade2;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-size: 2.5rem;
+      padding-bottom: 60px;
       position: relative;
-      padding-bottom: 20px;
     }
 
-    h1::after {
+    body::before {
       content: '';
-      display: block;
-      width: 80px;
-      height: 3px;
-      background: linear-gradient(90deg, #5dade2, #2a5f7f);
-      margin: 15px auto 0;
-      border-radius: 2px;
+      position: fixed;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      width: 800px; height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,230,118,.06) 0%, transparent 70%);
+      pointer-events: none;
     }
 
-    .top-buttons {
-      position: absolute;
-      top: 30px;
-      right: 30px;
+    /* ─── TOPBAR ─── */
+    .topbar {
       display: flex;
-      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 64px;
+      border-bottom: 1px solid var(--borde);
+      background: rgba(10,14,20,.9);
+      backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
       z-index: 100;
     }
-
-    .top-buttons a {
-      background-color: rgba(45, 45, 45, 0.9);
-      color: #5dade2;
-      border: 2px solid #5dade2;
-      border-radius: 10px;
-      padding: 10px 18px;
+    .topbar-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      color: #fff;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: all .3s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(10px);
     }
+    .topbar-logo em { color: var(--verde); font-style: normal; }
 
-    .top-buttons a:hover {
-      background-color: #5dade2;
-      color: #1f1f1f;
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(93, 173, 226, 0.3);
-    }
-
-    /* SECCIÓN WRAPPER */
-    .section-wrapper {
-      margin-bottom: 60px;
-    }
-
-    /* SECTION TITLE */
-    .section-title {
-      color: #5dade2;
+    .topbar-actions { display: flex; gap: 10px; }
+    .topbar-btn {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .07em;
       text-transform: uppercase;
-      font-weight: 700;
-      font-size: 1.35rem;
-      margin: 0 0 30px 0;
-      position: relative;
-      padding-left: 20px;
-      letter-spacing: 1px;
-    }
-
-    .section-title::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 28px;
-      background: linear-gradient(180deg, #5dade2, #2a5f7f);
-      border-radius: 2px;
-    }
-
-    /* GRID PRINCIPAL */
-    .panel-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 25px;
-      padding: 0 0 20px 0;
-    }
-
-    /* CARD BASE */
-    .admin-card-wrapper {
       text-decoration: none;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      transform: translateZ(0);
+      padding: 7px 18px;
+      border-radius: 7px;
+      border: 1px solid var(--borde);
+      color: var(--texto-dim);
+      background: rgba(255,255,255,.04);
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    .topbar-btn:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+    }
+    .topbar-btn.danger:hover {
+      color: #e74c3c;
+      border-color: rgba(231,76,60,.35);
+      background: rgba(231,76,60,.07);
     }
 
-    .admin-card {
-      background: linear-gradient(135deg, rgba(45, 45, 45, 0.8), rgba(60, 60, 60, 0.6));
-      border-radius: 16px;
-      padding: 35px 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      min-height: 160px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      border: 1px solid rgba(93, 173, 226, 0.2);
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-    }
-
-    .admin-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(93, 173, 226, 0.1), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .admin-card-wrapper:hover .admin-card::before {
-      left: 100%;
-    }
-
-    .admin-card h5 {
-      margin: 0;
-      color: #5dade2;
-      font-weight: 700;
-      font-size: 1.15rem;
+    /* ─── PAGE ─── */
+    .panel-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 52px 2rem;
       position: relative;
       z-index: 1;
-      transition: all 0.3s ease;
-      line-height: 1.4;
     }
 
-    .admin-card-wrapper:hover .admin-card h5 {
-      color: #a8d8f0;
-      text-shadow: 0 0 10px rgba(93, 173, 226, 0.3);
+    /* ─── HEADER ─── */
+    .panel-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--verde);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .panel-eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 28px; height: 1px;
+      background: var(--verde);
+      opacity: .5;
+    }
+    .panel-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 52px;
+    }
+    .panel-title span { color: var(--verde); }
+
+    /* ─── SECTION ─── */
+    .section-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--texto-dim);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--borde);
     }
 
-    .admin-card-wrapper:hover .admin-card {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 40px rgba(93, 173, 226, 0.2), 0 0 30px rgba(93, 173, 226, 0.1);
-      border-color: rgba(93, 173, 226, 0.5);
-      background: linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(65, 65, 65, 0.8));
+    /* ─── GRID ─── */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 52px;
     }
 
-    /* ICON POSITION */
-    .admin-card-icon {
-      font-size: 2.5rem;
-      margin-right: 15px;
-      opacity: 0.8;
-      transition: all 0.3s ease;
+    /* ─── ACTION CARD ─── */
+    .action-card {
+      display: block;
+      text-decoration: none;
+      background: var(--panel);
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 28px 24px;
+      transition: transform .22s, border-color .22s, box-shadow .22s, background .22s;
+      position: relative;
+      overflow: hidden;
+    }
+    .action-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,230,118,.04) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity .22s;
+    }
+    .action-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(0,230,118,.28);
+      box-shadow: 0 14px 36px rgba(0,0,0,.35), 0 0 0 1px rgba(0,230,118,.12);
+      background: var(--panel-2);
+    }
+    .action-card:hover::before { opacity: 1; }
+
+    .card-icon {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 14px;
+      line-height: 1;
+    }
+    .card-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #fff;
+      line-height: 1.2;
+      position: relative;
+      z-index: 1;
+      transition: color .2s;
+    }
+    .action-card:hover .card-label { color: var(--verde); }
+    .card-desc {
+      font-size: .82rem;
+      color: var(--texto-dim);
+      margin-top: 6px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
     }
 
-    .admin-card-wrapper:hover .admin-card-icon {
-      opacity: 1;
-      transform: scale(1.1);
+    @media (max-width: 600px) {
+      .topbar { padding: 0 1.2rem; }
+      .panel-page { padding: 36px 1rem; }
+      .panel-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .action-card { padding: 22px 16px; }
     }
-
-    /* RESPONSIVO */
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 1.8rem;
-        margin-top: 30px;
-        margin-bottom: 40px;
-      }
-
-      .top-buttons {
-        position: static;
-        justify-content: center;
-        margin-bottom: 30px;
-        flex-wrap: wrap;
-      }
-
-      .panel-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 18px;
-      }
-
-      .admin-card {
-        padding: 25px 15px;
-        min-height: 140px;
-      }
-
-      .admin-card h5 {
-        font-size: 0.95rem;
-      }
-
-      .admin-card-icon {
-        font-size: 1.8rem;
-        margin-right: 10px;
-      }
-    }
-
   </style>
 </head>
-
 <body>
-  <div class="container position-relative">
 
-    <h1>Panel del Periodista</h1>
-
-    <!-- BOTONES SUPERIORES -->
-    <div class="top-buttons">
-      <a href="{{ url_for('views.index') }}">🏠 Inicio</a>
-      <a href="{{ url_for('views.logout') }}">🔒 Cerrar Sesión</a>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <a href="{{ url_for('views.index') }}" class="topbar-logo">L<em>I</em>F</a>
+    <div class="topbar-actions">
+      <a href="{{ url_for('views.index') }}" class="topbar-btn">Inicio</a>
+      <a href="{{ url_for('views.logout') }}" class="topbar-btn danger">Cerrar sesión</a>
     </div>
+  </header>
 
-    <!-- SECCIÓN: Gestión de Contenido -->
-    <div class="section-wrapper">
-      <div class="section-title">📝 Gestión de Contenido</div>
-      <div class="panel-grid">
-        <a href="{{ url_for('views.cargar_noticia') }}" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Noticias</h5>
-          </div>
-        </a>
+  <div class="panel-page">
 
-        <a href="{{ url_for('views.cargar_video') }}" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Videos</h5>
-          </div>
-        </a>
-      </div>
+    <p class="panel-eyebrow">Acceso restringido</p>
+    <h1 class="panel-title">Panel del <span>Periodista</span></h1>
+
+    <p class="section-label">Gestión de contenido</p>
+    <div class="panel-grid">
+
+      <a href="{{ url_for('views.cargar_noticia') }}" class="action-card">
+        <span class="card-icon">📰</span>
+        <div class="card-label">Cargar Noticias</div>
+        <p class="card-desc">Publicá una nueva nota en el sitio de la liga</p>
+      </a>
+
+      <a href="{{ url_for('views.cargar_video') }}" class="action-card">
+        <span class="card-icon">🎬</span>
+        <div class="card-label">Cargar Videos</div>
+        <p class="card-desc">Agregá un video de YouTube al feed de multimedia</p>
+      </a>
+
     </div>
 
   </div>
+
 </body>
 </html>
-
 

@@ -1,125 +1,173 @@
 {% extends "base.html" %}
 {% block title %}{{ noticia.titulo }}{% endblock %}
 
-{% block content %}
+{% block extra_styles %}
 <style>
-    /* Fondo general */
-    .detalle-wrapper {
-        background-color: #f4f6f9;
-        padding: 60px 20px;
-        min-height: 100vh;
-    }
-
-    /* Card principal */
-    .detalle-card {
-        background: #ffffff;
-        border-radius: 18px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        overflow: hidden;
-        max-width: 900px;
+    .detalle-page {
+        max-width: 860px;
         margin: 0 auto;
+        padding: 48px 2rem 90px;
     }
 
-    /* Imagen principal */
+    /* ─── BACK ─── */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .85rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+        text-decoration: none;
+        margin-bottom: 32px;
+        transition: color .2s;
+    }
+    .back-link:hover { color: var(--verde); }
+    .back-link::before { content: '←'; }
+
+    /* ─── CARD ─── */
+    .detalle-card {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    /* ─── IMAGE ─── */
     .detalle-imagen {
         width: 100%;
-        height: 320px;
+        height: 340px;
         object-fit: cover;
         display: block;
     }
 
-    /* Contenido */
-    .detalle-contenido {
-        padding: 40px;
+    /* ─── BODY ─── */
+    .detalle-body {
+        padding: 40px 44px 36px;
     }
 
-    .detalle-contenido h1 {
-        font-size: 2rem;
-        color: #1f2d3d;
-        margin-bottom: 15px;
+    /* Category tag */
+    .detalle-tag {
+        display: inline-block;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        color: var(--verde);
+        border: 1px solid rgba(0,230,118,.3);
+        border-radius: 5px;
+        padding: 3px 12px;
+        margin-bottom: 16px;
     }
 
-    .detalle-fecha {
-        font-size: 0.9rem;
-        color: #6c757d;
-        margin-bottom: 30px;
+    .detalle-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        color: #fff;
+        line-height: 1.05;
+        margin-bottom: 18px;
     }
 
+    /* Meta row */
+    .detalle-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+    }
+    .meta-date {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+    }
+    .meta-sep {
+        width: 4px; height: 4px;
+        border-radius: 50%;
+        background: var(--texto-dim);
+        opacity: .4;
+        flex-shrink: 0;
+    }
+    .meta-autor {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+    }
+
+    /* Divider */
+    .detalle-divider {
+        height: 1px;
+        background: var(--borde);
+        margin-bottom: 32px;
+    }
+
+    /* Content text */
     .detalle-texto {
         font-size: 1.05rem;
-        line-height: 1.75;
-        color: #2c3e50;
+        line-height: 1.8;
+        color: rgba(232,237,245,.85);
     }
-
-    /* Botón volver */
-    .volver-link {
-        display: inline-block;
-        margin-bottom: 20px;
-        font-size: 0.9rem;
-        color: #6c757d;
-        text-decoration: none;
-        transition: color 0.2s ease;
+    .detalle-texto p { margin-bottom: 1.2em; }
+    .detalle-texto h2, .detalle-texto h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #fff;
+        margin: 1.6em 0 .6em;
     }
+    .detalle-texto strong { color: #fff; }
+    .detalle-texto a { color: var(--verde); }
 
-    .volver-link:hover {
-        color: #1f2d3d;
-        text-decoration: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .detalle-imagen {
-            height: 220px;
-        }
-
-        .detalle-contenido {
-            padding: 25px;
-        }
-
-        .detalle-contenido h1 {
-            font-size: 1.6rem;
-        }
-    }
-    /* Autor de la noticia */
-    .noticia-autor {
-        margin-top: auto;
-        font-size: 0.8rem;
-        color: #8a8a8a;
-        text-align: right;
-        font-style: italic;
+    @media (max-width: 700px) {
+        .detalle-page { padding: 32px 1rem 60px; }
+        .detalle-imagen { height: 220px; }
+        .detalle-body { padding: 28px 22px 24px; }
     }
 </style>
+{% endblock %}
 
-<div class="detalle-wrapper">
+{% block content %}
+<div class="detalle-page">
 
-    <a href="{{ url_for('views.todas_noticias') }}" class="volver-link">
-        ← Volver a noticias
-    </a>
+    <a href="{{ url_for('views.todas_noticias') }}" class="back-link">Volver a noticias</a>
 
     <div class="detalle-card">
 
         {% if noticia.imagen_url %}
-            <img
-                src="{{ noticia.imagen_url }}"
-                class="detalle-imagen"
-                alt="{{ noticia.titulo }}">
+        <img src="{{ noticia.imagen_url }}" class="detalle-imagen" alt="{{ noticia.titulo }}">
         {% endif %}
 
-        <div class="detalle-contenido">
-            <h1 class="fw-bold">{{ noticia.titulo }}</h1>
+        <div class="detalle-body">
+            <span class="detalle-tag">Noticia</span>
 
-            <div class="detalle-fecha">
-                {{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}
+            <h1 class="detalle-title">{{ noticia.titulo }}</h1>
+
+            <div class="detalle-meta">
+                <span class="meta-date">{{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}</span>
+                <span class="meta-sep"></span>
+                <span class="meta-autor">por {{ noticia.autor.nombre_completo }}</span>
             </div>
+
+            <div class="detalle-divider"></div>
 
             <div class="detalle-texto">
                 {{ noticia.contenido | safe }}
             </div>
-            <div class="noticia-autor">
-                por {{ noticia.autor.nombre_completo }} 
-            </div>
         </div>
 
     </div>
+
 </div>
 {% endblock %}
