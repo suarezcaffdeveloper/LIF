@@ -4,554 +4,426 @@
 
 {% block extra_styles %}
 <style>
-@media (max-width: 600px) {
-    .tabla-layout {
-        padding: 0 0px !important;
-        max-width: 100vw !important;
-        min-width: 100vw !important;
-        width: 100vw !important;
-        overflow-x: auto;
+    /* ─── PAGE ─── */
+    .pos-page {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 48px 2rem 80px;
     }
-    .table-container {
-        width: 100vw !important;
-        min-width: 100vw !important;
-        max-width: 100vw !important;
-        overflow-x: auto;
-        padding: 0 0 18px 0 !important;
-        border-radius: 0 0 18px 18px;
+
+    /* ─── PAGE HEADER ─── */
+    .pos-header {
+        margin-bottom: 36px;
     }
-    h1 {
-        font-size: 1.35rem !important;
-        margin: 18px 0 10px 0 !important;
-        padding: 0 8px;
-        text-align: center !important;
-        font-weight: 900 !important;
-        letter-spacing: 0.01em;
-        display: block;
-    }
-    table {
-        min-width: 700px;
-        width: 100vw !important;
-        font-size: 0.98rem;
-        overflow-x: auto;
-        display: block;
-    }
-    th, td {
-        font-size: 0.97rem;
-        padding: 10px 6px;
-    }
-    th, td {
-        font-size: 0.97rem;
-        padding: 10px 6px;
-    }
-    h1 {
-        font-size: 1.15rem !important;
-        margin: 18px 0 10px 0 !important;
-        padding: 0 8px;
-        text-align: left !important;
+    .pos-eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: var(--verde);
         display: flex;
         align-items: center;
-        justify-content: flex-start;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .pos-eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 32px; height: 1px;
+        background: var(--verde);
+        opacity: .5;
+    }
+    .pos-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        color: #fff;
+        line-height: 1;
+        margin: 0;
+    }
+    .pos-title span { color: var(--verde); }
+
+    /* ─── LAYOUT ─── */
+    .pos-layout {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1000px) {
+        .pos-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ─── CARD BASE ─── */
+    .lif-card {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .lif-card-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--borde);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .lif-card-header h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #fff;
+        margin: 0;
+    }
+    .lif-card-header .dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: var(--verde);
+        box-shadow: 0 0 8px var(--verde);
+        flex-shrink: 0;
+    }
+
+    /* ─── MAIN TABLE ─── */
+    .pos-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .pos-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 640px;
+    }
+
+    .pos-table thead th {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+        padding: 12px 14px;
+        text-align: center;
+        border-bottom: 1px solid var(--borde);
+        white-space: nowrap;
+    }
+    .pos-table thead th:first-child { text-align: left; padding-left: 20px; }
+
+    .pos-table tbody tr {
+        border-bottom: 1px solid rgba(255,255,255,.04);
+        transition: background .18s;
+    }
+    .pos-table tbody tr:last-child { border-bottom: none; }
+    .pos-table tbody tr:hover { background: rgba(255,255,255,.04); }
+
+    .pos-table td {
+        padding: 13px 14px;
+        font-size: .95rem;
+        color: var(--texto);
+        text-align: center;
+        white-space: nowrap;
+    }
+    .pos-table td:first-child { text-align: left; padding-left: 20px; }
+
+    /* Row pos indicator */
+    .pos-table tbody tr.clasificado {
+        border-left: 3px solid var(--verde);
+    }
+    .pos-table tbody tr.eliminado {
+        border-left: 3px solid rgba(220, 60, 60, .6);
+    }
+
+    /* Team cell */
+    .team-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .team-pos {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .85rem;
+        font-weight: 700;
+        color: var(--texto-dim);
+        width: 20px;
+        text-align: right;
+        flex-shrink: 0;
+    }
+    .team-cell img {
+        width: 28px; height: 28px;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+        flex-shrink: 0;
+    }
+    .team-name {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: .03em;
+        color: #fff;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+    }
+
+    /* PTS badge */
+    .pts-badge {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+        color: #fff;
+        background: rgba(255,255,255,.07);
+        border-radius: 6px;
+        padding: 4px 10px;
+        display: inline-block;
+        min-width: 36px;
+        text-align: center;
+    }
+
+    /* Racha */
+    .racha { display: flex; align-items: center; gap: 4px; justify-content: center; }
+    .circulo {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .G { background: var(--verde); box-shadow: 0 0 6px rgba(0,230,118,.5); }
+    .E { background: #f5a623; box-shadow: 0 0 6px rgba(245,166,35,.4); }
+    .P { background: #e74c3c; box-shadow: 0 0 6px rgba(231,76,60,.4); }
+
+    /* ─── LEGEND ─── */
+    .legend {
+        display: flex;
+        gap: 20px;
+        padding: 14px 20px;
+        border-top: 1px solid var(--borde);
+        flex-wrap: wrap;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+    }
+    .legend-line {
+        width: 18px; height: 3px;
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+    .legend-line.clas { background: var(--verde); }
+    .legend-line.elim { background: rgba(220,60,60,.6); }
+
+    /* ─── SIDE PANELS ─── */
+    .side-col { display: flex; flex-direction: column; gap: 18px; }
+
+    .stat-row {
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--borde);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--verde);
+        margin-bottom: 4px;
+    }
+    .stat-value {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        text-transform: uppercase;
+    }
+    .stat-sub {
+        font-size: .8rem;
+        color: var(--texto-dim);
+        margin-top: 1px;
+    }
+
+    /* Cruces */
+    .cruce-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--borde);
         gap: 8px;
     }
-}
-body {
-    background: #f2f4f7;
-}
-
-h1 {
-    text-align: center;
-    margin: 40px 0 30px;
-    color: #2c3e50;
-    font-weight: 700;
-}
-
-body {
-    font-family: 'Inter', 'Roboto', Arial, sans-serif;
-    background: #f4f6fb;
-    color: #23272f;
-}
-
-h1 {
-    text-align: center;
-    margin: 38px 0 18px 0;
-    color: #1f2937;
-    font-weight: 900;
-    font-size: 2.1rem;
-    font-family: 'Inter', 'Roboto', Arial, sans-serif;
-    letter-spacing: 0.01em;
-    background: none;
-    text-shadow: 0 1px 0 #fff, 0 2px 8px rgba(31,41,55,0.04);
-}
-
-/* ======== LAYOUT PRINCIPAL ======== */
-.tabla-layout {
-    max-width: 1300px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 3fr 1.2fr;
-    gap: 25px;
-}
-
-@media (max-width: 992px) {
-    .table-container {
-        width: 100vw !important;
-        min-width: 100vw !important;
-        max-width: 100vw !important;
-        overflow-x: auto !important;
-        padding: 0 !important;
-        border-radius: 0 !important;
-        border: none !important;
-        box-shadow: none !important;
-        box-sizing: border-box;
-        display: block !important;
-        overscroll-behavior-x: contain;
+    .cruce-row:last-child { border-bottom: none; }
+    .cruce-team {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .92rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: var(--texto);
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-    .tabla-layout {
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100vw !important;
-        min-width: 100vw !important;
-        width: 100vw !important;
+    .cruce-team:last-child { text-align: right; }
+    .cruce-vs {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .75rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+        color: var(--verde);
+        padding: 3px 8px;
+        border: 1px solid rgba(0,230,118,.25);
+        border-radius: 4px;
+        flex-shrink: 0;
     }
-    table {
-        min-width: max-content !important;
-        width: auto !important;
-        max-width: none !important;
-        margin: 0 !important;
-        font-size: 0.98rem;
-        overflow-x: auto;
-        display: block;
+
+    @media (max-width: 600px) {
+        .pos-page { padding: 32px 1rem 60px; }
+        .team-name { max-width: 110px; }
     }
-    display: grid;
-    grid-template-columns: 2.8fr 1.15fr;
-    gap: 32px;
-    padding: 0 24px;
-    align-items: start;
-}
-
-@media (max-width: 992px) {
-    .tabla-layout {
-        grid-template-columns: 1fr;
-        padding: 0 8px;
-    }
-}
-
-/* ======== TABLA ======== */
-.table-container {
-    background: white;
-    border-radius: 14px;
-    padding: 25px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-}
-
-.table-container {
-    background: #fff;
-    border-radius: 22px;
-    padding: 32px 18px 26px 18px;
-    box-shadow: 0 8px 32px rgba(31,41,55,0.10);
-    border: 1.5px solid #e0e7ef;
-    min-height: 520px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    transition: box-shadow 0.2s;
-    width: 100%;
-    max-width: 100%;
-}
-.table-container:hover {
-    box-shadow: 0 12px 36px rgba(31,41,55,0.13);
-}
-
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px;
-}
-
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    table-layout: auto;
-    font-size: 1rem;
-    background: #f8fafc;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(31,41,55,0.04);
-}
-
-thead th {
-    background: #1a1a1a;
-    color: white;
-    padding: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-size: 0.85rem;
-}
-
-thead th {
-    background: #e3f0fa;
-    color: #1f2937;
-    padding: 14px 12px;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-align: left;
-    border: none;
-}
-
-tbody tr {
-    background: #ffffff;
-    transition: 0.2s ease;
-}
-
-tbody tr:hover {
-    background: #f1f1f1;
-}
-
-tbody tr {
-    background: #fff;
-    transition: background 0.18s;
-}
-tbody tr:nth-child(even) {
-    background: #f3f6fa;
-}
-tbody tr:hover {
-    background: #e0e7ef;
-}
-
-td {
-    padding: 12px 10px;
-    font-size: 0.95rem;
-}
-
-td {
-    padding: 12px 10px;
-    border-bottom: 1px solid #ececec;
-    vertical-align: middle;
-    font-size: 1.01rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.fila-clasificado {
-    box-shadow: 0 0 0 2px #c9f2c9 inset;
-}
-
-.fila-eliminado {
-    box-shadow: 0 0 0 2px #f5d0d0 inset;
-}
-
-.fila-clasificado {
-    background: #e8fbe8 !important;
-    border-left: 4px solid #7be87b;
-    box-shadow: none;
-}
-.fila-eliminado {
-    background: #fdeaea !important;
-    border-left: 4px solid #f3bebe;
-    box-shadow: none;
-}
-
-/* Escudo + Nombre */
-td:first-child {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-}
-
-td:first-child img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-}
-
-td:first-child {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 600;
-    color: #1d3557;
-    letter-spacing: 0.01em;
-    font-size: 1.04em;
-}
-td:first-child img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    border-radius: 8px;
-    border: 1.5px solid #e0e7ef;
-    background: #fff;
-}
-
-/* ======== ICONOS DE RACHA (G/E/P) ======== */
-.racha {
-    display: flex;
-    gap: 4px;
-}
-
-.circulo {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-}
-
-.G { background: #18c964; }
-.E { background: #f5a623; }
-.P { background: #d63031; }
-
-.racha {
-    display: flex;
-    gap: 4px;
-}
-.circulo {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(31,41,55,0.10);
-}
-.G { background: #18c964; }
-.E { background: #f5a623; }
-.P { background: #d63031; }
-
-/* ======== PANEL LATERAL ======== */
-.side-panel {
-    display: flex;
-    flex-direction: row;
-    gap: 18px;
-    width: 100%;
-    justify-content: center;
-}
-@media (max-width: 600px) {
-    .side-panel {
-        flex-direction: row;
-        gap: 12px;
-        width: 100%;
-    }
-    .panel-box {
-        min-width: 0;
-        max-width: 100%;
-        flex: 1 1 50%;
-        margin: 0;
-        padding: 12px 8px 10px 8px;
-    }
-}
-
-
-.panel-box {
-    background: white;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-    min-width: 0;
-    max-width: 100%;
-    flex: 1 1 50%;
-}
-
-.panel-box h3 {
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #1f2d3d;
-}
-
-.side-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 26px;
-    min-width: 320px;
-    max-width: 420px;
-}
-.panel-box {
-    background: #fff;
-    border-radius: 18px;
-    padding: 24px 22px 18px 22px;
-    box-shadow: 0 8px 32px rgba(31,41,55,0.10);
-    border: 1.5px solid #e0e7ef;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    transition: box-shadow 0.2s;
-}
-.panel-box:hover {
-    box-shadow: 0 12px 36px rgba(31,41,55,0.13);
-}
-.panel-box h3 {
-    margin-bottom: 14px;
-    font-size: 1.13rem;
-    font-weight: 800;
-    color: #1f2937;
-    letter-spacing: 0.01em;
-    background: none;
-    font-family: 'Inter', 'Roboto', Arial, sans-serif;
-}
-
-.stat-item {
-    margin-bottom: 12px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
-
-.stat-item:last-child {
-    border-bottom: none;
-}
-
-.stat-item strong {
-    color: #333;
-}
-
-.stat-item {
-    margin-bottom: 12px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    font-family: 'Inter', 'Roboto', Arial, sans-serif;
-    font-size: 1.01em;
-}
-.stat-item:last-child {
-    border-bottom: none;
-}
-.stat-item strong {
-    color: #1f2937;
-    font-weight: 700;
-}
-
-.cruce {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 8px;
-    border-bottom: 1px solid #ededed;
-    font-size: 0.95rem;
-}
-
-.cruce:last-child {
-    border-bottom: none;
-}
-
-.cruce strong {
-    color: #1f2d3d;
-}
-
-.cruce {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 8px;
-    border-bottom: 1px solid #ededed;
-    font-size: 1.01em;
-    font-family: 'Inter', 'Roboto', Arial, sans-serif;
-}
-.cruce:last-child {
-    border-bottom: none;
-}
-.cruce strong {
-    color: #1f2937;
-    font-weight: 700;
-}
-</style>
-<!-- Google Fonts: Inter -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="pos-page">
 
-<h1>Tabla de Posiciones <span style="font-weight:400;font-size:0.95em;opacity:0.85;margin-left:6px;">- {{ categoria|capitalize }}</span></h1>
-
-<div class="tabla-layout">
-
-    <!-- ================= TABLA PRINCIPAL ================= -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Equipo</th>
-                    <th>PJ</th>
-                    <th>G</th>
-                    <th>E</th>
-                    <th>P</th>
-                    <th>GF</th>
-                    <th>GC</th>
-                    <th>DIF</th>
-                    <th>PTS</th>
-                    <th>Racha</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for fila in tabla %}
-                <tr class="{% if loop.index <= 8 %}fila-clasificado{% else %}fila-eliminado{% endif %}">
-                    <td>
-                        <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo|replace(' ', '_') + '.jpg') }}">
-                        {{ fila.nombre_equipo }}
-                    </td>
-                    <td>{{ fila.partidos_jugados }}</td>
-                    <td>{{ fila.partidos_ganados }}</td>
-                    <td>{{ fila.partidos_empatados }}</td>
-                    <td>{{ fila.partidos_perdidos }}</td>
-                    <td>{{ fila.goles_a_favor }}</td>
-                    <td>{{ fila.goles_en_contra }}</td>
-                    <td>{{ fila.diferencia_gol }}</td>
-                    <td><strong>{{ fila.cantidad_puntos }}</strong></td>
-                    <td>
-                        <div class="racha">
-                            {% if rachas[fila.nombre_equipo] %}
-                                {% for r in rachas[fila.nombre_equipo] %}
-                                    <div class="circulo {{ r }}"></div>
-                                {% endfor %}
-                            {% else %}
-                                <span style="color:#999; font-size:0.8rem;">—</span>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- HEADER -->
+    <div class="pos-header">
+        <p class="pos-eyebrow">Temporada 2026</p>
+        <h1 class="pos-title">Tabla de <span>Posiciones</span><br>{{ categoria|capitalize }}</h1>
     </div>
 
-    <!-- ================= PANEL LATERAL ================= -->
-    <div class="side-panel">
+    <div class="pos-layout">
 
-        <!-- Estadísticas destacadas -->
-        <div class="panel-box">
-            <h3>Estadísticas destacadas</h3>
-            {% if stats %}
-            <div class="stat-item">
-                <strong>Equipo más goleador:</strong><br>
-                {{ stats.mas_goleador.nombre_equipo }} ({{ stats.mas_goleador.goles_a_favor }} GF)
+        <!-- TABLA PRINCIPAL -->
+        <div class="lif-card">
+            <div class="lif-card-header">
+                <div class="dot"></div>
+                <h3>Clasificación — {{ categoria|capitalize }}</h3>
             </div>
-            <div class="stat-item">
-                <strong>Equipo menos goleado:</strong><br>
-                {{ stats.menos_goleado.nombre_equipo }} ({{ stats.menos_goleado.goles_en_contra }} GC)
+            <div class="pos-table-wrap">
+                <table class="pos-table">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>PJ</th>
+                            <th>G</th>
+                            <th>E</th>
+                            <th>P</th>
+                            <th>GF</th>
+                            <th>GC</th>
+                            <th>DIF</th>
+                            <th>PTS</th>
+                            <th>Racha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fila in tabla %}
+                        <tr class="{% if loop.index <= 8 %}clasificado{% else %}eliminado{% endif %}">
+                            <td>
+                                <div class="team-cell">
+                                    <span class="team-pos">{{ loop.index }}</span>
+                                    <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo|replace(' ', '_') + '.jpg') }}" alt="">
+                                    <span class="team-name">{{ fila.nombre_equipo }}</span>
+                                </div>
+                            </td>
+                            <td>{{ fila.partidos_jugados }}</td>
+                            <td>{{ fila.partidos_ganados }}</td>
+                            <td>{{ fila.partidos_empatados }}</td>
+                            <td>{{ fila.partidos_perdidos }}</td>
+                            <td>{{ fila.goles_a_favor }}</td>
+                            <td>{{ fila.goles_en_contra }}</td>
+                            <td>{{ fila.diferencia_gol }}</td>
+                            <td><span class="pts-badge">{{ fila.cantidad_puntos }}</span></td>
+                            <td>
+                                <div class="racha">
+                                    {% if rachas[fila.nombre_equipo] %}
+                                        {% for r in rachas[fila.nombre_equipo] %}
+                                            <div class="circulo {{ r }}"></div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span style="color:var(--texto-dim); font-size:.8rem;">—</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div class="stat-item">
-                <strong>Mejor diferencia de gol:</strong><br>
-                {{ stats.mejor_diferencia.nombre_equipo }} (+{{ stats.mejor_diferencia.diferencia_gol }})
+            <div class="legend">
+                <div class="legend-item"><div class="legend-line clas"></div> Clasificado</div>
+                <div class="legend-item"><div class="legend-line elim"></div> Eliminado</div>
             </div>
-            {% else %}
-            <p>No hay estadísticas disponibles.</p>
-            {% endif %}
         </div>
 
-        <!-- Cruces teóricos -->
-        <div class="panel-box">
-            <h3>Cuartos de final (si terminara hoy)</h3>
-            {% if cruces %}
-                {% for a, b in cruces %}
-                <div class="cruce">
-                    <strong>{{ a.nombre_equipo }}</strong> vs <strong>{{ b.nombre_equipo }}</strong>
+        <!-- PANEL LATERAL -->
+        <div class="side-col">
+
+            <!-- Estadísticas -->
+            <div class="lif-card">
+                <div class="lif-card-header">
+                    <div class="dot"></div>
+                    <h3>Estadísticas</h3>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>No hay suficientes equipos para definir cruces.</p>
-            {% endif %}
-        </div>
+                {% if stats %}
+                <div class="stat-row">
+                    <p class="stat-label">Más goleador</p>
+                    <p class="stat-value">{{ stats.mas_goleador.nombre_equipo }}</p>
+                    <p class="stat-sub">{{ stats.mas_goleador.goles_a_favor }} goles a favor</p>
+                </div>
+                <div class="stat-row">
+                    <p class="stat-label">Menos goleado</p>
+                    <p class="stat-value">{{ stats.menos_goleado.nombre_equipo }}</p>
+                    <p class="stat-sub">{{ stats.menos_goleado.goles_en_contra }} goles en contra</p>
+                </div>
+                <div class="stat-row">
+                    <p class="stat-label">Mejor diferencia</p>
+                    <p class="stat-value">{{ stats.mejor_diferencia.nombre_equipo }}</p>
+                    <p class="stat-sub">+{{ stats.mejor_diferencia.diferencia_gol }} de diferencia</p>
+                </div>
+                {% else %}
+                <div class="stat-row"><p class="stat-sub">No hay estadísticas disponibles.</p></div>
+                {% endif %}
+            </div>
 
+            <!-- Cruces -->
+            <div class="lif-card">
+                <div class="lif-card-header">
+                    <div class="dot"></div>
+                    <h3>Cuartos de final</h3>
+                </div>
+                {% if cruces %}
+                    {% for a, b in cruces %}
+                    <div class="cruce-row">
+                        <span class="cruce-team">{{ a.nombre_equipo }}</span>
+                        <span class="cruce-vs">VS</span>
+                        <span class="cruce-team">{{ b.nombre_equipo }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="cruce-row">
+                    <span class="stat-sub">No hay suficientes equipos para definir cruces.</span>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
     </div>
 </div>
-
 {% endblock %}
 
 

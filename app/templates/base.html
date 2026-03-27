@@ -4,287 +4,280 @@
     <meta charset="UTF-8">
     <title>{% block title %}LIF{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-                /* ======== HAMBURGER MENU ======== */
-                .navbar-toggle {
-                    display: none;
-                    background: none;
-                    border: none;
-                    outline: none;
-                    cursor: pointer;
-                    padding: 8px 12px;
-                    border-radius: 8px;
-                    transition: background 0.2s;
-                }
-                .navbar-toggle:focus, .navbar-toggle:hover {
-                    background: rgba(75,137,220,0.12);
-                }
-                .navbar-toggle .hamburger {
-                    width: 28px;
-                    height: 28px;
-                    display: block;
-                    position: relative;
-                }
-                .navbar-toggle .hamburger span {
-                    display: block;
-                    position: absolute;
-                    height: 3px;
-                    width: 100%;
-                    background: linear-gradient(90deg, #4b89dc, #3a6ea5);
-                    border-radius: 2px;
-                    opacity: 1;
-                    left: 0;
-                    transition: all 0.3s cubic-bezier(.4,0,.2,1);
-                }
-                .navbar-toggle .hamburger span:nth-child(1) { top: 6px; }
-                .navbar-toggle .hamburger span:nth-child(2) { top: 13px; }
-                .navbar-toggle .hamburger span:nth-child(3) { top: 20px; }
+        :root {
+            --verde:     #00e676;
+            --verde-dim: #00c160;
+            --oscuro:    #0a0e14;
+            --panel:     #111720;
+            --panel-2:   #161d28;
+            --borde:     rgba(255,255,255,0.07);
+            --texto:     #e8edf5;
+            --texto-dim: #7a8a9e;
+            --acento:    #00e676;
+        }
 
-                @media (max-width: 600px) {
-                    .navbar-links {
-                        display: none !important;
-                    }
-                    .navbar-toggle {
-                        display: block;
-                    }
-                    .navbar-dropdown {
-                        display: none;
-                        position: absolute;
-                        top: 60px;
-                        right: 20px;
-                        background: #fff;
-                        box-shadow: 0 8px 20px rgba(75,137,220,0.10);
-                        border-radius: 12px;
-                        min-width: 260px;
-                        z-index: 999;
-                        padding: 18px 0 10px 0;
-                        animation: fadeIn 0.3s cubic-bezier(.4,0,.2,1);
-                    }
-                    @keyframes fadeIn {
-                        from { opacity: 0; transform: translateY(-10px); }
-                        to { opacity: 1; transform: translateY(0); }
-                    }
-                    .navbar-dropdown a, .navbar-dropdown .dropdown-group > button {
-                        color: #23272f !important;
-                        padding: 12px 24px;
-                        display: block;
-                        font-weight: 600;
-                        font-size: 1.08rem;
-                        background: none;
-                        border: none;
-                        text-align: left;
-                        width: 100%;
-                        transition: background 0.18s, color 0.18s, padding 0.18s;
-                        border-radius: 8px;
-                    }
-                    .navbar-dropdown a:hover, .navbar-dropdown .dropdown-group > button:hover {
-                        background: linear-gradient(90deg, #e3eaf7 0%, #f2f6fb 100%);
-                        color: #3a6ea5;
-                        padding-left: 32px;
-                    }
-                    .navbar-dropdown .dropdown-group > button {
-                        color: #23272f;
-                        font-weight: 700;
-                        padding-left: 32px;
-                    }
-                    .navbar-dropdown .dropdown-group > button:hover {
-                        background: linear-gradient(90deg, #e3eaf7 0%, #f2f6fb 100%);
-                        color: #3a6ea5;
-                        padding-left: 40px;
-                    }
-                    .navbar-dropdown .dropdown-group {
-                        margin-bottom: 2px;
-                    }
-                    .navbar-dropdown .dropdown-options {
-                        display: none;
-                        background: #f8fbff;
-                        border-radius: 8px;
-                        margin: 0 12px 8px 12px;
-                        box-shadow: 0 2px 8px rgba(75,137,220,0.07);
-                        padding: 6px 0;
-                        animation: slideDown 0.3s cubic-bezier(.4,0,.2,1);
-                        overflow: hidden;
-                    }
-                    @keyframes slideDown {
-                        from { opacity: 0; max-height: 0; transform: translateY(-8px); }
-                        to { opacity: 1; max-height: 400px; transform: translateY(0); }
-                    }
-                    .navbar-dropdown .dropdown-options a {
-                        padding: 10px 44px;
-                        font-size: 0.98rem;
-                        font-weight: 500;
-                        border-radius: 6px;
-                        color: #23272f;
-                        transition: background 0.18s, color 0.18s, padding 0.18s;
-                    }
-                    .navbar-dropdown .dropdown-options a:hover {
-                        background: linear-gradient(90deg, #e3eaf7 0%, #dbe6fa 100%);
-                        color: #3a6ea5;
-                        padding-left: 56px;
-                    }
-                    .navbar-dropdown .dropdown-group {
-                        position: relative;
-                    }
-                    .navbar-dropdown .dropdown-options {
-                        display: none;
-                        background: #f8fbff;
-                        border-radius: 8px;
-                        margin: 0 12px 8px 12px;
-                        box-shadow: 0 2px 8px rgba(75,137,220,0.07);
-                        padding: 6px 0;
-                        animation: slideDown 0.3s cubic-bezier(.4,0,.2,1);
-                    }
-                    @keyframes slideDown {
-                        from { opacity: 0; transform: translateY(-8px); }
-                        to { opacity: 1; transform: translateY(0); }
-                    }
-                    .navbar-dropdown .dropdown-options a {
-                        padding: 10px 32px;
-                        font-size: 0.98rem;
-                        font-weight: 500;
-                        border-radius: 6px;
-                        transition: background 0.2s, color 0.2s;
-                    }
-                    .navbar-dropdown .dropdown-options a:hover {
-                        background: linear-gradient(90deg, #e3eaf7 0%, #dbe6fa 100%);
-                        color: #3a6ea5;
-                    }
-                }
-                @media (min-width: 601px) {
-                    .navbar-toggle {
-                        display: none !important;
-                    }
-                    .navbar-dropdown {
-                        display: none !important;
-                    }
-                    .navbar-links {
-                        display: flex !important;
-                    }
-                }
-        /* ======== NAVBAR (MODERNO) ======== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background-color: var(--oscuro);
+            color: var(--texto);
+            min-height: 100vh;
+        }
+
+        /* ─── NOISE OVERLAY ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: .5;
+        }
+
+        /* ─── NAVBAR ─── */
         .navbar {
-            background: linear-gradient(90deg, #4b89dc, #3a6ea5);
+            background: rgba(10, 14, 20, 0.92);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--borde);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.8rem 2rem;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+            padding: 0 2.5rem;
+            height: 64px;
             position: sticky;
             top: 0;
-            z-index: 100;
-            font-family: 'Inter', 'Roboto', Arial, sans-serif;
-            width: 100vw;
-            min-width: 100vw;
-            left: 0;
-            margin: 0;
-            box-sizing: border-box;
-        }
-        @media (max-width: 600px) {
-            .navbar {
-                padding: 0.8rem 8px;
-                width: 100vw;
-                min-width: 100vw;
-                left: 0;
-                margin: 0;
-                box-sizing: border-box;
-            }
+            z-index: 1000;
+            width: 100%;
         }
 
+        /* Logo */
         .navbar-logo {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            text-decoration: none;
         }
-
-        .navbar-logo img { width: 40px; height: 40px; border-radius: 8px; }
+        .navbar-logo img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
         .navbar-logo span {
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 800;
-            font-family: 'Inter', 'Roboto', Arial, sans-serif;
-            letter-spacing: 0.01em;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            color: #fff;
+        }
+        .navbar-logo span em {
+            color: var(--verde);
+            font-style: normal;
         }
 
+        /* Links */
         .navbar-links {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 4px;
         }
 
         .navbar a, .dropbtn {
-            color: #fff;
-            text-decoration: none;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
             font-weight: 700;
-            font-size: 1.04rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--texto-dim);
+            text-decoration: none;
             background: none;
             border: none;
             cursor: pointer;
-            transition: all 0.3s ease;
             padding: 8px 14px;
-            border-radius: 8px;
-            font-family: 'Inter', 'Roboto', Arial, sans-serif;
-            letter-spacing: 0.01em;
+            border-radius: 6px;
+            transition: color .2s, background .2s;
+            white-space: nowrap;
         }
 
         .navbar a:hover, .dropdown:hover .dropbtn {
-            background: rgba(255, 255, 255, 0.18);
-            color: #23272f;
+            color: #fff;
+            background: rgba(255,255,255,0.07);
         }
+
+        /* Dropdown */
+        .dropdown { position: relative; }
 
         .dropdown-content {
             display: none;
             position: absolute;
-            background: #ffffff;
-            min-width: 180px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            top: calc(100% + 8px);
+            left: 0;
+            background: var(--panel);
+            border: 1px solid var(--borde);
             border-radius: 10px;
-            top: 110%;
+            min-width: 170px;
+            padding: 6px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            z-index: 200;
         }
 
         .dropdown-content a {
-            color: #2c3e50;
-            padding: 12px 16px;
             display: block;
-            font-weight: 500;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: .95rem;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--texto-dim) !important;
+            padding: 9px 14px;
+            border-radius: 6px;
+            background: none !important;
+            transition: color .2s, background .2s;
         }
 
         .dropdown-content a:hover {
-            background: #f2f6fb;
-            color: #3a6ea5;
+            color: var(--verde) !important;
+            background: rgba(0,230,118,.07) !important;
         }
 
         .dropdown:hover .dropdown-content { display: block; }
 
-        /* ======== FOOTER ======== */
+        /* Auth buttons */
+        .btn-lif-outline {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: .9rem;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            border: 1px solid var(--verde);
+            color: var(--verde);
+            background: transparent;
+            padding: 6px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background .2s, color .2s;
+        }
+        .btn-lif-outline:hover {
+            background: var(--verde);
+            color: var(--oscuro);
+        }
+
+        .btn-lif-admin {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: .85rem;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #f5a623, #e8890a);
+            color: #000;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: opacity .2s;
+        }
+        .btn-lif-admin:hover { opacity: .85; color: #000; }
+
+        /* ─── HAMBURGER ─── */
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+        .hamburger { display: flex; flex-direction: column; gap: 5px; }
+        .hamburger span {
+            display: block;
+            width: 26px; height: 2.5px;
+            background: var(--texto);
+            border-radius: 2px;
+            transition: all .3s;
+        }
+
+        /* Mobile dropdown */
+        .navbar-dropdown {
+            display: none;
+            position: absolute;
+            top: 64px; right: 0;
+            width: 100%;
+            background: var(--panel);
+            border-bottom: 1px solid var(--borde);
+            z-index: 999;
+            padding: 12px 0 18px;
+        }
+
+        .navbar-dropdown a,
+        .navbar-dropdown .dropdown-group > button {
+            display: block;
+            width: 100%;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--texto-dim);
+            padding: 11px 24px;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            transition: color .2s, padding .2s;
+        }
+
+        .navbar-dropdown a:hover,
+        .navbar-dropdown .dropdown-group > button:hover {
+            color: var(--verde);
+            padding-left: 32px;
+        }
+
+        .navbar-dropdown .dropdown-options {
+            display: none;
+            background: rgba(255,255,255,.03);
+            padding: 4px 0;
+        }
+        .navbar-dropdown .dropdown-options a {
+            padding: 9px 40px;
+            font-size: .95rem;
+            color: var(--texto-dim);
+        }
+        .navbar-dropdown .dropdown-options a:hover {
+            color: var(--verde);
+            padding-left: 50px;
+        }
+
+        @media (max-width: 900px) {
+            .navbar { padding: 0 1.2rem; }
+            .navbar-links { display: none; }
+            .navbar-toggle { display: block; }
+        }
+        @media (min-width: 901px) {
+            .navbar-toggle { display: none !important; }
+            .navbar-dropdown { display: none !important; }
+        }
+
+        /* ─── MAIN CONTAINER ─── */
+        .main-container { position: relative; z-index: 1; }
+
+        /* ─── FOOTER ─── */
         footer {
             text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-            background: #f5f7fa;
-            font-size: 0.95rem;
-            color: #555;
-            border-top: 1px solid #dcdfe3;
+            padding: 28px 20px;
+            margin-top: 80px;
+            border-top: 1px solid var(--borde);
+            font-size: .85rem;
+            color: var(--texto-dim);
+            font-family: 'Barlow Condensed', sans-serif;
+            letter-spacing: .06em;
+            text-transform: uppercase;
         }
-
-        body {
-            font-family: 'Inter', 'Roboto', Arial, sans-serif;
-            background: linear-gradient(180deg, #e9eef5 0%, #f6f8fb 40%, #ffffff 100%);
-            margin: 0; padding: 0;
-            color: #2c3e50; line-height: 1.6;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: 900;
-            color: #1f2d3d;
-            font-size: 2.1rem;
-            font-family: 'Inter', 'Roboto', Arial, sans-serif;
-            letter-spacing: 0.01em;
-        }
-    
+        footer span { color: var(--verde); }
 
     </style>
     {% block extra_styles %}{% endblock %}
@@ -293,19 +286,20 @@
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <div class="navbar-logo">
+        <a href="/" class="navbar-logo">
             <img src="{{ url_for('static', filename='escudos/logolif.png') }}" alt="Logo LIF">
-            <span>LIF</span>
-        </div>
+            <span>L<em>I</em>F</span>
+        </a>
+
         <button class="navbar-toggle" onclick="toggleNavbar()">
-            <span class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </span>
+            <div class="hamburger">
+                <span></span><span></span><span></span>
+            </div>
         </button>
+
         <div class="navbar-links">
             <a href="/">Inicio</a>
+
             <div class="dropdown">
                 <button class="dropbtn">Fixture Mayores</button>
                 <div class="dropdown-content">
@@ -313,6 +307,7 @@
                     <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
                 </div>
             </div>
+
             <div class="dropdown">
                 <button class="dropbtn">Fixture Inferiores</button>
                 <div class="dropdown-content">
@@ -321,6 +316,7 @@
                     <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Quinta') }}">Quinta</a>
                 </div>
             </div>
+
             <div class="dropdown">
                 <button class="dropbtn">Goleadores</button>
                 <div class="dropdown-content">
@@ -331,8 +327,9 @@
                     <a href="/goleadores/septima">Séptima</a>
                 </div>
             </div>
+
             <div class="dropdown">
-                <button class="dropbtn">Tabla de Posiciones</button>
+                <button class="dropbtn">Posiciones</button>
                 <div class="dropdown-content">
                     <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
                     <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
@@ -341,20 +338,24 @@
                     <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
                 </div>
             </div>
+
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('views.logout') }}">Log-Out</a>
+                <a href="{{ url_for('views.logout') }}" class="btn-lif-outline" style="margin-left:8px;">Log-Out</a>
                 {% if current_user.rol == 'administrador' %}
-                    <a href="{{ url_for('views.adminview') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Admin</a>
+                    <a href="{{ url_for('views.adminview') }}" class="btn-lif-admin" style="margin-left:6px;">Panel Admin</a>
                 {% endif %}
                 {% if current_user.rol == 'periodista' %}
-                    <a href="{{ url_for('views.panelperiodista') }}" class="btn btn-sm btn-warning" style="margin-left: 10px;">Panel Periodista</a>
+                    <a href="{{ url_for('views.panelperiodista') }}" class="btn-lif-admin" style="margin-left:6px;">Panel Periodista</a>
                 {% endif %}
             {% else %}
-                <a href="{{ url_for('views.login') }}">Log-In</a>
+                <a href="{{ url_for('views.login') }}" class="btn-lif-outline" style="margin-left:8px;">Log-In</a>
             {% endif %}
         </div>
-        <div class="navbar-dropdown" id="navbarDropdown" style="display:none;">
+
+        <!-- MOBILE MENU -->
+        <div class="navbar-dropdown" id="navbarDropdown">
             <a href="/">Inicio</a>
+
             <div class="dropdown-group">
                 <button onclick="toggleDropdownOptions('mayores')">Fixture Mayores</button>
                 <div class="dropdown-options" id="dropdown-mayores">
@@ -362,6 +363,7 @@
                     <a href="{{ url_for('views.fixture', bloque='mayores', categoria='Reserva') }}">Reserva</a>
                 </div>
             </div>
+
             <div class="dropdown-group">
                 <button onclick="toggleDropdownOptions('inferiores')">Fixture Inferiores</button>
                 <div class="dropdown-options" id="dropdown-inferiores">
@@ -370,6 +372,7 @@
                     <a href="{{ url_for('views.fixture', bloque='inferiores', categoria='Septima') }}">Séptima</a>
                 </div>
             </div>
+
             <div class="dropdown-group">
                 <button onclick="toggleDropdownOptions('goleadores')">Goleadores</button>
                 <div class="dropdown-options" id="dropdown-goleadores">
@@ -380,8 +383,9 @@
                     <a href="/goleadores/septima">Séptima</a>
                 </div>
             </div>
+
             <div class="dropdown-group">
-                <button onclick="toggleDropdownOptions('tabla')">Tabla de Posiciones</button>
+                <button onclick="toggleDropdownOptions('tabla')">Posiciones</button>
                 <div class="dropdown-options" id="dropdown-tabla">
                     <a href="{{ url_for('views.tabla_posiciones', categoria='Primera') }}">Primera</a>
                     <a href="{{ url_for('views.tabla_posiciones', categoria='Reserva') }}">Reserva</a>
@@ -390,6 +394,7 @@
                     <a href="{{ url_for('views.tabla_posiciones', categoria='Septima') }}">Séptima</a>
                 </div>
             </div>
+
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('views.logout') }}">Log-Out</a>
                 {% if current_user.rol == 'administrador' %}
@@ -401,58 +406,40 @@
             {% else %}
                 <a href="{{ url_for('views.login') }}">Log-In</a>
             {% endif %}
-                    
         </div>
     </nav>
+
     <script>
     function toggleNavbar() {
-        var dropdown = document.getElementById('navbarDropdown');
-        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
-            dropdown.style.display = 'block';
-        } else {
-            dropdown.style.display = 'none';
-        }
-        // Close all nested dropdowns when opening main menu
-        var groups = document.querySelectorAll('.dropdown-options');
-        groups.forEach(function(opt){ opt.style.display = 'none'; });
+        var d = document.getElementById('navbarDropdown');
+        d.style.display = (d.style.display === 'block') ? 'none' : 'block';
+        document.querySelectorAll('.dropdown-options').forEach(o => o.style.display = 'none');
     }
-
     function toggleDropdownOptions(group) {
         var el = document.getElementById('dropdown-' + group);
-        if (el.style.display === 'block') {
-            el.style.display = 'none';
-        } else {
-            // Hide others
-            var groups = document.querySelectorAll('.dropdown-options');
-            groups.forEach(function(opt){ opt.style.display = 'none'; });
-            el.style.display = 'block';
-        }
+        var open = el.style.display === 'block';
+        document.querySelectorAll('.dropdown-options').forEach(o => o.style.display = 'none');
+        el.style.display = open ? 'none' : 'block';
     }
-
-    window.addEventListener('resize', function() {
-        if(window.innerWidth > 900){
-            document.getElementById('navbarDropdown').style.display = 'none';
-        }
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 900) document.getElementById('navbarDropdown').style.display = 'none';
     });
-    // Hide dropdown if click outside
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', e => {
         var nav = document.getElementById('navbarDropdown');
         var toggle = document.querySelector('.navbar-toggle');
         if (nav.style.display === 'block' && !nav.contains(e.target) && !toggle.contains(e.target)) {
             nav.style.display = 'none';
-            var groups = document.querySelectorAll('.dropdown-options');
-            groups.forEach(function(opt){ opt.style.display = 'none'; });
+            document.querySelectorAll('.dropdown-options').forEach(o => o.style.display = 'none');
         }
     });
     </script>
 
-    <!-- BLOQUE DE CONTENIDO -->
     <div class="main-container">
         {% block content %}{% endblock %}
     </div>
 
     <footer>
-        &copy; 2026 Liga Interprovincial de Fútbol - Todos los derechos reservados
+        &copy; 2026 <span>Liga Interprovincial de Fútbol</span> — Todos los derechos reservados
     </footer>
 
 </body>
