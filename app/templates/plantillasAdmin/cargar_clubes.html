@@ -4,184 +4,405 @@
   <meta charset="utf-8">
   <title>Cargar Clubes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #111118;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #00e5ff;
+      --accent2:   #7c3aed;
+      --text:      #e8e8f0;
+      --muted:     #6b6b80;
+      --card-bg:   #13131c;
+      --input-bg:  #0f0f18;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background-color: #1f1f1f;
-      color: #f5f6fa;
-      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
-      padding-top: 40px;
+      overflow-x: hidden;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 40px;
-      font-weight: 700;
-      color: #5dade2;
-      text-transform: uppercase;
-      letter-spacing: 2px;
+    /* ── NOISE TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .5;
     }
 
-    .form-card {
-      background-color: #2c2c2c;
-      border-radius: 15px;
-      padding: 30px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-      max-width: 600px;
-      margin: auto;
+    /* ── AMBIENT GLOW ── */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 700px; height: 700px;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrapper {
       position: relative;
       z-index: 1;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
     }
 
-    label {
-      color: #5dade2;
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .6;
+    }
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
       font-weight: 500;
-    }
-
-    input {
-      background-color: #3a3a3a !important;
-      border: none !important;
-      color: #f5f6fa !important;
-    }
-
-    input:focus {
-      background-color: #444 !important;
-      color: white !important;
-      box-shadow: 0 0 5px #5dade2 !important;
-    }
-
-    .btn-primary {
-      background-color: #5dade2;
-      border: none;
-      font-weight: 600;
-      padding: 10px 20px;
-      border-radius: 10px;
-    }
-
-    .btn-primary:hover {
-      background-color: #7dc0ef;
-    }
-
-    a.volver {
-      color: #5dade2;
       text-decoration: none;
+      cursor: pointer;
+      transition: all .25s ease;
+      letter-spacing: .3px;
+    }
+
+    .btn-nav:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 48px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .page-eyebrow {
+      font-size: 0.7rem;
       font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .7;
+      margin-bottom: 14px;
     }
 
-    a.volver:hover {
-      text-decoration: underline;
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -1.2px;
+      line-height: 1.05;
+      color: var(--text);
     }
 
-    /* Contenedor flotante para flashes */
+    .page-header h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 48px;
+      max-width: 580px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp .5s ease .1s both;
+    }
+
+    /* subtle top-right glow */
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── FIELD GROUP ── */
+    .field-group {
+      margin-bottom: 28px;
+    }
+
+    .field-group label {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .field-group input[type="text"],
+    .field-group input[type="file"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color .25s ease, box-shadow .25s ease;
+      -webkit-appearance: none;
+    }
+
+    .field-group input[type="text"]::placeholder { color: var(--muted); }
+
+    .field-group input:focus {
+      border-color: rgba(0,229,255,.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.08);
+    }
+
+    /* file input custom style */
+    .field-group input[type="file"] {
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .field-group input[type="file"]::-webkit-file-upload-button {
+      background: rgba(0,229,255,.1);
+      border: 1px solid rgba(0,229,255,.25);
+      border-radius: 6px;
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 5px 14px;
+      margin-right: 12px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .field-group input[type="file"]::-webkit-file-upload-button:hover {
+      background: rgba(0,229,255,.18);
+    }
+
+    .field-hint {
+      margin-top: 7px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ── DIVIDER ── */
+    .form-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border: none;
+      border-radius: 10px;
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .25s ease, transform .2s ease, box-shadow .25s ease;
+    }
+
+    .btn-submit:hover {
+      opacity: .9;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,229,255,.25);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 28px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+
+    .back-link:hover { color: var(--accent); }
+
+    /* ── FLASH MESSAGES ── */
     #flash-container {
       position: fixed;
-      top: 20px;
+      top: 24px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 2000;
-      pointer-events: none; /* Para que no interfiera con clicks */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
     }
 
-    /* Estilo para flash messages */
     .flash-message {
-      display: inline-block;          /* tamaño según el texto */
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      font-weight: bold;
-      text-align: center;
-      opacity: 0;                     /* inicial invisible */
-      transition: opacity 0.5s ease, transform 0.5s ease;
-      margin-bottom: 0.5rem;
-      transform: translateY(-20px);   /* slide inicial hacia arriba */
-      pointer-events: auto;           /* permite interacción con toast si fuera necesario */
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(-12px);
+      transition: opacity .4s ease, transform .4s ease;
+      pointer-events: auto;
+      backdrop-filter: blur(10px);
     }
 
-    /* Colores por categoría */
     .flash-success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+      background: rgba(0,230,118,.12);
+      color: #00e676;
+      border: 1px solid rgba(0,230,118,.25);
     }
 
     .flash-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+      background: rgba(255,82,82,.12);
+      color: #ff5252;
+      border: 1px solid rgba(255,82,82,.25);
     }
 
+    /* ── ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .wrapper { padding: 0 18px 60px; }
+      .form-card { padding: 30px 22px; }
+    }
   </style>
 </head>
 
 <body>
 
-  <!-- Flash container flotante -->
+  <!-- Flash container -->
   <div id="flash-container">
     {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash-message flash-{{ category }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
     {% endwith %}
   </div>
 
-  <h1>CARGAR CLUBES</h1>
+  <div class="wrapper">
 
-  <div class="form-card">
-    <form action="{{ url_for('views.cargar_clubes') }}" method="POST" enctype="multipart/form-data">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="logo-mark">Admin</span>
+      <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
+    </header>
 
-      <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre del Club</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" required>
-      </div>
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <p class="page-eyebrow">Jugadores y Equipos</p>
+      <h1>Cargar<br><span>Clubes</span></h1>
+    </div>
 
-      <div class="mb-3">
-        <label for="localidad" class="form-label">Localidad</label>
-        <input type="text" class="form-control" id="localidad" name="localidad" required>
-      </div>
+    <!-- FORM CARD -->
+    <div class="form-card">
+      <form action="{{ url_for('views.cargar_clubes') }}" method="POST" enctype="multipart/form-data">
 
-      <div class="mb-3">
-        <label for="escudo" class="form-label">Escudo del Club (Imagen)</label>
-        <input type="file" class="form-control" id="escudo" name="escudo" accept="image/*">
-        <small class="text-muted">Formatos permitidos: JPG, PNG, WEBP</small>
-      </div>
+        <div class="field-group">
+          <label for="nombre">Nombre del Club</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Ej: Club Atlético Rosario" required>
+        </div>
 
-      <button type="submit" class="btn btn-primary w-100 mt-3">
-        Guardar Club
-      </button>
+        <div class="field-group">
+          <label for="localidad">Localidad</label>
+          <input type="text" id="localidad" name="localidad" placeholder="Ej: Rosario" required>
+        </div>
 
-    </form>
+        <div class="field-group">
+          <label for="escudo">Escudo del Club</label>
+          <input type="file" id="escudo" name="escudo" accept="image/*">
+          <p class="field-hint">Formatos permitidos: JPG, PNG, WEBP</p>
+        </div>
 
-  <div class="text-center mt-4">
-    <a href="{{ url_for('views.adminview') }}" class="back-link">
-      ← Volver al panel de administrador
-    </a>
+        <div class="form-divider"></div>
+
+        <button type="submit" class="btn-submit">Guardar Club</button>
+
+      </form>
+
+      <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
+    </div>
+
   </div>
-</div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const flashes = document.querySelectorAll(".flash-message");
-    flashes.forEach(flash => {
-        // Slide + fade in
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const flashes = document.querySelectorAll(".flash-message");
+      flashes.forEach(flash => {
         setTimeout(() => {
-            flash.style.opacity = 1;
-            flash.style.transform = "translateY(0)";
+          flash.style.opacity = 1;
+          flash.style.transform = "translateY(0)";
         }, 100);
-
-        // Desaparece después de 3 segundos
         setTimeout(() => {
-            flash.style.opacity = 0;
-            flash.style.transform = "translateY(-20px)";
-            setTimeout(() => flash.remove(), 500);
+          flash.style.opacity = 0;
+          flash.style.transform = "translateY(-12px)";
+          setTimeout(() => flash.remove(), 400);
         }, 3000);
+      });
     });
-});
-</script>
+  </script>
 
 </body>
 </html>

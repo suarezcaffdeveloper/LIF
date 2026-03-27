@@ -1,522 +1,573 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asignar Jugador a Categoría</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asignar Jugador a Categoría</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background: linear-gradient(135deg, #1a1a2e 0%, #242440 100%);
-    position: relative;
-    color: #ffffff;
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    justify-content: center;
-    padding: 40px 20px;
-}
-
-/* FLASH FLOTA SOBRE EL FORMULARIO */
-#flash-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2000;
-            pointer-events: none; /* No bloquea clicks */
-        }
-
-        .flash-message {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-weight: bold;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            margin-bottom: 0.5rem;
-            transform: translateY(-20px);
-            pointer-events: auto;
-        }
-
-        .flash-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .flash-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-.panel-container {
-    display: flex;
-    gap: 35px;
-    width: 100%;
-    max-width: 1300px;
-    align-items: flex-start;
-}
-
-/* PANEL IZQUIERDO */
-.form-box {
-    flex: 1;
-    background: linear-gradient(135deg, rgba(45, 45, 60, 0.9), rgba(60, 60, 80, 0.8));
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.3),
-        0 0 30px rgba(93, 173, 226, 0.1);
-    display: flex;
-    flex-direction: column;
-    border: 1px solid rgba(93, 173, 226, 0.2);
-    backdrop-filter: blur(10px);
-}
-
-.form-box h2 {
-    color: #5dade2;
-    margin-bottom: 30px;
-    font-weight: 700;
-    font-size: 1.8rem;
-    text-align: center;
-    letter-spacing: 0.5px;
-}
-
-.form-box label {
-    color: #5dade2;
-    font-weight: 600;
-    margin-top: 18px;
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-    letter-spacing: 0.3px;
-}
-
-.form-box .form-select {
-    background: linear-gradient(135deg, #2a2a3f, #3a3a50) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(93, 173, 226, 0.4) !important;
-    border-radius: 10px;
-    padding: 12px 15px !important;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-/* FORZAR MODO OSCURO REAL EN SELECT */
-.form-box .form-select {
-    background-color: #2a2a3f !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(93, 173, 226, 0.4) !important;
-    color-scheme: dark; /* 🔥 CLAVE */
-}
-
-/* Opciones en navegadores compatibles */
-.form-box .form-select option {
-    background-color: #2a2a3f;
-    color: #ffffff;
-}
-
-.form-box .form-select:hover {
-    border-color: rgba(93, 173, 226, 0.6) !important;
-    box-shadow: 0 0 15px rgba(93, 173, 226, 0.1) !important;
-}
-
-.form-box .form-select:focus {
-    background: linear-gradient(135deg, #3a3a50, #4a4a65) !important;
-    border-color: #5dade2 !important;
-    box-shadow: 0 0 20px rgba(93, 173, 226, 0.2) !important;
-    outline: none !important;
-}
-
-.form-box .btn-primary {
-    background: linear-gradient(135deg, #5dade2, #4a96c7);
-    border: none;
-    border-radius: 10px;
-    padding: 12px 20px;
-    font-weight: 700;
-    margin-top: 25px;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-}
-
-.form-box .btn-primary:hover {
-    background: linear-gradient(135deg, #4a96c7, #3d7da8);
-    box-shadow: 0 10px 30px rgba(93, 173, 226, 0.3);
-    transform: translateY(-2px);
-}
-
-.form-box .btn-primary:active {
-    transform: translateY(0);
-}
-
-/* PANEL DERECHO */
-.right-panel {
-    flex: 1;
-    background: linear-gradient(135deg, rgba(45, 45, 60, 0.9), rgba(60, 60, 80, 0.8));
-    padding: 40px;
-    border-radius: 20px;
-    min-height: 650px;
-    max-height: 700px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.3),
-        0 0 30px rgba(93, 173, 226, 0.1);
-    border: 1px solid rgba(93, 173, 226, 0.2);
-    backdrop-filter: blur(10px);
-}
-
-.right-panel h2 {
-    text-align: center;
-    color: #5dade2;
-    margin-bottom: 25px;
-    font-weight: 700;
-    font-size: 1.8rem;
-    letter-spacing: 0.5px;
-}
-
-/* LISTA SCROLL */
-.lista-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding-right: 8px;
-}
-
-.lista-scroll::-webkit-scrollbar {
-    width: 8px;
-}
-
-.lista-scroll::-webkit-scrollbar-track {
-    background: rgba(93, 173, 226, 0.05);
-    border-radius: 10px;
-}
-
-.lista-scroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #5dade2, #4a96c7);
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-.lista-scroll::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #4a96c7, #3d7da8);
-}
-
-/* GRID 2 COLUMNAS */
-#lista-asignados {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: min-content;
-    gap: 12px;
-    overflow-y: auto;
-    flex: 1;
-    padding-right: 8px;
-}
-
-/* TARJETA JUGADOR ASIGNADO */
-.player-card {
-    background: linear-gradient(135deg, rgba(93, 173, 226, 0.1), rgba(50, 150, 200, 0.08));
-    padding: 14px 16px;
-    border-radius: 12px;
-    border-left: 4px solid #5dade2;
-    border: 1px solid rgba(93, 173, 226, 0.3);
-    width: 100%;
-    display: flex;
-    align-items: center;
-    color: #c5e3ff;
-    font-size: 0.95rem;
-    cursor: pointer;
-    opacity: 0;
-    animation: fadeIn 0.25s ease-out forwards;
-    transition: all 0.25s ease;
-    font-weight: 500;
-}
-
-.player-card:hover {
-    background: linear-gradient(135deg, rgba(93, 173, 226, 0.25), rgba(50, 150, 200, 0.18));
-    border-left-color: #a8d8f0;
-    transform: translateX(6px);
-    box-shadow: 0 6px 20px rgba(93, 173, 226, 0.15);
-}
-
-@keyframes fadeIn {
-    from { 
-        opacity: 0; 
-        transform: translateY(-4px);
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0);
-    }
-}
-
-/* PREVIEW */
-.preview-wrapper { 
-    min-height: 120px;
-    margin-top: 20px;
-}
-
-.preview-card {
-    padding: 18px 20px;
-    background: linear-gradient(135deg, rgba(93, 173, 226, 0.15), rgba(50, 150, 200, 0.1));
-    border-left: 4px solid #5dade2;
-    border-radius: 12px;
-    border: 1px solid rgba(93, 173, 226, 0.3);
-    transition: all 0.3s ease;
-    color: #c5e3ff;
-    font-weight: 500;
-    line-height: 1.6;
-}
-
-.preview-card strong {
-    color: #5dade2;
-    font-weight: 700;
-}
-
-/* BOTÓN VOLVER */
-.back-link {
-    margin-top: 20px;
-    color: #999;
-    text-align: center;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-.back-link:hover { 
-    color: #5dade2;
-    text-decoration: underline;
-}
-
-/* RESPONSIVE */
-@media (max-width: 1000px) {
-    .panel-container {
-        flex-direction: column;
-        gap: 25px;
+  <style>
+    :root {
+      --bg:       #0a0a0f;
+      --border:   rgba(255,255,255,0.07);
+      --accent:   #00e5ff;
+      --accent2:  #7c3aed;
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --card-bg:  #13131c;
+      --input-bg: #0f0f18;
     }
 
-    .right-panel {
-        min-height: 400px;
-        max-height: none;
-    }
-
-    #lista-asignados {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .form-box, .right-panel {
-        padding: 25px;
-    }
-
-    .form-box h2, .right-panel h2 {
-        font-size: 1.4rem;
-    }
-
-    #lista-asignados {
-        grid-template-columns: 1fr;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-        padding: 20px 10px;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
-}
-</style>
-</head>
 
+    /* ── NOISE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
+    }
+
+    /* ── AMBIENT GLOW ── */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 700px; height: 700px;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); opacity: .6;
+    }
+
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 20px; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      text-decoration: none; transition: all .25s ease;
+    }
+
+    .btn-nav:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 48px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .page-eyebrow {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent); opacity: .7; margin-bottom: 14px;
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -1.2px; line-height: 1.05;
+    }
+
+    .page-header h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── TWO-COLUMN LAYOUT ── */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── CARD BASE ── */
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp .5s ease both;
+    }
+
+    .panel-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .panel-card:nth-child(2) { animation-delay: .08s; }
+
+    /* ── CARD SECTION TITLE ── */
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 32px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .card-title::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    /* ── FIELD GROUP ── */
+    .field-group { margin-bottom: 22px; }
+
+    .field-group label {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 9px;
+    }
+
+    .field-group select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 40px 12px 15px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      appearance: none; -webkit-appearance: none;
+      cursor: pointer;
+      transition: border-color .25s ease, box-shadow .25s ease;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      color-scheme: dark;
+    }
+
+    .field-group select option { background: #13131c; color: var(--text); }
+
+    .field-group select:focus {
+      border-color: rgba(0,229,255,.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.08);
+    }
+
+    .field-group select:disabled {
+      opacity: .35; cursor: not-allowed;
+    }
+
+    /* ── PREVIEW ── */
+    .preview-box {
+      margin-top: 8px;
+      background: rgba(0,229,255,.05);
+      border: 1px solid rgba(0,229,255,.15);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: none;
+      transition: opacity .3s ease;
+    }
+
+    .preview-box strong { color: var(--accent); font-weight: 600; }
+
+    /* ── DIVIDER ── */
+    .form-divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+    /* ── SUBMIT ── */
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border: none; border-radius: 10px;
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .25s, transform .2s, box-shadow .25s;
+    }
+
+    .btn-submit:hover {
+      opacity: .9; transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,229,255,.25);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 24px; font-size: 0.82rem;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s;
+    }
+
+    .back-link:hover { color: var(--accent); }
+
+    /* ── RIGHT PANEL: player list ── */
+    .right-card {
+      max-height: 620px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-list {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 6px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .player-list::-webkit-scrollbar { width: 4px; }
+    .player-list::-webkit-scrollbar-track { background: transparent; }
+    .player-list::-webkit-scrollbar-thumb {
+      background: rgba(0,229,255,.2); border-radius: 4px;
+    }
+
+    /* ── PLAYER CARD ── */
+    .player-card {
+      background: rgba(0,229,255,.05);
+      border: 1px solid rgba(0,229,255,.12);
+      border-radius: 10px;
+      padding: 11px 14px;
+      font-size: 0.82rem;
+      color: var(--text);
+      opacity: 0;
+      animation: fadeUp .25s ease forwards;
+      transition: background .2s, border-color .2s, transform .2s;
+      line-height: 1.3;
+    }
+
+    .player-card:hover {
+      background: rgba(0,229,255,.1);
+      border-color: rgba(0,229,255,.28);
+      transform: translateX(4px);
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 40px 0;
+      grid-column: 1 / -1;
+    }
+
+    .empty-state .empty-icon {
+      font-size: 2rem; margin-bottom: 10px; opacity: .4;
+    }
+
+    /* ── FLASH ── */
+    #flash-container {
+      position: fixed; top: 24px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      pointer-events: none;
+    }
+
+    .flash-message {
+      display: inline-block; padding: 10px 22px;
+      border-radius: 100px; font-size: 0.85rem; font-weight: 500;
+      opacity: 0; transform: translateY(-12px);
+      transition: opacity .4s ease, transform .4s ease;
+      pointer-events: auto; backdrop-filter: blur(10px);
+    }
+
+    .flash-success {
+      background: rgba(0,230,118,.12); color: #00e676;
+      border: 1px solid rgba(0,230,118,.25);
+    }
+
+    .flash-danger {
+      background: rgba(255,82,82,.12); color: #ff5252;
+      border: 1px solid rgba(255,82,82,.25);
+    }
+
+    /* ── ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .panel-grid { grid-template-columns: 1fr; }
+      .right-card { max-height: none; }
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { padding: 0 18px 60px; }
+      .panel-card { padding: 26px 20px; }
+      .player-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
 <body>
 
-<!-- FLASH -->
-<div id="flash-container">
+  <!-- FLASH -->
+  <div id="flash-container">
     {% with messages = get_flashed_messages(with_categories=True) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash-message flash-{{ category }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
     {% endwith %}
-</div>
+  </div>
 
-<div class="panel-container">
+  <div class="wrapper">
 
-    <!-- FORMULARIO -->
-    <div class="form-box">
-        <h2>👥 Asignar Jugador</h2>
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="logo-mark">Admin</span>
+      <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <p class="page-eyebrow">Jugadores y Equipos</p>
+      <h1>Asignar<br><span>Jugador</span></h1>
+    </div>
+
+    <!-- TWO-COLUMN GRID -->
+    <div class="panel-grid">
+
+      <!-- LEFT: FORMULARIO -->
+      <div class="panel-card">
+        <div class="card-title">Datos de asignación</div>
 
         <form id="form-asignar" method="POST" action="{{ url_for('views.asignar_jugador_categoria') }}">
 
-            <label>Club</label>
-            <select id="club_id" name="club_id" class="form-select mb-3" required>
-                <option value="">Seleccionar club...</option>
-                {% for club in clubes %}
-                    <option value="{{ club.id }}">{{ club.nombre }}</option>
-                {% endfor %}
+          <div class="field-group">
+            <label for="club_id">Club</label>
+            <select id="club_id" name="club_id" required>
+              <option value="">Seleccionar club...</option>
+              {% for club in clubes %}
+                <option value="{{ club.id }}">{{ club.nombre }}</option>
+              {% endfor %}
             </select>
+          </div>
 
-            <label>Categoría</label>
-            <select id="equipo_id" name="equipo_id" class="form-select mb-3" required disabled>
-                <option value="">Seleccione un club...</option>
+          <div class="field-group">
+            <label for="equipo_id">Categoría</label>
+            <select id="equipo_id" name="equipo_id" required disabled>
+              <option value="">Seleccione un club primero...</option>
             </select>
+          </div>
 
-            <label>Jugador</label>
-            <select id="numero_carnet" name="numero_carnet" class="form-select mb-3" required disabled>
-                <option value="">Seleccione un club...</option>
-            </select>           
+          <div class="field-group">
+            <label for="numero_carnet">Jugador</label>
+            <select id="numero_carnet" name="numero_carnet" required disabled>
+              <option value="">Seleccione un club primero...</option>
+            </select>
+          </div>
 
-            <button class="btn btn-primary w-100">✓ Asignar Jugador</button>
+          <div id="preview" class="preview-box"></div>
+
+          <div class="form-divider"></div>
+
+          <button type="submit" class="btn-submit">✓ Asignar Jugador</button>
+
         </form>
 
-        <div class="preview-wrapper">
-            <div id="preview" class="preview-card" style="display:none;"></div>
-        </div>
-
         <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
+      </div>
+
+      <!-- RIGHT: LISTA -->
+      <div class="panel-card right-card">
+        <div class="card-title">Jugadores asignados</div>
+        <div id="lista-asignados" class="player-list">
+          <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            Seleccioná una categoría para ver los jugadores asignados
+          </div>
+        </div>
+      </div>
+
     </div>
+  </div>
 
-    <!-- PANEL DERECHA -->
-    <div class="right-panel">
-        <h2>Jugadores ya asignados</h2>
-        <div id="lista-asignados" class="lista-scroll"></div>
-    </div>
+  <script>
+    const clubSelect      = document.getElementById("club_id");
+    const jugadorSelect   = document.getElementById("numero_carnet");
+    const equipoSelect    = document.getElementById("equipo_id");
+    const listaAsignados  = document.getElementById("lista-asignados");
+    const preview         = document.getElementById("preview");
 
-</div>
+    clubSelect.addEventListener("change", async function () {
+      const clubId = this.value;
+      jugadorSelect.disabled = true;
+      equipoSelect.disabled  = true;
+      listaAsignados.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div>Seleccioná una categoría para ver los jugadores</div>`;
+      preview.style.display = "none";
 
-<script>
-const clubSelect = document.getElementById("club_id");
-const jugadorSelect = document.getElementById("numero_carnet");
-const equipoSelect = document.getElementById("equipo_id");
-const listaAsignados = document.getElementById("lista-asignados");
-const preview = document.getElementById("preview");
+      if (!clubId) return;
 
-clubSelect.addEventListener("change", async function () {
-    const clubId = this.value;
-    jugadorSelect.disabled = true;
-    equipoSelect.disabled = true;
+      const res  = await fetch(`/obtener_datos_club/${clubId}`);
+      const data = await res.json();
 
-    if (!clubId) return;
-
-    const res = await fetch(`/obtener_datos_club/${clubId}`);
-    const data = await res.json();
-
-    jugadorSelect.innerHTML = '<option value="">Seleccionar jugador...</option>';
-    data.jugadores.forEach(j => {
+      jugadorSelect.innerHTML = '<option value="">Seleccionar jugador...</option>';
+      data.jugadores.forEach(j => {
         jugadorSelect.innerHTML += `<option value="${j.numero_carnet}">${j.apellido}, ${j.nombre}</option>`;
-    });
+      });
 
-    equipoSelect.innerHTML = '<option value="">Seleccionar categoría...</option>';
-    data.equipos.forEach(e => {
+      equipoSelect.innerHTML = '<option value="">Seleccionar categoría...</option>';
+      data.equipos.forEach(e => {
         equipoSelect.innerHTML += `<option value="${e.id}">${e.categoria}</option>`;
+      });
+
+      jugadorSelect.disabled = false;
+      equipoSelect.disabled  = false;
     });
 
-    jugadorSelect.disabled = false;
-    equipoSelect.disabled = false;
+    equipoSelect.addEventListener("change", async function () {
+      const equipoId = this.value;
+      if (!equipoId) return;
 
-    listaAsignados.innerHTML = "";
-    preview.style.display = "none";
-});
+      const res      = await fetch(`/api/jugadores_por_equipo/${equipoId}`);
+      const jugadores = await res.json();
 
-equipoSelect.addEventListener("change", async function () {
-    const equipoId = this.value;
-    if (!equipoId) return;
+      listaAsignados.innerHTML = "";
 
-    const res = await fetch(`/api/jugadores_por_equipo/${equipoId}`);
-    const jugadores = await res.json();
-
-    listaAsignados.innerHTML = "";
-    jugadores.forEach(j => {
-        listaAsignados.innerHTML += `
-            <div class="player-card">${j.nombre} </div>
-        `;
-    });
-});
-
-jugadorSelect.addEventListener("change", function () {
-    const carnet = this.value;
-    const texto = this.options[this.selectedIndex].textContent;
-
-    if (!carnet) {
-        preview.style.display = "none";
+      if (jugadores.length === 0) {
+        listaAsignados.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div>Sin jugadores asignados aún</div>`;
         return;
-    }
+      }
 
-    preview.innerHTML = `
-        <strong>Carnet Nº:</strong> ${carnet}<br>
-        <strong>Jugador:</strong> ${texto}
-    `;
-    preview.style.opacity = 0;
-    preview.style.display = "block";
-    setTimeout(() => preview.style.opacity = 1, 50);
-});
+      jugadores.forEach((j, i) => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+        card.style.animationDelay = `${i * 0.04}s`;
+        card.textContent = j.nombre;
+        listaAsignados.appendChild(card);
+      });
+    });
 
-document.getElementById("form-asignar").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const formData = new FormData(this);
+    jugadorSelect.addEventListener("change", function () {
+      const carnet = this.value;
+      const texto  = this.options[this.selectedIndex].textContent;
 
-    const res = await fetch("{{ url_for('views.asignar_jugador_categoria') }}", {
+      if (!carnet) { preview.style.display = "none"; return; }
+
+      preview.innerHTML = `<strong>Carnet Nº:</strong> ${carnet} &nbsp;·&nbsp; <strong>Jugador:</strong> ${texto}`;
+      preview.style.opacity = 0;
+      preview.style.display = "block";
+      setTimeout(() => preview.style.opacity = 1, 50);
+    });
+
+    document.getElementById("form-asignar").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+
+      const res  = await fetch("{{ url_for('views.asignar_jugador_categoria') }}", {
         method: "POST",
         body: formData,
         headers: { "X-Requested-With": "XMLHttpRequest" }
-    });
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!data.ok) {
-        // FLASH ERROR
+      if (!data.ok) {
         showFlash(data.msg, "danger");
         return;
-    }
+      }
 
-    // FLASH SUCCESS
-    showFlash(`Jugador ${data.nombre} asignado correctamente`, "success");
+      showFlash(`Jugador ${data.nombre} asignado correctamente`, "success");
 
-    preview.style.transition = "opacity 0.5s";
-    preview.style.opacity = 0;
+      preview.style.opacity = 0;
+      setTimeout(() => { preview.style.display = "none"; }, 400);
 
-    setTimeout(() => {
-        const nuevo = document.createElement("div");
-        nuevo.classList.add("player-card");
-        nuevo.textContent = data.nombre;
-        nuevo.style.opacity = 0;
-        listaAsignados.appendChild(nuevo);
-        setTimeout(() => nuevo.style.opacity = 1, 50);
-        preview.style.display = "none";
-    }, 400);
+      const card = document.createElement("div");
+      card.className = "player-card";
+      card.style.opacity = 0;
+      card.textContent = data.nombre;
 
-    jugadorSelect.value = "";
-});
+      // remove empty state if present
+      const empty = listaAsignados.querySelector(".empty-state");
+      if (empty) empty.remove();
 
-// FUNCION PARA MOSTRAR FLASH
-function showFlash(msg, category) {
-    const container = document.getElementById("flash-container");
-    const flash = document.createElement("div");
-    flash.className = `flash-message flash-${category}`;
-    flash.textContent = msg;
-    container.appendChild(flash);
+      listaAsignados.appendChild(card);
+      setTimeout(() => card.style.opacity = 1, 50);
 
-    setTimeout(() => {
+      jugadorSelect.value = "";
+    });
+
+    function showFlash(msg, category) {
+      const container = document.getElementById("flash-container");
+      const flash = document.createElement("div");
+      flash.className = `flash-message flash-${category}`;
+      flash.textContent = msg;
+      container.appendChild(flash);
+
+      setTimeout(() => {
         flash.style.opacity = 1;
         flash.style.transform = "translateY(0)";
-    }, 50);
+      }, 50);
 
-    setTimeout(() => {
+      setTimeout(() => {
         flash.style.opacity = 0;
-        flash.style.transform = "translateY(-20px)";
-        setTimeout(() => flash.remove(), 500);
-    }, 3000);
-}
-</script>
+        flash.style.transform = "translateY(-12px)";
+        setTimeout(() => flash.remove(), 400);
+      }, 3000);
+    }
+
+    // Flash iniciales (desde Jinja)
+    document.querySelectorAll(".flash-message").forEach(flash => {
+      setTimeout(() => { flash.style.opacity = 1; flash.style.transform = "translateY(0)"; }, 100);
+      setTimeout(() => {
+        flash.style.opacity = 0; flash.style.transform = "translateY(-12px)";
+        setTimeout(() => flash.remove(), 400);
+      }, 3000);
+    });
+  </script>
 
 </body>
 </html>

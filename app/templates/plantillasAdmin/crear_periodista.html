@@ -1,158 +1,368 @@
 <!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Registrar Periodista</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Registrar Periodista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            background: #1f1f1f;
-            color: #f5f6fa;
-            font-family: "Poppins", sans-serif;
-        }
-        .form-container {
-            max-width: 550px;
-            margin: 70px auto;
-            background: #2c2c2c;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0px 0px 20px rgba(0,0,0,0.4);
-        }
-        h2 {
-            text-align: center;
-            color: #5dade2;
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-        .btn-primary {
-            background-color: #5dade2;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #3498db;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 1rem;
-            color: #ccc;
-        }
-        .back-link:hover {
-            color: #00bfff;
-        }
+  <style>
+    :root {
+      --bg:       #0a0a0f;
+      --border:   rgba(255,255,255,0.07);
+      --accent:   #00e5ff;
+      --accent2:  #7c3aed;
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --card-bg:  #13131c;
+      --input-bg: #0f0f18;
+    }
 
-        /* Flash container flotante */
-        #flash-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2000;
-            pointer-events: none;
-        }
-        .flash-message {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border-radius: 10px;
-            font-weight: bold;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            margin-bottom: 0.5rem;
-            pointer-events: auto;
-        }
-        .flash-success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .flash-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-    </style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
+    }
+
+    /* ── AMBIENT GLOW ── */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 700px; height: 700px;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); opacity: .6;
+    }
+
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 20px; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      text-decoration: none; transition: all .25s ease;
+    }
+
+    .btn-nav:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 48px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .page-eyebrow {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent); opacity: .7; margin-bottom: 14px;
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -1.2px; line-height: 1.05;
+    }
+
+    .page-header h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 48px;
+      max-width: 580px;
+      position: relative; overflow: hidden;
+      animation: fadeUp .5s ease .1s both;
+    }
+
+    .form-card::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── FIELD GROUP ── */
+    .field-group { margin-bottom: 26px; }
+
+    .field-group label {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+
+    .field-group input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color .25s ease, box-shadow .25s ease;
+      -webkit-appearance: none;
+    }
+
+    .field-group input::placeholder { color: var(--muted); }
+
+    .field-group input:focus {
+      border-color: rgba(0,229,255,.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.08);
+    }
+
+    /* error state */
+    .field-group input.input-error {
+      border-color: rgba(255,82,82,.5);
+      box-shadow: 0 0 0 3px rgba(255,82,82,.08);
+    }
+
+    .field-hint {
+      margin-top: 7px;
+      font-size: 0.75rem;
+      color: #ff5252;
+      display: none;
+    }
+
+    .field-hint.visible { display: block; }
+
+    /* ── DIVIDER ── */
+    .form-divider { height: 1px; background: var(--border); margin: 30px 0; }
+
+    /* ── SUBMIT ── */
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border: none; border-radius: 10px;
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .25s, transform .2s, box-shadow .25s;
+    }
+
+    .btn-submit:hover {
+      opacity: .9; transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,229,255,.25);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 28px; font-size: 0.82rem;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s;
+    }
+
+    .back-link:hover { color: var(--accent); }
+
+    /* ── FLASH ── */
+    #flash-container {
+      position: fixed; top: 24px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2000;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      pointer-events: none;
+    }
+
+    .flash-message {
+      display: inline-block; padding: 10px 22px;
+      border-radius: 100px; font-size: 0.85rem; font-weight: 500;
+      opacity: 0; transform: translateY(-12px);
+      transition: opacity .4s ease, transform .4s ease;
+      pointer-events: auto; backdrop-filter: blur(10px);
+    }
+
+    .flash-success {
+      background: rgba(0,230,118,.12); color: #00e676;
+      border: 1px solid rgba(0,230,118,.25);
+    }
+
+    .flash-danger {
+      background: rgba(255,82,82,.12); color: #ff5252;
+      border: 1px solid rgba(255,82,82,.25);
+    }
+
+    /* ── ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .wrapper { padding: 0 18px 60px; }
+      .form-card { padding: 30px 22px; }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="form-container">
-    <h2>Registrar Periodista</h2>
+  <!-- FLASH -->
+  <div id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
-    <!-- Flash container flotante -->
-    <div id="flash-container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash-message flash-{{ category }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+  <div class="wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="logo-mark">Admin</span>
+      <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <p class="page-eyebrow">Fixture y Contenido</p>
+      <h1>Registrar<br><span>Periodista</span></h1>
     </div>
 
-    <form id="periodista-form" action="{{ url_for('views.crear_periodista') }}" method="POST">
+    <!-- FORM CARD -->
+    <div class="form-card">
+      <form id="periodista-form" action="{{ url_for('views.crear_periodista') }}" method="POST">
 
-        <div class="mb-3">
-            <label class="form-label">Nombre completo</label>
-            <input type="text" name="nombre_completo" class="form-control"
-                   value="{{ request.form.nombre_completo if request.form.nombre_completo else '' }}" required>
+        <div class="field-group">
+          <label for="nombre_completo">Nombre completo</label>
+          <input type="text" id="nombre_completo" name="nombre_completo"
+                 value="{{ request.form.nombre_completo if request.form.nombre_completo else '' }}"
+                 placeholder="Ej: Juan García" required>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Correo electrónico</label>
-            <input type="email" name="email" class="form-control"
-                   value="{{ request.form.email if request.form.email else '' }}" required>
+        <div class="field-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" name="email"
+                 value="{{ request.form.email if request.form.email else '' }}"
+                 placeholder="correo@ejemplo.com" required>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Confirmar correo electrónico</label>
-            <input type="email" name="email_confirm" id="email_confirm" class="form-control" required>
+        <div class="field-group">
+          <label for="email_confirm">Confirmar correo electrónico</label>
+          <input type="email" id="email_confirm" name="email_confirm"
+                 placeholder="Repita el correo electrónico" required>
+          <p class="field-hint" id="email-hint">Los correos electrónicos no coinciden</p>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Registrar Periodista</button>
+        <div class="form-divider"></div>
 
-        <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
-    </form>
-</div>
+        <button type="submit" class="btn-submit">Registrar Periodista</button>
 
-<script>
-// =========================
-// FLASH SLIDE + FADE
-// =========================
-document.addEventListener("DOMContentLoaded", () => {
-    const flashes = document.querySelectorAll(".flash-message");
-    flashes.forEach(flash => {
-        // Slide + fade in
+      </form>
+
+      <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // ── FLASH ANIMATIONS ──
+      document.querySelectorAll(".flash-message").forEach(flash => {
         setTimeout(() => {
-            flash.style.opacity = 1;
-            flash.style.transform = "translateY(0)";
+          flash.style.opacity = 1;
+          flash.style.transform = "translateY(0)";
         }, 100);
-
-        // Desaparece después de 3 segundos
         setTimeout(() => {
-            flash.style.opacity = 0;
-            flash.style.transform = "translateY(-20px)";
-            setTimeout(() => flash.remove(), 500);
+          flash.style.opacity = 0;
+          flash.style.transform = "translateY(-12px)";
+          setTimeout(() => flash.remove(), 400);
         }, 3000);
+      });
+
+      // ── EMAIL VALIDATION ──
+      const form         = document.getElementById("periodista-form");
+      const emailInput   = document.getElementById("email");
+      const confirmInput = document.getElementById("email_confirm");
+      const hint         = document.getElementById("email-hint");
+
+      // live feedback while typing confirmation
+      confirmInput.addEventListener("input", () => {
+        if (confirmInput.value && confirmInput.value !== emailInput.value) {
+          confirmInput.classList.add("input-error");
+          hint.classList.add("visible");
+        } else {
+          confirmInput.classList.remove("input-error");
+          hint.classList.remove("visible");
+        }
+      });
+
+      form.addEventListener("submit", (e) => {
+        const email        = emailInput.value;
+        const emailConfirm = confirmInput.value;
+
+        if (email !== emailConfirm) {
+          e.preventDefault();
+          confirmInput.classList.add("input-error");
+          hint.classList.add("visible");
+          confirmInput.value = "";
+          confirmInput.focus();
+        }
+      });
+
     });
-
-    // =========================
-    // Validación de emails antes de enviar
-    // =========================
-    form.addEventListener("submit", (e) => {
-    const email = form.email.value;
-    const emailConfirm = form.email_confirm.value;
-
-    if (email !== emailConfirm) {
-        e.preventDefault(); // Detiene el submit
-        alert("Los correos electrónicos no coinciden"); // También podrías usar flash dinámico si querés
-        form.email_confirm.value = ""; // Borra solo el campo de confirmación
-        form.email_confirm.focus();
-    }
-});
-});
-</script>
+  </script>
 
 </body>
 </html>

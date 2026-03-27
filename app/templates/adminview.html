@@ -4,347 +4,471 @@
   <meta charset="utf-8">
   <title>Panel de Administración</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #111118;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #00e5ff;
+      --accent2:   #7c3aed;
+      --text:      #e8e8f0;
+      --muted:     #6b6b80;
+      --card-bg:   #13131c;
+      --card-hover:#181825;
     }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
-      color: #f5f6fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
-      padding-bottom: 40px;
+      overflow-x: hidden;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 50px;
-      margin-bottom: 60px;
-      font-weight: 800;
-      color: #5dade2;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-size: 2.5rem;
-      position: relative;
-      padding-bottom: 20px;
-    }
-
-    h1::after {
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
       content: '';
-      display: block;
-      width: 80px;
-      height: 3px;
-      background: linear-gradient(90deg, #5dade2, #2a5f7f);
-      margin: 15px auto 0;
-      border-radius: 2px;
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .5;
     }
 
-    .top-buttons {
-      position: absolute;
-      top: 30px;
-      right: 30px;
-      display: flex;
-      gap: 12px;
-      z-index: 100;
-    }
-
-    .top-buttons a {
-      background-color: rgba(45, 45, 45, 0.9);
-      color: #5dade2;
-      border: 2px solid #5dade2;
-      border-radius: 10px;
-      padding: 10px 18px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: all .3s ease;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(10px);
-    }
-
-    .top-buttons a:hover {
-      background-color: #5dade2;
-      color: #1f1f1f;
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(93, 173, 226, 0.3);
-    }
-
-    /* SECCIÓN WRAPPER */
-    .section-wrapper {
-      margin-bottom: 60px;
-    }
-
-    /* SECTION TITLE */
-    .section-title {
-      color: #5dade2;
-      text-transform: uppercase;
-      font-weight: 700;
-      font-size: 1.35rem;
-      margin: 0 0 30px 0;
-      position: relative;
-      padding-left: 20px;
-      letter-spacing: 1px;
-    }
-
-    .section-title::before {
+    /* ── AMBIENT GLOW ── */
+    body::after {
       content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 4px;
-      height: 28px;
-      background: linear-gradient(180deg, #5dade2, #2a5f7f);
-      border-radius: 2px;
+      position: fixed;
+      width: 700px; height: 700px;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
 
-    /* GRID PRINCIPAL */
-    .panel-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 25px;
-      padding: 0 0 20px 0;
-    }
-
-    /* CARD BASE */
-    .admin-card-wrapper {
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      transform: translateZ(0);
-    }
-
-    .admin-card {
-      background: linear-gradient(135deg, rgba(45, 45, 45, 0.8), rgba(60, 60, 60, 0.6));
-      border-radius: 16px;
-      padding: 35px 25px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      min-height: 160px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      border: 1px solid rgba(93, 173, 226, 0.2);
-      position: relative;
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-    }
-
-    .admin-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(93, 173, 226, 0.1), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .admin-card-wrapper:hover .admin-card::before {
-      left: 100%;
-    }
-
-    .admin-card h5 {
-      margin: 0;
-      color: #5dade2;
-      font-weight: 700;
-      font-size: 1.15rem;
+    .wrapper {
       position: relative;
       z-index: 1;
-      transition: all 0.3s ease;
-      line-height: 1.4;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
     }
 
-    .admin-card-wrapper:hover .admin-card h5 {
-      color: #a8d8f0;
-      text-shadow: 0 0 10px rgba(93, 173, 226, 0.3);
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
     }
 
-    .admin-card-wrapper:hover .admin-card {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 40px rgba(93, 173, 226, 0.2), 0 0 30px rgba(93, 173, 226, 0.1);
-      border-color: rgba(93, 173, 226, 0.5);
-      background: linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(65, 65, 65, 0.8));
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .6;
     }
 
-    /* ICON POSITION */
-    .admin-card-icon {
-      font-size: 2.5rem;
-      margin-right: 15px;
-      opacity: 0.8;
-      transition: all 0.3s ease;
+    .top-actions {
+      display: flex;
+      gap: 10px;
     }
 
-    .admin-card-wrapper:hover .admin-card-icon {
-      opacity: 1;
-      transform: scale(1.1);
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .25s ease;
+      letter-spacing: .3px;
     }
 
-    /* RESPONS */
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 1.8rem;
-        margin-top: 30px;
-        margin-bottom: 40px;
-      }
-
-      .top-buttons {
-        position: static;
-        justify-content: center;
-        margin-bottom: 30px;
-        flex-wrap: wrap;
-      }
-
-      .panel-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 18px;
-      }
-
-      .admin-card {
-        padding: 25px 15px;
-        min-height: 140px;
-      }
-
-      .admin-card h5 {
-        font-size: 0.95rem;
-      }
-
-      .admin-card-icon {
-        font-size: 1.8rem;
-        margin-right: 10px;
-      }
+    .btn-nav:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,229,255,.06);
     }
 
+    .btn-nav .icon { font-style: normal; font-size: 1rem; }
+
+    /* ── HERO HEADER ── */
+    .hero {
+      margin-bottom: 72px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .7;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      color: var(--text);
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 56px; }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .section-label .label-icon {
+      font-size: 1rem;
+      width: 34px; height: 34px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .section-label h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section-label .divider {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── GRID ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    /* ── CARD ── */
+    .card-link {
+      text-decoration: none;
+      display: block;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s cubic-bezier(.22,.68,0,1.2),
+                  background .25s ease,
+                  border-color .25s ease,
+                  box-shadow .3s ease;
+      cursor: pointer;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    /* Glow pill top-right */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.18) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity .35s ease;
+    }
+
+    .card-link:hover .card::before { opacity: 1; }
+
+    .card-link:hover .card {
+      transform: translateY(-5px) scale(1.01);
+      background: var(--card-hover);
+      border-color: rgba(0,229,255,.25);
+      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 0 1px rgba(0,229,255,.1);
+    }
+
+    .card-number {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: rgba(0,229,255,.3);
+      margin-bottom: 14px;
+      transition: color .25s;
+    }
+
+    .card-link:hover .card-number { color: rgba(0,229,255,.65); }
+
+    .card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.35;
+      letter-spacing: -.2px;
+      transition: color .25s;
+    }
+
+    .card-link:hover .card h3 { color: #fff; }
+
+    .card-arrow {
+      position: absolute;
+      top: 24px; right: 24px;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      transition: all .3s ease;
+    }
+
+    .card-link:hover .card-arrow {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,229,255,.08);
+      transform: rotate(45deg);
+    }
+
+    /* ── STAGGER ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-link {
+      animation: fadeUp .5s ease both;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .wrapper { padding: 0 18px 60px; }
+      .hero h1 { letter-spacing: -1px; }
+      .card-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+      .topbar { flex-direction: column; gap: 16px; align-items: flex-start; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="container position-relative">
+<div class="wrapper">
 
-    <h1>Panel de Administración</h1>
-
-    <!-- BOTONES SUPERIORES -->
-    <div class="top-buttons">
-      <a href="{{ url_for('views.index') }}">🏠 Inicio</a>
-      <a href="{{ url_for('views.logout') }}">🚪 Cerrar Sesión</a>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span class="logo-mark">Admin</span>
+    <div class="top-actions">
+      <a href="{{ url_for('views.index') }}" class="btn-nav">
+        <i class="icon">⌂</i> Inicio
+      </a>
+      <a href="{{ url_for('views.logout') }}" class="btn-nav">
+        <i class="icon">→</i> Cerrar Sesión
+      </a>
     </div>
+  </header>
 
-    <!-- SECCIÓN 1: Estadísticas -->
-    <div class="section-wrapper">
-      <div class="section-title">📊 Estadísticas</div>
-      <div class="panel-grid">
-        <a href="/cargar_estadisticas_mayores" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Estadísticas Mayores</h5>
-          </div>
-        </a>
-
-        <a href="/cargar_estadisticas_inferiores" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Estadísticas Inferiores</h5>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- SECCIÓN 2: Jugadores y Equipos -->
-    <div class="section-wrapper">
-      <div class="section-title">👥 Jugadores y Equipos</div>
-      <div class="panel-grid">
-        <a href="/cargar_jugadores" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Jugadores</h5>
-          </div>
-        </a>
-
-        <a href="/asignar_jugador_categoria" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Asignar Jugador a Equipo</h5>
-          </div>
-        </a>
-
-        <a href="/cargar_clubes" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Clubes</h5>
-          </div>
-        </a>
-
-        <a href="/cargar_equipos" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Equipos</h5>
-          </div>
-        </a>
-
-        <a href="{{ url_for('views.vista_crear_partido_playoff') }}" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Partidos Playoffs</h5>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- SECCIÓN 3: Fixture y Contenido -->
-    <div class="section-wrapper">
-      <div class="section-title">🎯 Fixture y Contenido</div>
-      <div class="panel-grid">
-        <a href="/cargar_fixture_mayores" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Fixture Mayores</h5>
-          </div>
-        </a>
-
-        <a href="/cargar_fixture_inferiores" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Fixture Inferiores</h5>
-          </div>
-        </a>
-
-        <a href="/cargar_noticia" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Noticia</h5>
-          </div>
-        </a>
-
-        <a href="/cargar_video" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Video</h5>
-          </div>
-        </a>
-
-        <a href="/crear_periodista" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Registrar Periodista</h5>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- SECCIÓN 4: Parámetros -->
-    <div class="section-wrapper">
-      <div class="section-title">⚙️ Parámetros</div>
-      <div class="panel-grid">
-        <a href="/admin/temporadas" class="admin-card-wrapper">
-          <div class="admin-card">
-            <h5>Cargar Parámetros</h5>
-          </div>
-        </a>
-      </div>
-    </div>
-
+  <!-- HERO -->
+  <div class="hero">
+    <p class="hero-eyebrow">Sistema de gestión</p>
+    <h1>Panel de<br><span>Administración</span></h1>
   </div>
+
+  <!-- ── SECCIÓN 1: Estadísticas ── -->
+  <section class="section">
+    <div class="section-label">
+      <span class="label-icon">📊</span>
+      <h2>Estadísticas</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="card-grid">
+
+      <a href="/cargar_estadisticas_mayores" class="card-link" style="animation-delay:.05s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">01</div>
+          <h3>Cargar Estadísticas Mayores</h3>
+        </div>
+      </a>
+
+      <a href="/cargar_estadisticas_inferiores" class="card-link" style="animation-delay:.10s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">02</div>
+          <h3>Cargar Estadísticas Inferiores</h3>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── SECCIÓN 2: Jugadores y Equipos ── -->
+  <section class="section">
+    <div class="section-label">
+      <span class="label-icon">👥</span>
+      <h2>Jugadores y Equipos</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="card-grid">
+
+      <a href="/cargar_jugadores" class="card-link" style="animation-delay:.05s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">01</div>
+          <h3>Cargar Jugadores</h3>
+        </div>
+      </a>
+
+      <a href="/asignar_jugador_categoria" class="card-link" style="animation-delay:.10s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">02</div>
+          <h3>Asignar Jugador a Equipo</h3>
+        </div>
+      </a>
+
+      <a href="/cargar_clubes" class="card-link" style="animation-delay:.15s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">03</div>
+          <h3>Cargar Clubes</h3>
+        </div>
+      </a>
+
+      <a href="/cargar_equipos" class="card-link" style="animation-delay:.20s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">04</div>
+          <h3>Cargar Equipos</h3>
+        </div>
+      </a>
+
+      <a href="{{ url_for('views.vista_crear_partido_playoff') }}" class="card-link" style="animation-delay:.25s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">05</div>
+          <h3>Cargar Partidos Playoffs</h3>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── SECCIÓN 3: Fixture y Contenido ── -->
+  <section class="section">
+    <div class="section-label">
+      <span class="label-icon">🎯</span>
+      <h2>Fixture y Contenido</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="card-grid">
+
+      <a href="/cargar_fixture_mayores" class="card-link" style="animation-delay:.05s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">01</div>
+          <h3>Cargar Fixture Mayores</h3>
+        </div>
+      </a>
+
+      <a href="/cargar_fixture_inferiores" class="card-link" style="animation-delay:.10s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">02</div>
+          <h3>Cargar Fixture Inferiores</h3>
+        </div>
+      </a>
+
+      <a href="/cargar_noticia" class="card-link" style="animation-delay:.15s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">03</div>
+          <h3>Cargar Noticia</h3>
+        </div>
+      </a>
+
+      <a href="/cargar_video" class="card-link" style="animation-delay:.20s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">04</div>
+          <h3>Cargar Video</h3>
+        </div>
+      </a>
+
+      <a href="/crear_periodista" class="card-link" style="animation-delay:.25s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">05</div>
+          <h3>Registrar Periodista</h3>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── SECCIÓN 4: Parámetros ── -->
+  <section class="section">
+    <div class="section-label">
+      <span class="label-icon">⚙️</span>
+      <h2>Parámetros</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="card-grid">
+
+      <a href="/admin/temporadas" class="card-link" style="animation-delay:.05s">
+        <div class="card">
+          <div class="card-arrow">↗</div>
+          <div class="card-number">01</div>
+          <h3>Cargar Parámetros</h3>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+</div>
 </body>
 </html>

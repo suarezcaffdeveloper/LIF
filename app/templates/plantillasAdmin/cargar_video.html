@@ -4,298 +4,401 @@
   <meta charset="utf-8">
   <title>Cargar Video</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg:       #0a0a0f;
+      --border:   rgba(255,255,255,0.07);
+      --accent:   #00e5ff;
+      --accent2:  #7c3aed;
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --card-bg:  #13131c;
+      --input-bg: #0f0f18;
     }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: linear-gradient(135deg, #1a1a2e 0%, #242440 100%);
-      color: #f5f6fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
-      padding: 40px 20px;
+      overflow-x: hidden;
     }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    h2 {
-      text-align: center;
-      margin-top: 20px;
-      margin-bottom: 50px;
-      font-weight: 800;
-      color: #5dade2;
-      font-size: 2.2rem;
-      letter-spacing: 1px;
-      position: relative;
-      padding-bottom: 20px;
-    }
-
-    h2::after {
+    /* ── NOISE ── */
+    body::before {
       content: '';
-      display: block;
-      width: 80px;
-      height: 3px;
-      background: linear-gradient(90deg, #5dade2, #2a5f7f);
-      margin: 15px auto 0;
-      border-radius: 2px;
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
     }
 
-    /* Contenedor del formulario */
-    form {
-      background: linear-gradient(135deg, rgba(45, 45, 60, 0.9), rgba(60, 60, 80, 0.8));
-      padding: 45px;
+    /* ── AMBIENT GLOW ── */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 700px; height: 700px;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); opacity: .6;
+    }
+
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 20px; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      text-decoration: none; transition: all .25s ease;
+    }
+
+    .btn-nav:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 48px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .page-eyebrow {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent); opacity: .7; margin-bottom: 14px;
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -1.2px; line-height: 1.05;
+    }
+
+    .page-header h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       border-radius: 20px;
-      box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.3),
-        0 0 30px rgba(93, 173, 226, 0.1);
-      border: 1px solid rgba(93, 173, 226, 0.2);
-      backdrop-filter: blur(10px);
+      padding: 44px 48px;
+      max-width: 760px;
+      position: relative; overflow: hidden;
+      animation: fadeUp .5s ease .1s both;
     }
 
-    .form-label {
-      font-weight: 700;
-      color: #5dade2;
-      margin-bottom: 10px;
-      font-size: 0.95rem;
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
+    .form-card::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.08) 0%, transparent 70%);
+      pointer-events: none;
     }
 
-    .form-control {
-      background: linear-gradient(135deg, #2a2a3f, #3a3a50);
-      border: 1px solid rgba(93, 173, 226, 0.4);
-      color: #ffffff;
+    /* ── FIELD GROUP ── */
+    .field-group { margin-bottom: 26px; }
+
+    .field-group label {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+
+    .field-group input[type="text"],
+    .field-group input[type="number"],
+    .field-group textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 14px 16px;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      font-size: 0.95rem;
-    }
-
-    .form-control::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .form-control:hover {
-      border-color: rgba(93, 173, 226, 0.6);
-      box-shadow: 0 0 15px rgba(93, 173, 226, 0.1);
-    }
-
-    .form-control:focus {
-      background: linear-gradient(135deg, #3a3a50, #4a4a65);
-      border-color: #5dade2;
-      color: #fff;
-      box-shadow: 0 0 20px rgba(93, 173, 226, 0.2);
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
       outline: none;
+      transition: border-color .25s ease, box-shadow .25s ease;
+      -webkit-appearance: none;
     }
 
-    textarea.form-control {
+    .field-group input::placeholder,
+    .field-group textarea::placeholder { color: var(--muted); }
+
+    .field-group input:focus,
+    .field-group textarea:focus {
+      border-color: rgba(0,229,255,.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.08);
+    }
+
+    .field-group textarea {
       resize: vertical;
       min-height: 120px;
-      font-family: 'Segoe UI', sans-serif;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
-    .mb-3 {
-      margin-bottom: 25px;
+    /* ── URL PREVIEW ── */
+    .url-preview {
+      margin-top: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(0,229,255,.15);
+      display: none;
+      animation: fadeUp .3s ease;
+      background: var(--input-bg);
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #5dade2, #4a96c7);
+    .url-preview iframe {
+      width: 100%;
+      height: 240px;
       border: none;
-      border-radius: 10px;
-      padding: 14px 28px;
-      font-weight: 700;
-      color: #fff;
-      font-size: 1rem;
-      transition: all 0.3s ease;
+      display: block;
+    }
+
+    .url-preview-label {
+      padding: 8px 14px;
+      background: rgba(0,229,255,.05);
+      font-size: 0.72rem;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-top: 1px solid rgba(0,229,255,.1);
+    }
+
+    /* ── DIVIDER ── */
+    .form-divider { height: 1px; background: var(--border); margin: 30px 0; }
+
+    /* ── SUBMIT ── */
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border: none; border-radius: 10px;
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
       cursor: pointer;
-      letter-spacing: 0.5px;
+      transition: opacity .25s, transform .2s, box-shadow .25s;
     }
 
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #4a96c7, #3d7da8);
-      box-shadow: 0 12px 30px rgba(93, 173, 226, 0.3);
-      transform: translateY(-2px);
+    .btn-submit:hover {
+      opacity: .9; transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,229,255,.25);
     }
 
-    .btn-primary:active {
-      transform: translateY(0);
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 28px; font-size: 0.82rem;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s;
     }
 
-    /* =========================
-       FLASHES FLOTANTES
-    ========================= */
+    .back-link:hover { color: var(--accent); }
+
+    /* ── FLASH ── */
     #flash-container {
-      position: fixed;
-      top: 20px;
-      left: 50%;
+      position: fixed; top: 24px; left: 50%;
       transform: translateX(-50%);
       z-index: 2000;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
       pointer-events: none;
     }
 
     .flash-message {
-      display: inline-block;
-      padding: 14px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(-20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-      margin-bottom: 8px;
-      pointer-events: auto;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      display: inline-block; padding: 10px 22px;
+      border-radius: 100px; font-size: 0.85rem; font-weight: 500;
+      opacity: 0; transform: translateY(-12px);
+      transition: opacity .4s ease, transform .4s ease;
+      pointer-events: auto; backdrop-filter: blur(10px);
     }
 
     .flash-success {
-      background-color: rgba(76, 175, 80, 0.9);
-      color: #fff;
-      border: 1px solid rgba(76, 175, 80, 0.5);
+      background: rgba(0,230,118,.12); color: #00e676;
+      border: 1px solid rgba(0,230,118,.25);
     }
 
     .flash-danger {
-      background-color: rgba(244, 67, 54, 0.9);
-      color: #fff;
-      border: 1px solid rgba(244, 67, 54, 0.5);
+      background: rgba(255,82,82,.12); color: #ff5252;
+      border: 1px solid rgba(255,82,82,.25);
     }
 
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 30px;
-      color: #999;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      font-size: 0.95rem;
+    /* ── ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    .back-link:hover {
-      color: #5dade2;
-      text-decoration: underline;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      body {
-        padding: 20px 15px;
-      }
-
-      form {
-        padding: 30px;
-      }
-
-      h2 {
-        font-size: 1.8rem;
-        margin-bottom: 35px;
-      }
-
-      .form-control {
-        padding: 12px 14px;
-      }
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .wrapper { padding: 0 18px 60px; }
+      .form-card { padding: 30px 22px; }
+      .url-preview iframe { height: 180px; }
     }
   </style>
 </head>
 
 <body>
 
-<!-- =========================
-     FLASH CONTAINER
-========================= -->
-<div id="flash-container">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="flash-message flash-{{ category }}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-</div>
+  <!-- FLASH -->
+  <div id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
-<div class="container">
+  <div class="wrapper">
 
-  <h2>🎥 Cargar Video</h2>
-
-  <form action="{{ url_for('views.cargar_video') }}" method="POST">
-
-    <div class="mb-3">
-      <label class="form-label">Título del Video</label>
-      <input type="text" class="form-control" name="titulo_video" placeholder="Ingrese el título del video" required>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">URL del Video (YouTube)</label>
-      <input type="text" class="form-control" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Descripción</label>
-      <textarea class="form-control" rows="4" name="descripcion" placeholder="Escriba una descripción del video..."></textarea>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Jornada / Fecha Jugada</label>
-      <input type="number" class="form-control" name="jornada_jugada" placeholder="Ej: 1, 2, 3...">
-    </div>
-
-    <button type="submit" class="btn btn-primary w-100 mt-4">✓ Subir Video</button>
-
-    <div class="text-center mt-4">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="logo-mark">Admin</span>
       {% if current_user.rol == 'administrador' %}
-        <a href="{{ url_for('views.adminview') }}" class="back-link">
-          ← Volver al panel de administrador
-        </a>
+        <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
       {% elif current_user.rol == 'periodista' %}
-        <a href="{{ url_for('views.panel_periodista') }}" class="back-link">
-          ← Volver al panel de periodista
-        </a>
+        <a href="{{ url_for('views.panel_periodista') }}" class="btn-nav">← Panel</a>
+      {% endif %}
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <p class="page-eyebrow">Fixture y Contenido</p>
+      <h1>Cargar<br><span>Video</span></h1>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+      <form action="{{ url_for('views.cargar_video') }}" method="POST">
+
+        <div class="field-group">
+          <label for="titulo_video">Título del Video</label>
+          <input type="text" id="titulo_video" name="titulo_video" placeholder="Ingrese el título del video" required>
+        </div>
+
+        <div class="field-group">
+          <label for="url">URL del Video (YouTube)</label>
+          <input type="text" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+          <!-- YOUTUBE PREVIEW -->
+          <div class="url-preview" id="url-preview">
+            <iframe id="yt-iframe" allowfullscreen></iframe>
+            <div class="url-preview-label">Vista previa · YouTube</div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" name="descripcion" rows="4" placeholder="Escriba una descripción del video..."></textarea>
+        </div>
+
+        <div class="field-group">
+          <label for="jornada_jugada">Jornada / Fecha Jugada</label>
+          <input type="number" id="jornada_jugada" name="jornada_jugada" placeholder="Ej: 1, 2, 3...">
+        </div>
+
+        <div class="form-divider"></div>
+
+        <button type="submit" class="btn-submit">✓ Subir Video</button>
+
+      </form>
+
+      {% if current_user.rol == 'administrador' %}
+        <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
+      {% elif current_user.rol == 'periodista' %}
+        <a href="{{ url_for('views.panel_periodista') }}" class="back-link">← Volver al panel de periodista</a>
       {% endif %}
     </div>
 
-  </form>
+  </div>
 
-</div>
+  <script>
+    // ── YOUTUBE PREVIEW ──
+    const urlInput   = document.getElementById("url");
+    const previewBox = document.getElementById("url-preview");
+    const iframe     = document.getElementById("yt-iframe");
 
-<!-- =========================
-     JS FLASH SLIDE
-========================= -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const flashes = document.querySelectorAll(".flash-message");
+    function getYouTubeId(url) {
+      const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
+      ];
+      for (const p of patterns) {
+        const m = url.match(p);
+        if (m) return m[1];
+      }
+      return null;
+    }
 
-    flashes.forEach(flash => {
-      // Slide + fade in
-      setTimeout(() => {
-        flash.style.opacity = "1";
-        flash.style.transform = "translateY(0)";
-      }, 100);
-
-      // Desaparece a los 3 segundos
-      setTimeout(() => {
-        flash.style.opacity = "0";
-        flash.style.transform = "translateY(-20px)";
-        setTimeout(() => flash.remove(), 500);
-      }, 3000);
+    let debounceTimer;
+    urlInput.addEventListener("input", function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        const id = getYouTubeId(this.value.trim());
+        if (id) {
+          iframe.src = `https://www.youtube.com/embed/${id}`;
+          previewBox.style.display = "block";
+        } else {
+          previewBox.style.display = "none";
+          iframe.src = "";
+        }
+      }, 500);
     });
-  });
-</script>
+
+    // ── FLASH ANIMATIONS ──
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".flash-message").forEach(flash => {
+        setTimeout(() => {
+          flash.style.opacity = "1";
+          flash.style.transform = "translateY(0)";
+        }, 100);
+        setTimeout(() => {
+          flash.style.opacity = "0";
+          flash.style.transform = "translateY(-12px)";
+          setTimeout(() => flash.remove(), 400);
+        }, 3000);
+      });
+    });
+  </script>
 
 </body>
 </html>
-
-

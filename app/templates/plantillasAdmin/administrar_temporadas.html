@@ -1,222 +1,485 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrar Temporadas</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrar Temporadas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            background-color: #1e1e2f;
-            color: #fff;
-            font-family: 'Poppins', sans-serif;
-            padding: 40px;
-        }
+  <style>
+    :root {
+      --bg:       #0a0a0f;
+      --border:   rgba(255,255,255,0.07);
+      --accent:   #00e5ff;
+      --accent2:  #7c3aed;
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --card-bg:  #13131c;
+      --input-bg: #0f0f18;
+    }
 
-        .container-form {
-            background-color: #2a2a3d;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 600px;
-            margin: auto;
-            box-shadow: 0 0 15px rgba(0,0,0,0.4);
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .container-form h2 {
-            text-align: center;
-            color: #4fc3f7;
-            margin-bottom: 20px;
-        }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        .form-control, .form-select {
-            background-color: #1e1e2f;
-            color: #fff;
-            border: 1px solid #4fc3f7;
-        }
+    /* ── NOISE ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
+    }
 
-        .form-control:focus, .form-select:focus {
-            border-color: #4fc3f7;
-            box-shadow: 0 0 8px rgba(79,195,247,0.6);
-        }
-
-        .btn-primary {
-            background-color: #4fc3f7;
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background-color: #39b0e0;
-        }
-
-        table {
-            margin-top: 30px;
-        }
-
-        th, td {
-            color: #fff !important;
-        }
-
-        .active-true {
-            color: #00ff00;
-            font-weight: bold;
-        }
-
-        .active-false {
-            color: #ff5555;
-            font-weight: bold;
-        }
-
-        .back-link {
-            display: block;
-            margin-top: 30px;
-            text-align: center;
-            color: #ccc;
-        }
-        .back-link:hover {
-            color: #4fc3f7;
-        }
-
-    /* Contenedor flotante para flashes */
-    #flash-container {
+    /* ── AMBIENT GLOW ── */
+    body::after {
+      content: '';
       position: fixed;
-      top: 20px;
-      left: 50%;
+      width: 700px; height: 700px;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 32px 80px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); opacity: .6;
+    }
+
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 20px; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      text-decoration: none; transition: all .25s ease;
+    }
+
+    .btn-nav:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 48px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .page-eyebrow {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent); opacity: .7; margin-bottom: 14px;
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -1.2px; line-height: 1.05;
+    }
+
+    .page-header h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── TWO-COLUMN LAYOUT ── */
+    .panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── CARD ── */
+    .panel-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px;
+      position: relative; overflow: hidden;
+      animation: fadeUp .5s ease both;
+    }
+
+    .panel-card::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .panel-card:nth-child(2) { animation-delay: .08s; }
+
+    /* ── CARD SECTION TITLE ── */
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 32px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .card-title::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── FIELD GROUP ── */
+    .field-group { margin-bottom: 22px; }
+
+    .field-group label {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+
+    .field-group input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color .25s ease, box-shadow .25s ease;
+      -webkit-appearance: none;
+    }
+
+    .field-group input::placeholder { color: var(--muted); }
+
+    .field-group input:focus {
+      border-color: rgba(0,229,255,.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.08);
+    }
+
+    /* ── DIVIDER ── */
+    .form-divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+    /* ── SUBMIT ── */
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border: none; border-radius: 10px;
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .25s, transform .2s, box-shadow .25s;
+    }
+
+    .btn-submit:hover {
+      opacity: .9; transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,229,255,.25);
+    }
+
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── SEASONS TABLE ── */
+    .seasons-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+
+    .seasons-table th {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 0 14px 0;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .seasons-table th:last-child { text-align: right; }
+
+    .seasons-table td {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .seasons-table td:last-child { text-align: right; }
+
+    .seasons-table tr:last-child td { border-bottom: none; }
+
+    .badge-active {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 100px;
+      font-size: 0.72rem; font-weight: 600;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    .badge-active.yes {
+      background: rgba(0,230,118,.12);
+      color: #00e676;
+      border: 1px solid rgba(0,230,118,.25);
+    }
+
+    .badge-active.no {
+      background: rgba(255,82,82,.08);
+      color: #ff5252;
+      border: 1px solid rgba(255,82,82,.18);
+    }
+
+    /* ── TORNEOS SECTION ── */
+    .torneos-section { margin-top: 24px; }
+
+    .section-label {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-label h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .section-label .divider {
+      flex: 1; height: 1px; background: var(--border);
+    }
+
+    .torneos-grid {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+
+    .btn-torneo {
+      padding: 10px 22px;
+      border-radius: 100px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer;
+      transition: all .25s ease;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .btn-torneo:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    .btn-torneo.activo {
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border-color: transparent;
+      color: #0a0a0f;
+    }
+
+    .btn-torneo.activo:hover {
+      opacity: .85; color: #0a0a0f;
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 28px; font-size: 0.82rem;
+      color: var(--muted); text-decoration: none;
+      transition: color .2s;
+    }
+
+    .back-link:hover { color: var(--accent); }
+
+    /* ── FLASH ── */
+    #flash-container {
+      position: fixed; top: 24px; left: 50%;
       transform: translateX(-50%);
       z-index: 2000;
-      pointer-events: none; /* Para que no interfiera con clicks */
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+      pointer-events: none;
     }
 
-    /* Estilo para flash messages */
     .flash-message {
-      display: inline-block;          /* tamaño según el texto */
-      padding: 0.5rem 1rem;
-      border-radius: 10px;
-      font-weight: bold;
-      text-align: center;
-      opacity: 0;                     /* inicial invisible */
-      transition: opacity 0.5s ease, transform 0.5s ease;
-      margin-bottom: 0.5rem;
-      transform: translateY(-20px);   /* slide inicial hacia arriba */
-      pointer-events: auto;           /* permite interacción con toast si fuera necesario */
+      display: inline-block; padding: 10px 22px;
+      border-radius: 100px; font-size: 0.85rem; font-weight: 500;
+      opacity: 0; transform: translateY(-12px);
+      transition: opacity .4s ease, transform .4s ease;
+      pointer-events: auto; backdrop-filter: blur(10px);
     }
 
-    /* Colores por categoría */
     .flash-success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+      background: rgba(0,230,118,.12); color: #00e676;
+      border: 1px solid rgba(0,230,118,.25);
     }
 
     .flash-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+      background: rgba(255,82,82,.12); color: #ff5252;
+      border: 1px solid rgba(255,82,82,.25);
     }
 
-    </style>
+    /* ── ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .panel-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { padding: 0 18px 60px; }
+      .panel-card { padding: 28px 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<div class="container-form">
-    <!-- Contenedor de flashes flotante -->
-    <div id="flash-container">
-        {% with messages = get_flashed_messages(with_categories=True) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message flash-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+  <!-- FLASH -->
+  <div id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span class="logo-mark">Admin</span>
+      <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <p class="page-eyebrow">Parámetros</p>
+      <h1>Administrar<br><span>Temporadas</span></h1>
     </div>
-    <h2>Administrar Temporadas</h2>
 
-    <form method="POST" action="{{ url_for('views.crear_temporada') }}">
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nueva Temporada (Año):</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ej: 2026" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Crear Temporada</button>
-    </form>
+    <!-- TWO-COLUMN GRID -->
+    <div class="panel-grid">
 
-    {% if temporadas %}
-        <table class="table table-dark table-striped mt-4">
-            <thead>
-                <tr>
-                    <th>Año</th>
-                    <th>Activa</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in temporadas %}
-                    <tr>
-                        <td>{{ t.nombre }}</td>
-                        <td class="{{ 'active-true' if t.activa else 'active-false' }}">
-                            {{ 'Sí' if t.activa else 'No' }}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endif %}
+      <!-- LEFT: FORM + TORNEOS -->
+      <div class="panel-card">
+        <div class="card-title">Nueva temporada</div>
 
-    {% if torneos %}
-        <hr>
+        <form method="POST" action="{{ url_for('views.crear_temporada') }}">
+          <div class="field-group">
+            <label for="nombre">Año de la Temporada</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej: 2026" required>
+          </div>
 
-        <h4 class="text-center mt-4">Torneo Activo</h4>
+          <div class="form-divider"></div>
 
-        <div class="d-flex justify-content-center gap-3 mt-3">
-
-        {% for torneo in torneos %}
-
-        <form method="POST" action="{{ url_for('views.activar_torneo', torneo_id=torneo.id) }}">
-            
-            <button class="btn 
-                {% if torneo.activo %}
-                    btn-success
-                {% else %}
-                    btn-outline-light
-                {% endif %}
-            ">
-                {{ torneo.nombre }}
-            </button>
-
+          <button type="submit" class="btn-submit">Crear Temporada</button>
         </form>
 
-        {% endfor %}
-
-        </div>
+        {% if torneos %}
+          <div class="torneos-section">
+            <div class="form-divider"></div>
+            <div class="section-label">
+              <h2>Torneo Activo</h2>
+              <div class="divider"></div>
+            </div>
+            <div class="torneos-grid">
+              {% for torneo in torneos %}
+                <form method="POST" action="{{ url_for('views.activar_torneo', torneo_id=torneo.id) }}">
+                  <button type="submit" class="btn-torneo {% if torneo.activo %}activo{% endif %}">
+                    {{ torneo.nombre }}
+                  </button>
+                </form>
+              {% endfor %}
+            </div>
+          </div>
         {% endif %}
 
-    <a href="{{ url_for('views.adminview') }}" class="back-link">
-        ← Volver al panel de administrador
-    </a>
-</div>
+        <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
+      </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
+      <!-- RIGHT: SEASONS TABLE -->
+      {% if temporadas %}
+      <div class="panel-card">
+        <div class="card-title">Temporadas registradas</div>
 
-    const flashes = document.querySelectorAll(".flash-message");
+        <table class="seasons-table">
+          <thead>
+            <tr>
+              <th>Año</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in temporadas %}
+              <tr>
+                <td>{{ t.nombre }}</td>
+                <td>
+                  <span class="badge-active {% if t.activa %}yes{% else %}no{% endif %}">
+                    {% if t.activa %}Activa{% else %}Inactiva{% endif %}
+                  </span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
 
-    flashes.forEach((flash) => {
+    </div>
+  </div>
 
-        // cerrar con botón
-        flash.querySelector(".flash-close").addEventListener("click", () => {
-            flash.remove();
-        });
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
 
-        // auto cerrar después de 4s
+      // ── FLASH ANIMATIONS ──
+      document.querySelectorAll(".flash-message").forEach(flash => {
         setTimeout(() => {
-            flash.style.opacity = "0";
-            setTimeout(() => flash.remove(), 400);
+          flash.style.opacity = 1;
+          flash.style.transform = "translateY(0)";
+        }, 100);
+        setTimeout(() => {
+          flash.style.opacity = 0;
+          flash.style.transform = "translateY(-12px)";
+          setTimeout(() => flash.remove(), 400);
         }, 4000);
+      });
 
     });
-
-});
-</script>
+  </script>
 
 </body>
 </html>
