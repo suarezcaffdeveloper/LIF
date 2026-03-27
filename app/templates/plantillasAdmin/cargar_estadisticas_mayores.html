@@ -4,631 +4,745 @@
   <meta charset="utf-8">
   <title>Cargar Estadísticas — Mayores</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --bg:          #0a0a0f;
+      --border:      rgba(255,255,255,0.07);
+      --accent:      #00e5ff;
+      --accent2:     #7c3aed;
+      --text:        #e8e8f0;
+      --muted:       #6b6b80;
+      --card-bg:     #13131c;
+      --input-bg:    #0f0f18;
+      --gold:        #f5b041;
+      --gold-bg:     rgba(245,176,65,0.07);
+      --gold-border: rgba(245,176,65,0.25);
     }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: linear-gradient(135deg, #1a1a2e 0%, #242440 100%);
-      color: #f5f6fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
-      padding-bottom: 40px;
+      overflow-x: hidden;
+      padding-bottom: 60px;
     }
 
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-
-    h1 {
-      text-align: center;
-      margin-top: 50px;
-      margin-bottom: 60px;
-      font-weight: 800;
-      color: #5dade2;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-size: 2.5rem;
-      position: relative;
-      padding-bottom: 20px;
-    }
-
-    h1::after {
+    body::before {
       content: '';
-      display: block;
-      width: 80px;
-      height: 3px;
-      background: linear-gradient(90deg, #5dade2, #2a5f7f);
-      margin: 15px auto 0;
-      border-radius: 2px;
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
     }
 
-    .card {
-      background: linear-gradient(135deg, rgba(45, 45, 60, 0.9), rgba(60, 60, 80, 0.8));
-      border: none;
+    body::after {
+      content: '';
+      position: fixed;
+      width: 700px; height: 700px;
+      top: -200px; left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); opacity: .6;
+    }
+
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 20px; border-radius: 100px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem; font-weight: 500;
+      text-decoration: none; transition: all .25s ease;
+    }
+
+    .btn-nav:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 48px;
+      animation: fadeUp .5s ease both;
+    }
+
+    .page-eyebrow {
+      font-size: 0.7rem; font-weight: 500;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent); opacity: .7; margin-bottom: 14px;
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -1.2px; line-height: 1.05;
+    }
+
+    .page-header h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── FLASH ── */
+    #flash-container {
+      margin-bottom: 32px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .flash-alert {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px; border-radius: 12px; font-size: 0.88rem;
+      transition: opacity .4s ease;
+    }
+
+    .flash-alert.success { background: rgba(0,230,118,.1);  color: #00e676; border: 1px solid rgba(0,230,118,.2); }
+    .flash-alert.error,
+    .flash-alert.danger  { background: rgba(255,82,82,.1);  color: #ff5252; border: 1px solid rgba(255,82,82,.2); }
+    .flash-alert.warning { background: rgba(255,193,7,.1);  color: #ffc107; border: 1px solid rgba(255,193,7,.2); }
+    .flash-alert.info    { background: rgba(0,229,255,.08); color: var(--accent); border: 1px solid rgba(0,229,255,.18); }
+
+    .flash-close-btn {
+      background: transparent; border: none; cursor: pointer;
+      color: inherit; opacity: .6; font-size: 1rem; transition: opacity .2s;
+    }
+    .flash-close-btn:hover { opacity: 1; }
+
+    /* ── SELECTOR CARD ── */
+    .selector-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
       border-radius: 20px;
-      box-shadow: 
-        0 20px 50px rgba(0, 0, 0, 0.3),
-        0 0 30px rgba(93, 173, 226, 0.1);
-      color: #f5f6fa;
-      padding: 35px;
-      border: 1px solid rgba(93, 173, 226, 0.2);
-      backdrop-filter: blur(10px);
+      padding: 36px 40px;
+      margin-bottom: 24px;
+      position: relative; overflow: hidden;
+      animation: fadeUp .5s ease .05s both;
     }
 
-    .form-label {
-      font-weight: 700;
-      color: #5dade2;
-      margin-top: 15px;
-      margin-bottom: 8px;
-      font-size: 0.95rem;
-      letter-spacing: 0.3px;
+    .selector-card::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 180px; height: 180px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.08) 0%, transparent 70%);
+      pointer-events: none;
     }
 
-    select, input {
-      background: linear-gradient(135deg, #2a2a3f, #3a3a50) !important;
-      color: #fff !important;
-      border: 1px solid rgba(93, 173, 226, 0.4) !important;
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 28px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .selector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── FIELD GROUP ── */
+    .field-group { display: flex; flex-direction: column; }
+
+    .field-group label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.65rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 9px;
+    }
+
+    .field-group select {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 12px 15px !important;
-      transition: all 0.3s ease !important;
-      font-weight: 500 !important;
+      padding: 12px 40px 12px 15px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      appearance: none; -webkit-appearance: none;
+      cursor: pointer; color-scheme: dark;
+      transition: border-color .25s, box-shadow .25s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
     }
 
-    select:hover, input:hover {
-      border-color: rgba(93, 173, 226, 0.6) !important;
-      box-shadow: 0 0 15px rgba(93, 173, 226, 0.1) !important;
+    .field-group select option,
+    .field-group select optgroup { background: #13131c; color: var(--text); }
+    .field-group select optgroup  { color: var(--accent); font-weight: 700; }
+
+    .field-group select:focus {
+      border-color: rgba(0,229,255,.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.08);
     }
 
-    select:focus, input:focus {
-      background: linear-gradient(135deg, #3a3a50, #4a4a65) !important;
-      border-color: #5dade2 !important;
-      box-shadow: 0 0 20px rgba(93, 173, 226, 0.2) !important;
-      outline: none !important;
+    /* ── STATS CARD ── */
+    .stats-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 40px;
+      margin-bottom: 24px;
+      animation: fadeUp .5s ease .1s both;
     }
 
-    select option {
-      background-color: #2d3748 !important;
-      color: #ffffff !important;
-      padding: 10px 15px;
-      font-weight: 500;
+    /* ── CATEGORY TITLE ── */
+    .cat-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1rem;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 28px;
+      display: flex; align-items: center; gap: 12px;
     }
 
-    select option:checked {
-      background: linear-gradient(135deg, #5dade2, #4a96c7) !important;
-      background-color: #5dade2 !important;
-      color: #ffffff !important;
+    .cat-title::after { content: ''; flex: 1; height: 1px; background: rgba(0,229,255,.15); }
+
+    /* ── TEAMS GRID ── */
+    .teams-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
     }
 
-    select option:hover {
-      background-color: #4a5f7f !important;
+    /* ── TEAM BOX ── */
+    .team-box {
+      background: rgba(0,229,255,.03);
+      border: 1px solid rgba(0,229,255,.12);
+      border-radius: 14px;
+      padding: 24px;
+      transition: border-color .2s;
     }
 
-    select optgroup {
-      background-color: #2d3748 !important;
-      color: #5dade2 !important;
-      font-weight: 700 !important;
-      font-size: 0.95rem !important;
-      letter-spacing: 0.5px !important;
+    .team-box:hover { border-color: rgba(0,229,255,.22); }
+
+    .team-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 20px;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #5dade2, #4a96c7);
-      border-color: #5dade2;
-      border: none;
-      font-weight: 700;
-      border-radius: 10px;
-      padding: 10px 16px;
-      transition: all 0.3s ease;
-    }
+    .team-box .field-group { margin-bottom: 16px; }
+    .team-box .field-group label { font-size: 0.62rem; margin-bottom: 8px; }
 
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #4a96c7, #3d7da8);
-      box-shadow: 0 10px 25px rgba(93, 173, 226, 0.3);
-      transform: translateY(-2px);
-    }
-
-    .btn-add-item {
-      background: #2a5f7f !important;
-      border: 1px solid #5dade2 !important;
-      color: #5dade2 !important;
-      transition: 0.2s;
+    .team-box .field-group input[type="number"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
       border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color .25s, box-shadow .25s;
+      -webkit-appearance: none;
     }
 
-    .btn-add-item:hover {
-      background: #5dade2 !important;
-      color: #1f1f1f !important;
+    .team-box .field-group input[type="number"]:focus {
+      border-color: rgba(0,229,255,.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,.08);
     }
 
-    .subtitulo {
-      color: #5dade2;
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin: 30px 0 20px 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .side-box {
-      border-radius: 16px;
-      padding: 20px;
-      background: rgba(93, 173, 226, 0.05);
-      border-left: 3px solid #5dade2;
-      border: 1px solid rgba(93, 173, 226, 0.2);
-      margin-bottom: 15px;
-      transition: all 0.3s ease;
-    }
-
-    .side-box:hover {
-      background: rgba(93, 173, 226, 0.08);
-      border-color: rgba(93, 173, 226, 0.4);
-    }
-
-    .side-box h5 {
-      font-weight: 700;
-      color: #5dade2;
-      margin-bottom: 15px;
-      font-size: 1.1em;
+    /* ── LIST ROWS ── */
+    .list-rows-container {
+      display: flex; flex-direction: column; gap: 8px;
+      margin-bottom: 10px;
     }
 
     .list-row {
-      margin-bottom: 10px;
-      padding: 12px;
       display: grid;
       grid-template-columns: 1fr auto auto;
-      gap: 12px;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.3);
+      gap: 8px; align-items: center;
+      background: rgba(0,0,0,.2);
+      border: 1px solid var(--border);
+      border-left: 3px solid rgba(0,229,255,.3);
       border-radius: 8px;
-      border-left: 3px solid #5dade2;
+      padding: 10px 12px;
     }
 
-    .list-row select {
-      width: 100%;
+    .list-row select,
+    .list-row input[type="number"] {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color .2s;
+      color-scheme: dark; width: 100%;
     }
 
-    .list-row input {
-      width: 100%;
-    }
+    .list-row select { appearance: none; cursor: pointer; }
+    .list-row select option { background: #13131c; }
+    .list-row select:focus,
+    .list-row input[type="number"]:focus { border-color: rgba(0,229,255,.4); }
+    .list-row input[type="number"] { max-width: 80px; text-align: center; }
 
+    /* ── REMOVE BTN ── */
     .remove-row {
       background: transparent;
-      border: 1px solid #aa3333;
-      color: #ffaaaa;
-      border-radius: 6px;
-      padding: 6px 12px;
-      cursor: pointer;
-      transition: 0.2s;
+      border: 1px solid rgba(255,82,82,.3);
+      color: rgba(255,82,82,.7);
+      border-radius: 6px; padding: 6px 10px;
+      cursor: pointer; font-size: 0.8rem;
+      transition: all .2s; white-space: nowrap;
     }
 
     .remove-row:hover {
-      background: #aa3333;
-      color: #fff;
+      background: rgba(255,82,82,.12);
+      border-color: #ff5252; color: #ff5252;
     }
 
-    .small-input { width: 100%; }
-    .muted { color: #bfc9d9; font-size: 0.9rem; }
+    /* ── ADD BTN ── */
+    .btn-add {
+      width: 100%; padding: 9px;
+      background: rgba(0,229,255,.06);
+      border: 1px dashed rgba(0,229,255,.25);
+      border-radius: 8px; color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+    }
 
-/*    .penales-box {
-  border-left: 3px solid #f5b041;
-  background: rgba(245, 176, 65, 0.05);
-  text-align: center;
-}
+    .btn-add:hover {
+      background: rgba(0,229,255,.12);
+      border-color: rgba(0,229,255,.45);
+    }
 
-.penales-box:hover {
-  background: rgba(245, 176, 65, 0.1);
-  border-color: #f5b041;
-}
+    /* ── PENALES BOX ── */
+    .penales-box {
+      background: var(--gold-bg);
+      border: 1px solid var(--gold-border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 8px auto 0;
+      max-width: 600px;
+    }
 
-.penales-box h5 {
-  color: #f5b041;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
+    .penales-header {
+      display: flex; justify-content: space-between; align-items: center;
+    }
 
-.form-check-input {
-  background-color: #2a2a3f;
-  border: 1px solid rgba(93, 173, 226, 0.4);
-}
+    .penales-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--gold);
+    }
 
-.form-check-input:checked {
-  background-color: #f5b041;
-  border-color: #f5b041;
-}*/
+    /* ── SWITCH ── */
+    .switch {
+      position: relative; display: inline-block;
+      width: 48px; height: 24px;
+    }
 
-/* HEADER FLEX */
-.penales-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
+    .switch input { opacity: 0; width: 0; height: 0; }
 
-.penales-box {
-  border-left: 3px solid #f5b041;
-  background: rgba(245, 176, 65, 0.05);
-}
+    .slider {
+      position: absolute; cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,.08);
+      border: 1px solid var(--border);
+      transition: .3s; border-radius: 34px;
+    }
 
-.penales-box h5 {
-  color: #f5b041;
-  font-weight: 700;
-  margin: 0;
-}
+    .slider::before {
+      position: absolute; content: "";
+      height: 16px; width: 16px;
+      left: 3px; bottom: 3px;
+      background: var(--muted);
+      transition: .3s; border-radius: 50%;
+    }
 
-/* SLIDE ANIMADO */
-.penales-slide {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition: all 0.4s ease;
-}
+    .switch input:checked + .slider {
+      background: var(--gold-bg);
+      border-color: var(--gold);
+    }
 
-.penales-slide.active {
-  max-height: 300px;
-  opacity: 1;
-  margin-top: 10px;
-}
+    .switch input:checked + .slider::before {
+      transform: translateX(24px);
+      background: var(--gold);
+    }
 
-/* SWITCH PERSONALIZADO */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 26px;
-}
+    /* ── PENALES SLIDE ── */
+    .penales-slide {
+      max-height: 0; overflow: hidden; opacity: 0;
+      transition: max-height .4s ease, opacity .4s ease, margin-top .4s ease;
+    }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+    .penales-slide.active {
+      max-height: 200px; opacity: 1; margin-top: 18px;
+    }
 
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #2a2a3f;
-  border: 1px solid rgba(93, 173, 226, 0.4);
-  transition: .4s;
-  border-radius: 34px;
-}
+    .penales-inputs-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 3px;
-  background-color: #5dade2;
-  transition: .4s;
-  border-radius: 50%;
-}
+    .penales-inputs-grid .field-group label {
+      text-align: center; display: block; margin-bottom: 8px;
+    }
 
-.switch input:checked + .slider {
-  background-color: rgba(245, 176, 65, 0.3);
-  border-color: #f5b041;
-}
+    .penales-inputs-grid input[type="number"] {
+      width: 100%;
+      background: rgba(0,0,0,.2);
+      border: 1px solid var(--gold-border);
+      border-radius: 8px; padding: 10px;
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem; text-align: center;
+      outline: none; transition: border-color .2s;
+    }
 
-.switch input:checked + .slider:before {
-  transform: translateX(22px);
-  background-color: #f5b041;
-}
+    .penales-inputs-grid input[type="number"]:focus { border-color: var(--gold); }
 
-    /* Responsive */
+    /* ── SAVE BTN ── */
+    .btn-save {
+      width: 100%; padding: 14px;
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border: none; border-radius: 10px;
+      color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer; margin-top: 24px;
+      transition: opacity .25s, transform .2s, box-shadow .25s;
+    }
+
+    .btn-save:hover {
+      opacity: .9; transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,229,255,.25);
+    }
+
+    .btn-save:active { transform: translateY(0); }
+
+    .btn-save:disabled {
+      background: rgba(0,229,255,.15);
+      color: rgba(0,229,255,.4);
+      cursor: not-allowed; transform: none; box-shadow: none; opacity: 1;
+    }
+
+    .btn-save.saved {
+      background: rgba(0,230,118,.15);
+      color: #00e676;
+      border: 1px solid rgba(0,230,118,.3);
+    }
+
+    /* ── CAT DIVIDER ── */
+    .cat-divider { height: 1px; background: var(--border); margin: 36px 0; }
+
+    /* ── ANIMATION ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
-      body {
-        padding: 20px 15px;
-      }
-
-      h1 {
-        font-size: 1.8rem;
-        margin-top: 30px;
-        margin-bottom: 40px;
-      }
-
-      .card {
-        padding: 25px;
-      }
-
-      .list-row {
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
+      .wrapper { padding: 0 18px; }
+      .selector-card, .stats-card { padding: 24px 18px; }
+      .selector-grid { grid-template-columns: 1fr; }
+      .teams-grid { grid-template-columns: 1fr; }
+      .penales-inputs-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 
 <body>
+<div class="wrapper">
 
-<div class="container">
-  <h1>📊 Cargar Estadísticas — Mayores</h1>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span class="logo-mark">Admin</span>
+    <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <p class="page-eyebrow">Estadísticas</p>
+    <h1>Mayores<br><span>Estadísticas</span></h1>
+  </div>
 
   <!-- FLASH MESSAGES -->
-  <div class="container mt-3" id="flash-container">
+  <div id="flash-container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert alert-{{ 
-            'success' if category=='success' else 
-            'danger' if category=='error' else 
-            'warning' if category=='warning' else 
-            'info' }}" 
-            role="alert"
-            style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid rgba(93, 173, 226, 0.2); backdrop-filter: blur(10px);">
-
-            <div class="d-flex justify-content-between align-items-center">
-              <span>{{ message }}</span>
-              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
+          <div class="flash-alert {{ 'success' if category=='success' else 'danger' if category=='error' else category }}">
+            <span>{{ message }}</span>
+            <button class="flash-close-btn" onclick="this.parentElement.remove()">✕</button>
           </div>
         {% endfor %}
       {% endif %}
     {% endwith %}
   </div>
 
-  <div class="card">
+  <!-- ── SELECTOR CARD ── -->
+  <div class="selector-card">
+    <div class="card-title">Selección de partido</div>
 
-    <!-- JORNADAS -->
-    <div class="mb-3">
-      <label class="form-label">📋 Seleccionar Jornada o Fase</label>
-      <select id="select-jornada" class="form-select">
-        <option value="">-- Seleccionar --</option>
-        <!-- JORNADAS REGULARES -->
-        <optgroup label="━━━ 📅 FASE REGULAR ━━━">
-          {% for j in jornadas %}
-            <option value="jornada_{{ j }}">Jornada {{ j }}</option>
-          {% endfor %}
-        </optgroup>
-        <!-- FASES PLAYOFF -->
-        <optgroup label="━━━ 🏆 FASE DECISIVA ━━━">
-          {% for fase in fases_playoff %}
-            <option value="fase_{{ fase.id }}">{{ fase.nombre }}</option>
-          {% endfor %}
-        </optgroup>
-      </select>
-    </div>
+    <div class="selector-grid">
 
-    <!-- IDA/VUELTA (solo para playoff con ida_vuelta=true) -->
-    <div id="ida-vuelta-container" style="display:none;" class="mb-3">
-      <label class="form-label">🔄 Tipo de Partido</label>
-      <select id="select-ida-vuelta" class="form-select">
-        <option value="">-- Seleccionar --</option>
-        <option value="ida">Ida 🏟️</option>
-        <option value="vuelta">Vuelta 🏟️</option>
-      </select>
-    </div>
+      <div class="field-group">
+        <label for="select-jornada">Jornada o Fase</label>
+        <select id="select-jornada">
+          <option value="">-- Seleccionar --</option>
+          <optgroup label="📅 Fase Regular">
+            {% for j in jornadas %}
+              <option value="jornada_{{ j }}">Jornada {{ j }}</option>
+            {% endfor %}
+          </optgroup>
+          <optgroup label="🏆 Fase Decisiva">
+            {% for fase in fases_playoff %}
+              <option value="fase_{{ fase.id }}">{{ fase.nombre }}</option>
+            {% endfor %}
+          </optgroup>
+        </select>
+      </div>
 
-    <!-- CATEGORÍA PLAYOFF (solo para playoff) -->
-    <div id="categoria-playoff-container" style="display:none;" class="mb-3">
-      <label class="form-label">Seleccionar Categoría</label>
-      <select id="select-categoria-playoff" class="form-select">
-        <option value="">Seleccionar...</option>
-        <option value="primera">Primera</option>
-        <option value="reserva">Reserva</option>
-      </select>
-    </div>
+      <div class="field-group" id="ida-vuelta-container" style="display:none;">
+        <label for="select-ida-vuelta">Tipo de Partido</label>
+        <select id="select-ida-vuelta">
+          <option value="">-- Seleccionar --</option>
+          <option value="ida">Ida 🏟️</option>
+          <option value="vuelta">Vuelta 🏟️</option>
+        </select>
+      </div>
 
-    <!-- CRUCES -->
-    <div id="cruces-container" style="display:none;">
-      <div class="mb-3">
-        <label class="form-label">Cruces de la Jornada/Fase</label>
-        <select id="select-cruce" class="form-select">
+      <div class="field-group" id="categoria-playoff-container" style="display:none;">
+        <label for="select-categoria-playoff">Categoría</label>
+        <select id="select-categoria-playoff">
+          <option value="">Seleccionar...</option>
+          <option value="primera">Primera</option>
+          <option value="reserva">Reserva</option>
+        </select>
+      </div>
+
+      <div class="field-group" id="cruces-container" style="display:none;">
+        <label for="select-cruce">Cruce</label>
+        <select id="select-cruce">
           <option value="">Seleccione un cruce...</option>
         </select>
       </div>
+
     </div>
+  </div>
 
-    <hr>
-
-    <!-- FORMULARIOS -->
-    <div id="formularios-estadisticas" style="display:none;">
+  <!-- ── STATS FORMS ── -->
+  <div id="formularios-estadisticas" style="display:none;">
+    <div class="stats-card">
 
       <!-- PRIMERA -->
       <div id="bloque-primera" style="display:none;">
-        <h3 class="subtitulo">Primera División</h3>
+        <!-- datos ocultos para validación de penales -->
         <div id="primera_partido_data"
           data-jornada="{{ partido_primera.jornada if partido_primera else 0 }}"
           data-ida-vuelta="{{ 1 if partido_primera and partido_primera.fase and partido_primera.fase.ida_vuelta else 0 }}"
           data-ida-local="{{ partido_ida_primera.goles_local if partido_ida_primera else 0 }}"
           data-ida-visitante="{{ partido_ida_primera.goles_visitante if partido_ida_primera else 0 }}"
           style="display:none;">
-      </div>
+        </div>
 
-          <div class="row" style="margin:0;">
+        <div class="cat-title">Primera División</div>
+
+        <div class="teams-grid">
           <!-- LOCAL -->
-          <div class="col-md-6" style="padding:10px;">
-            <div class="side-box">
-              <h5 id="primera_local_nombre">Local</h5>
+          <div class="team-box">
+            <div class="team-name" id="primera_local_nombre">Local</div>
 
-              <label class="form-label">Goles</label>
-              <input type="number" id="primera_goles_local" class="form-control" min="0" value="0">
+            <div class="field-group">
+              <label>Goles</label>
+              <input type="number" id="primera_goles_local" min="0" value="0">
+            </div>
 
-              <label class="form-label">Goleadores</label>
-              <div id="primera_goleadores_local_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('primera','local')">+ Agregar Goleador</button>
+            <div class="field-group">
+              <label>Goleadores</label>
+              <div id="primera_goleadores_local_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addGoleador('primera','local')">+ Agregar Goleador</button>
+            </div>
 
-              <label class="form-label">Tarjetas Disciplinarias</label>
-              <div id="primera_tarjetas_local_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('primera','local')">+ Agregar Tarjeta</button>
+            <div class="field-group" style="margin-top:16px;">
+              <label>Tarjetas Disciplinarias</label>
+              <div id="primera_tarjetas_local_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addTarjeta('primera','local')">+ Agregar Tarjeta</button>
             </div>
           </div>
 
           <!-- VISITANTE -->
-          <div class="col-md-6" style="padding:10px;">
-            <div class="side-box">
-              <h5 id="primera_visitante_nombre">Visitante</h5>
+          <div class="team-box">
+            <div class="team-name" id="primera_visitante_nombre">Visitante</div>
 
-              <label class="form-label">Goles</label>
-              <input type="number" id="primera_goles_visitante" class="form-control" min="0" value="0">
+            <div class="field-group">
+              <label>Goles</label>
+              <input type="number" id="primera_goles_visitante" min="0" value="0">
+            </div>
 
-              <label class="form-label">Goleadores</label>
-              <div id="primera_goleadores_visitante_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('primera','visitante')">+ Agregar Goleador</button>
+            <div class="field-group">
+              <label>Goleadores</label>
+              <div id="primera_goleadores_visitante_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addGoleador('primera','visitante')">+ Agregar Goleador</button>
+            </div>
 
-              <label class="form-label">Tarjetas Disciplinarias</label>
-              <div id="primera_tarjetas_visitante_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('primera','visitante')">+ Agregar Tarjeta</button>
+            <div class="field-group" style="margin-top:16px;">
+              <label>Tarjetas Disciplinarias</label>
+              <div id="primera_tarjetas_visitante_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addTarjeta('primera','visitante')">+ Agregar Tarjeta</button>
             </div>
           </div>
         </div>
 
         <!-- PENALES -->
-<div class="row justify-content-center">
-  <div class="col-md-8" style="padding:10px;">
-    <div class="side-box penales-box">
-
-      <!-- Header con toggle -->
-      <div class="penales-header">
-        <h5>Definición por Penales</h5>
-
-        <label class="switch">
-          <input type="checkbox" id="primera_penales_toggle" onchange="togglePenalesSlide('primera')">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <!-- Contenido deslizable -->
-      <div id="primera_penales_inputs" class="penales-slide">
-        <div class="row">
-          <div class="col-md-6">
-            <label class="form-label text-center w-100">
-              Penales Convertidos Local
+        <div class="penales-box">
+          <div class="penales-header">
+            <span class="penales-title">⚽ Definición por Penales</span>
+            <label class="switch">
+              <input type="checkbox" id="primera_penales_toggle" onchange="togglePenalesSlide('primera')">
+              <span class="slider"></span>
             </label>
-            <input type="number" id="primera_penales_local"
-              class="form-control text-center"
-              min="0" value="0">
           </div>
-
-          <div class="col-md-6">
-            <label class="form-label text-center w-100">
-              Penales Convertidos Visitante
-            </label>
-            <input type="number" id="primera_penales_visitante"
-              class="form-control text-center"
-              min="0" value="0">
+          <div id="primera_penales_inputs" class="penales-slide">
+            <div class="penales-inputs-grid">
+              <div class="field-group">
+                <label>Penales Convertidos Local</label>
+                <input type="number" id="primera_penales_local" min="0" value="0">
+              </div>
+              <div class="field-group">
+                <label>Penales Convertidos Visitante</label>
+                <input type="number" id="primera_penales_visitante" min="0" value="0">
+              </div>
+            </div>
           </div>
         </div>
+
+        <button id="btn_guardar_primera" class="btn-save" onclick="guardarCategoria('primera')">Guardar Primera</button>
       </div>
 
-    </div>
-  </div>
-</div>
-
-
-        <button id="btn_guardar_primera" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('primera')">Guardar Primera</button>
-      </div>
+      <!-- DIVIDER -->
+      <div id="div-reserva" class="cat-divider" style="display:none;"></div>
 
       <!-- RESERVA -->
       <div id="bloque-reserva" style="display:none;">
-        <h3 class="subtitulo">Reserva</h3>
-          <div id="reserva_partido_data"
-            data-jornada="{{ partido_reserva.jornada if partido_reserva else 0 }}"
-            data-ida-vuelta="{{ 1 if partido_reserva and partido_reserva.fase and partido_reserva.fase.ida_vuelta else 0 }}"
-            data-ida-local="{{ partido_ida_reserva.goles_local if partido_ida_reserva else 0 }}"
-            data-ida-visitante="{{ partido_ida_reserva.goles_visitante if partido_ida_reserva else 0 }}"
-            style="display:none;">
-          </div>
+        <div id="reserva_partido_data"
+          data-jornada="{{ partido_reserva.jornada if partido_reserva else 0 }}"
+          data-ida-vuelta="{{ 1 if partido_reserva and partido_reserva.fase and partido_reserva.fase.ida_vuelta else 0 }}"
+          data-ida-local="{{ partido_ida_reserva.goles_local if partido_ida_reserva else 0 }}"
+          data-ida-visitante="{{ partido_ida_reserva.goles_visitante if partido_ida_reserva else 0 }}"
+          style="display:none;">
+        </div>
 
-          <div class="row" style="margin:0;">
+        <div class="cat-title">Reserva</div>
+
+        <div class="teams-grid">
           <!-- LOCAL -->
-          <div class="col-md-6" style="padding:10px;">
-            <div class="side-box">
-              <h5 id="reserva_local_nombre">Local</h5>
+          <div class="team-box">
+            <div class="team-name" id="reserva_local_nombre">Local</div>
 
-              <label class="form-label">Goles</label>
-              <input type="number" id="reserva_goles_local" class="form-control" min="0" value="0">
+            <div class="field-group">
+              <label>Goles</label>
+              <input type="number" id="reserva_goles_local" min="0" value="0">
+            </div>
 
-              <label class="form-label">Goleadores</label>
-              <div id="reserva_goleadores_local_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('reserva','local')">+ Agregar Goleador</button>
+            <div class="field-group">
+              <label>Goleadores</label>
+              <div id="reserva_goleadores_local_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addGoleador('reserva','local')">+ Agregar Goleador</button>
+            </div>
 
-              <label class="form-label">Tarjetas Disciplinarias</label>
-              <div id="reserva_tarjetas_local_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('reserva','local')">+ Agregar Tarjeta</button>
+            <div class="field-group" style="margin-top:16px;">
+              <label>Tarjetas Disciplinarias</label>
+              <div id="reserva_tarjetas_local_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addTarjeta('reserva','local')">+ Agregar Tarjeta</button>
             </div>
           </div>
 
           <!-- VISITANTE -->
-          <div class="col-md-6" style="padding:10px;">
-            <div class="side-box">
-              <h5 id="reserva_visitante_nombre">Visitante</h5>
+          <div class="team-box">
+            <div class="team-name" id="reserva_visitante_nombre">Visitante</div>
 
-              <label class="form-label">Goles</label>
-              <input type="number" id="reserva_goles_visitante" class="form-control" min="0" value="0">
+            <div class="field-group">
+              <label>Goles</label>
+              <input type="number" id="reserva_goles_visitante" min="0" value="0">
+            </div>
 
-              <label class="form-label">Goleadores</label>
-              <div id="reserva_goleadores_visitante_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addGoleador('reserva','visitante')">+ Agregar Goleador</button>
+            <div class="field-group">
+              <label>Goleadores</label>
+              <div id="reserva_goleadores_visitante_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addGoleador('reserva','visitante')">+ Agregar Goleador</button>
+            </div>
 
-              <label class="form-label">Tarjetas Disciplinarias</label>
-              <div id="reserva_tarjetas_visitante_list"></div>
-              <button class="btn btn-sm btn-add-item w-100" onclick="addTarjeta('reserva','visitante')">+ Agregar Tarjeta</button>
+            <div class="field-group" style="margin-top:16px;">
+              <label>Tarjetas Disciplinarias</label>
+              <div id="reserva_tarjetas_visitante_list" class="list-rows-container"></div>
+              <button class="btn-add" onclick="addTarjeta('reserva','visitante')">+ Agregar Tarjeta</button>
             </div>
           </div>
         </div>
 
         <!-- PENALES -->
-<div class="row justify-content-center">
-  <div class="col-md-8" style="padding:10px;">
-    <div class="side-box penales-box">
-
-      <!-- Header con toggle -->
-      <div class="penales-header">
-        <h5>Definición por Penales</h5>
-
-        <label class="switch">
-          <input type="checkbox" id="reserva_penales_toggle" onchange="togglePenalesSlide('reserva')">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <!-- Contenido deslizable -->
-      <div id="reserva_penales_inputs" class="penales-slide">
-        <div class="row">
-          <div class="col-md-6">
-            <label class="form-label text-center w-100">
-              Penales Convertidos Local
+        <div class="penales-box">
+          <div class="penales-header">
+            <span class="penales-title">⚽ Definición por Penales</span>
+            <label class="switch">
+              <input type="checkbox" id="reserva_penales_toggle" onchange="togglePenalesSlide('reserva')">
+              <span class="slider"></span>
             </label>
-            <input type="number" id="reserva_penales_local"
-              class="form-control text-center"
-              min="0" value="0">
           </div>
-
-          <div class="col-md-6">
-            <label class="form-label text-center w-100">
-              Penales Convertidos Visitante
-            </label>
-            <input type="number" id="reserva_penales_visitante"
-              class="form-control text-center"
-              min="0" value="0">
+          <div id="reserva_penales_inputs" class="penales-slide">
+            <div class="penales-inputs-grid">
+              <div class="field-group">
+                <label>Penales Convertidos Local</label>
+                <input type="number" id="reserva_penales_local" min="0" value="0">
+              </div>
+              <div class="field-group">
+                <label>Penales Convertidos Visitante</label>
+                <input type="number" id="reserva_penales_visitante" min="0" value="0">
+              </div>
+            </div>
           </div>
         </div>
+
+        <button id="btn_guardar_reserva" class="btn-save" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /stats-card -->
+  </div><!-- /formularios-estadisticas -->
 
-        <button id="btn_guardar_reserva" class="btn btn-primary w-100 mt-4" onclick="guardarCategoria('reserva')">Guardar Reserva</button>
-      </div>
-
-    </div>
-
-  </div>
-</div>
+</div><!-- /wrapper -->
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -651,174 +765,149 @@ let current = {
   jugadores_reserva_visitante: []
 };
 
-const $id = id => document.getElementById(id);
-const safeInt = v => parseInt(v)||0;
+const $id   = id => document.getElementById(id);
+const safeInt = v => parseInt(v) || 0;
 
 /* ================= RESET ================= */
 function resetBloque(cat) {
-  $id(`${cat}_goles_local`).value = 0;
+  $id(`${cat}_goles_local`).value    = 0;
   $id(`${cat}_goles_visitante`).value = 0;
-
-  $id(`${cat}_goleadores_local_list`).innerHTML = "";
+  $id(`${cat}_goleadores_local_list`).innerHTML  = "";
   $id(`${cat}_goleadores_visitante_list`).innerHTML = "";
-  $id(`${cat}_tarjetas_local_list`).innerHTML = "";
-  $id(`${cat}_tarjetas_visitante_list`).innerHTML = "";
+  $id(`${cat}_tarjetas_local_list`).innerHTML    = "";
+  $id(`${cat}_tarjetas_visitante_list`).innerHTML   = "";
 
   const btn = $id(`btn_guardar_${cat}`);
   btn.disabled = false;
-  btn.classList.remove("btn-secondary");
-  btn.classList.add("btn-primary");
+  btn.classList.remove("saved");
   btn.innerText = `Guardar ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
 }
 
-function resetFormularioCompleto(resetJornada=false) {
-  CATS.forEach(cat=>{
+function resetFormularioCompleto(resetJornada = false) {
+  CATS.forEach(cat => {
     resetBloque(cat);
-    $id(`bloque-${cat}`).style.display="none";
+    $id(`bloque-${cat}`).style.display = "none";
+    const div = $id(`div-${cat}`);
+    if (div) div.style.display = "none";
   });
-  $id("formularios-estadisticas").style.display="none";
+  $id("formularios-estadisticas").style.display = "none";
 
   current = {
-    jornada: resetJornada ? null : current.jornada,
-    fase_id: resetJornada ? null : current.fase_id,
+    jornada:    resetJornada ? null : current.jornada,
+    fase_id:    resetJornada ? null : current.fase_id,
     ida_vuelta: resetJornada ? null : current.ida_vuelta,
-    local_id:null,
-    visitante_id:null,
-    id_primera:null,
-    id_reserva:null,
-    equipos_por_categoria:{},
-    jugadores_primera_local:[],
-    jugadores_primera_visitante:[],
-    jugadores_reserva_local:[],
-    jugadores_reserva_visitante:[]
+    local_id: null, visitante_id: null,
+    id_primera: null, id_reserva: null,
+    equipos_por_categoria: {},
+    jugadores_primera_local: [], jugadores_primera_visitante: [],
+    jugadores_reserva_local: [], jugadores_reserva_visitante: []
   };
 }
 
 /* ================= JORNADA / FASE ================= */
-$id("select-jornada").addEventListener("change", async e=>{
+$id("select-jornada").addEventListener("change", async e => {
   const val = e.target.value;
-  if(!val) {
-    $id("cruces-container").style.display="none";
-    $id("ida-vuelta-container").style.display="none";
-    $id("categoria-playoff-container").style.display="none";
+  if (!val) {
+    $id("cruces-container").style.display = "none";
+    $id("ida-vuelta-container").style.display = "none";
+    $id("categoria-playoff-container").style.display = "none";
     return;
   }
-
   resetFormularioCompleto();
-
-  // Detectar si es jornada regular o fase de playoff
-  if(val.startsWith("jornada_")) {
-    // JORNADA REGULAR
+  if (val.startsWith("jornada_")) {
     const jornada = val.replace("jornada_", "");
     current.jornada = jornada;
-    $id("ida-vuelta-container").style.display="none";
-    $id("categoria-playoff-container").style.display="none";
+    $id("ida-vuelta-container").style.display = "none";
+    $id("categoria-playoff-container").style.display = "none";
     cargarCrucesRegulares(jornada);
-  } else if(val.startsWith("fase_")) {
-    // FASE PLAYOFF
+  } else if (val.startsWith("fase_")) {
     const faseId = val.replace("fase_", "");
     current.fase_id = faseId;
-    $id("ida-vuelta-container").style.display="block";
+    $id("ida-vuelta-container").style.display = "block";
     $id("select-ida-vuelta").value = "";
-    $id("categoria-playoff-container").style.display="none";
-    $id("cruces-container").style.display="none";
+    $id("categoria-playoff-container").style.display = "none";
+    $id("cruces-container").style.display = "none";
   }
 });
 
-/* IDA/VUELTA PLAYOFF */
-$id("select-ida-vuelta").addEventListener("change", async e=>{
+$id("select-ida-vuelta").addEventListener("change", async e => {
   const val = e.target.value;
-  if(!val || !current.fase_id) {
-    $id("categoria-playoff-container").style.display="none";
-    $id("cruces-container").style.display="none";
+  if (!val || !current.fase_id) {
+    $id("categoria-playoff-container").style.display = "none";
+    $id("cruces-container").style.display = "none";
     return;
   }
-
   current.ida_vuelta = val;
-  $id("categoria-playoff-container").style.display="block";
+  $id("categoria-playoff-container").style.display = "block";
   $id("select-categoria-playoff").value = "";
-  $id("cruces-container").style.display="none";
+  $id("cruces-container").style.display = "none";
 });
 
-/* CATEGORÍA PLAYOFF */
-$id("select-categoria-playoff").addEventListener("change", async e=>{
+$id("select-categoria-playoff").addEventListener("change", async e => {
   const categoria = e.target.value;
-  if(!categoria || !current.fase_id || !current.ida_vuelta) return;
-
+  if (!categoria || !current.fase_id || !current.ida_vuelta) return;
   cargarCrucesPlayoff(current.fase_id, categoria, current.ida_vuelta);
 });
 
 async function cargarCrucesRegulares(jornada) {
-  try{
-    const r = await fetch(`/api/cruces_pendientes_mayores/${jornada}`);
+  try {
+    const r    = await fetch(`/api/cruces_pendientes_mayores/${jornada}`);
     const data = await r.json();
-
-    const sel = $id("select-cruce");
-    sel.innerHTML='<option value="">Seleccionar...</option>';
-
-    if(!Array.isArray(data) || data.length === 0){
-      $id("cruces-container").style.display="none";
-      Swal.fire("Info","No hay cruces pendientes","info");
+    const sel  = $id("select-cruce");
+    sel.innerHTML = '<option value="">Seleccionar...</option>';
+    if (!Array.isArray(data) || data.length === 0) {
+      $id("cruces-container").style.display = "none";
+      Swal.fire("Info", "No hay cruces pendientes", "info");
       return;
     }
-
-    data.forEach(c=>{
+    data.forEach(c => {
       const o = document.createElement("option");
-      o.value=c.id;
-      o.textContent=c.texto;
+      o.value = c.id; o.textContent = c.texto;
       sel.appendChild(o);
     });
-
-    $id("cruces-container").style.display="block";
-  }catch(err){
+    $id("cruces-container").style.display = "block";
+  } catch (err) {
     console.error(err);
-    Swal.fire("Error","No se pudieron cargar los cruces","error");
+    Swal.fire("Error", "No se pudieron cargar los cruces", "error");
   }
 }
 
 async function cargarCrucesPlayoff(faseId, categoria, idaVuelta) {
-  try{
-    const r = await fetch(`/api/cruces_playoff_mayores/${faseId}/${categoria}/${idaVuelta}`);
+  try {
+    const r    = await fetch(`/api/cruces_playoff_mayores/${faseId}/${categoria}/${idaVuelta}`);
     const data = await r.json();
-
-    const sel = $id("select-cruce");
-    sel.innerHTML='<option value="">Seleccionar...</option>';
-
-    if(!Array.isArray(data) || data.length === 0){
-      $id("cruces-container").style.display="none";
-      Swal.fire("Info","No hay cruces pendientes de carga","info");
+    const sel  = $id("select-cruce");
+    sel.innerHTML = '<option value="">Seleccionar...</option>';
+    if (!Array.isArray(data) || data.length === 0) {
+      $id("cruces-container").style.display = "none";
+      Swal.fire("Info", "No hay cruces pendientes de carga", "info");
       return;
     }
-
-    data.forEach(c=>{
+    data.forEach(c => {
       const o = document.createElement("option");
-      o.value=c.id;
-      o.textContent=c.texto;
+      o.value = c.id; o.textContent = c.texto;
       sel.appendChild(o);
     });
-
-    $id("cruces-container").style.display="block";
-  }catch(err){
+    $id("cruces-container").style.display = "block";
+  } catch (err) {
     console.error(err);
-    Swal.fire("Error","No se pudieron cargar los cruces","error");
+    Swal.fire("Error", "No se pudieron cargar los cruces", "error");
   }
 }
 
 /* ================= CRUCE ================= */
-$id("select-cruce").addEventListener("change", async e=>{
+$id("select-cruce").addEventListener("change", async e => {
   const id = e.target.value;
-  if(!id) return;
+  if (!id) return;
 
-  resetFormularioCompleto(false); // no resetear jornada
+  resetFormularioCompleto(false);
   estadoCruces[id] = estadoCruces[id] || {};
 
-  try{
-    // Determinar si es playoff o regular
+  try {
     const esPlayoff = current.fase_id ? true : false;
-
     let info;
     try {
-      if(esPlayoff) {
+      if (esPlayoff) {
         const categoria = $id("select-categoria-playoff").value;
         const idaVuelta = current.ida_vuelta;
         const resp = await fetch(`/api/info_cruce_playoff/${id}/${categoria}/${idaVuelta}`);
@@ -829,173 +918,170 @@ $id("select-cruce").addEventListener("change", async e=>{
         info = await resp.json();
         console.log("[DEBUG] Respuesta API /api/info_cruce:", info);
       }
-    } catch(fetchErr) {
+    } catch (fetchErr) {
       console.error("[DEBUG] Error al hacer fetch de la API:", fetchErr);
-      Swal.fire("Error","No se pudo cargar la info del cruce (fetch error)","error");
+      Swal.fire("Error", "No se pudo cargar la info del cruce (fetch error)", "error");
       return;
     }
 
-    // 👇 NUEVO: determinar si mostrar penales (después de tener info)
+    // Mostrar/ocultar penales según fase
     let mostrarPenales = false;
     if (esPlayoff && info.fase_nombre) {
       mostrarPenales = fasePermitePenales(info.fase_nombre);
     }
 
-    // Mostrar u ocultar bloques de penales según corresponda
     CATS.forEach(cat => {
       const bloquePenales = document.querySelector(`#bloque-${cat} .penales-box`);
       if (bloquePenales) {
         bloquePenales.style.display = mostrarPenales ? "block" : "none";
-
-        // Resetear toggle si no corresponde
         if (!mostrarPenales) {
-          const toggle = document.getElementById(`${cat}_penales_toggle`);
-          const slide = document.getElementById(`${cat}_penales_inputs`);
+          const toggle = $id(`${cat}_penales_toggle`);
+          const slide  = $id(`${cat}_penales_inputs`);
           if (toggle) toggle.checked = false;
-          if (slide) slide.classList.remove("active");
+          if (slide)  slide.classList.remove("active");
         }
       }
     });
 
-    if(info.error) {
+    if (info.error) {
       console.error("[DEBUG] Error recibido de la API:", info.error);
       Swal.fire("Error", info.error, "error");
       return;
     }
 
-    current.local_id = info.local_id;
+    current.local_id    = info.local_id;
     current.visitante_id = info.visitante_id;
 
-    let hayPendiente=false;
+    let hayPendiente = false;
 
-    CATS.forEach(cat=>{
+    CATS.forEach(cat => {
       const data = info[cat];
       console.log(`[DEBUG] Estado categoria ${cat}:`, data);
-      if(!data || data.jugado || !data.id) return;
+      if (!data || data.jugado || !data.id) return;
 
-      // En playoff, solo mostrar la categoría seleccionada
-      if(esPlayoff){
+      if (esPlayoff) {
         const categoriaSeleccionada = $id("select-categoria-playoff").value;
-        if(cat !== categoriaSeleccionada){
-          $id(`bloque-${cat}`).style.display="none";
+        if (cat !== categoriaSeleccionada) {
+          $id(`bloque-${cat}`).style.display = "none";
           return;
         }
       }
 
-      hayPendiente=true;
+      hayPendiente = true;
       current[`id_${cat}`] = data.id;
-      current.equipos_por_categoria[cat] = {local:data.local, visitante:data.visitante};
-      estadoCruces[id][cat]=false;
+      current.equipos_por_categoria[cat] = { local: data.local, visitante: data.visitante };
+      estadoCruces[id][cat] = false;
 
-      $id(`bloque-${cat}`).style.display="block";
-      $id(`${cat}_local_nombre`).innerText=info.local_nombre;
-      $id(`${cat}_visitante_nombre`).innerText=info.visitante_nombre;
+      $id(`bloque-${cat}`).style.display = "block";
+      $id(`${cat}_local_nombre`).innerText   = info.local_nombre;
+      $id(`${cat}_visitante_nombre`).innerText = info.visitante_nombre;
+
+      // Show divider between blocks if needed
+      const div = $id(`div-${cat}`);
+      if (div && hayPendiente) div.style.display = "block";
 
       cargarJugadores(cat);
     });
 
     $id("formularios-estadisticas").style.display = hayPendiente ? "block" : "none";
 
-    if(!hayPendiente) {
+    if (!hayPendiente) {
       console.warn("[DEBUG] No hay categorías pendientes para este cruce. info:", info);
-      Swal.fire("Info","Este cruce no tiene categorías pendientes","info");
+      Swal.fire("Info", "Este cruce no tiene categorías pendientes", "info");
     }
-  }catch(err){
+  } catch (err) {
     console.error("[DEBUG] Error general en el handler de cruce:", err);
-    Swal.fire("Error","No se pudo cargar la info del cruce","error");
+    Swal.fire("Error", "No se pudo cargar la info del cruce", "error");
   }
 });
 
 /* ================= JUGADORES ================= */
-async function cargarJugadores(cat){
+async function cargarJugadores(cat) {
   const ids = current.equipos_por_categoria[cat];
-  if(!ids?.local || !ids?.visitante) return;
-
-  const [locales,visitantes] = await Promise.all([
-    fetch(`/api/jugadores_por_equipo/${ids.local}`).then(r=>r.json()),
-    fetch(`/api/jugadores_por_equipo/${ids.visitante}`).then(r=>r.json())
+  if (!ids?.local || !ids?.visitante) return;
+  const [locales, visitantes] = await Promise.all([
+    fetch(`/api/jugadores_por_equipo/${ids.local}`).then(r => r.json()),
+    fetch(`/api/jugadores_por_equipo/${ids.visitante}`).then(r => r.json())
   ]);
-
-  current[`jugadores_${cat}_local`] = locales;
+  current[`jugadores_${cat}_local`]    = locales;
   current[`jugadores_${cat}_visitante`] = visitantes;
 }
 
 /* ================= DINÁMICOS ================= */
-function buildOptions(players){
-  return players.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join("");
+function buildOptions(players) {
+  return players.map(p => `<option value="${p.id}">${p.nombre}</option>`).join("");
 }
 
-function addGoleador(cat,side){
-  const cont = $id(`${cat}_goleadores_${side}_list`);
+function addGoleador(cat, side) {
+  const cont    = $id(`${cat}_goleadores_${side}_list`);
   const players = current[`jugadores_${cat}_${side}`];
-
-  cont.insertAdjacentHTML("beforeend",`
-    <div class="list-row">
-      <select class="form-select" data-player style="grid-column:1;">
-        <option value="">Seleccionar Jugador</option>${buildOptions(players)}
-      </select>
-      <input type="number" class="form-control" data-goles min="1" value="1" placeholder="Goles" style="grid-column:2; max-width:100px;">
-      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()" style="grid-column:3;">✕</button>
-    </div>
-  `);
+  const row = document.createElement("div");
+  row.className = "list-row";
+  row.innerHTML = `
+    <select data-player style="grid-column:1;">
+      <option value="">Seleccionar Jugador</option>${buildOptions(players)}
+    </select>
+    <input type="number" data-goles min="1" value="1" style="grid-column:2;">
+    <button class="remove-row" onclick="this.parentElement.remove()" style="grid-column:3;">✕</button>
+  `;
+  cont.appendChild(row);
 }
 
-function addTarjeta(cat,side){
-  const cont = $id(`${cat}_tarjetas_${side}_list`);
+function addTarjeta(cat, side) {
+  const cont    = $id(`${cat}_tarjetas_${side}_list`);
   const players = current[`jugadores_${cat}_${side}`];
-
-  cont.insertAdjacentHTML("beforeend",`
-    <div class="list-row">
-      <select class="form-select tarjeta-player" style="grid-column:1;">
-        <option value="">Seleccionar Jugador</option>${buildOptions(players)}
-      </select>
-      <select class="form-select tarjeta-tipo" style="grid-column:2; max-width:120px;">
-        <option value="amarilla">Amarilla</option>
-        <option value="roja">Roja</option>
-      </select>
-      <button class="remove-row btn btn-sm" onclick="this.parentElement.remove()" style="grid-column:3;">✕</button>
-    </div>
-  `);
+  const row = document.createElement("div");
+  row.className = "list-row";
+  row.innerHTML = `
+    <select class="tarjeta-player" style="grid-column:1;">
+      <option value="">Seleccionar Jugador</option>${buildOptions(players)}
+    </select>
+    <select class="tarjeta-tipo" style="grid-column:2; max-width:110px;">
+      <option value="amarilla">🟡 Amarilla</option>
+      <option value="roja">🔴 Roja</option>
+    </select>
+    <button class="remove-row" onclick="this.parentElement.remove()" style="grid-column:3;">✕</button>
+  `;
+  cont.appendChild(row);
 }
 
 /* ================= GUARDADO ================= */
-function construirPayload(cat){
+function construirPayload(cat) {
   const partidoId = current[`id_${cat}`];
-  if(!partidoId) throw new Error("ID de partido inexistente");
+  if (!partidoId) throw new Error("ID de partido inexistente");
 
-  const golesLocal = safeInt($id(`${cat}_goles_local`).value);
+  const golesLocal     = safeInt($id(`${cat}_goles_local`).value);
   const golesVisitante = safeInt($id(`${cat}_goles_visitante`).value);
 
   const leerGoleadores = side => Array.from(
     $id(`${cat}_goleadores_${side}_list`).querySelectorAll(".list-row")
-  ).map(row=>({
+  ).map(row => ({
     jugador_id: safeInt(row.querySelector("[data-player]").value),
-    goles: safeInt(row.querySelector("[data-goles]").value)
-  })).filter(g=>g.jugador_id);
+    goles:      safeInt(row.querySelector("[data-goles]").value)
+  })).filter(g => g.jugador_id);
 
-  const leerTarjetas = (side,tipo)=>Array.from(
+  const leerTarjetas = (side, tipo) => Array.from(
     $id(`${cat}_tarjetas_${side}_list`).querySelectorAll(".list-row")
-  ).filter(r=>r.querySelector(".tarjeta-tipo").value===tipo)
-   .map(r=>safeInt(r.querySelector(".tarjeta-player").value))
-   .filter(id=>id);
+  ).filter(r => r.querySelector(".tarjeta-tipo").value === tipo)
+   .map(r => safeInt(r.querySelector(".tarjeta-player").value))
+   .filter(id => id);
 
   const payload = {
-    partido_id: partidoId,
-    goles_local: golesLocal,
-    goles_visitante: golesVisitante,
-    goleadores_local: leerGoleadores("local"),
+    partido_id:          partidoId,
+    goles_local:         golesLocal,
+    goles_visitante:     golesVisitante,
+    goleadores_local:    leerGoleadores("local"),
     goleadores_visitante: leerGoleadores("visitante"),
-    amarillas_local: leerTarjetas("local","amarilla"),
-    amarillas_visitante: leerTarjetas("visitante","amarilla"),
-    rojas_local: leerTarjetas("local","roja"),
-    rojas_visitante: leerTarjetas("visitante","roja")
+    amarillas_local:     leerTarjetas("local", "amarilla"),
+    amarillas_visitante: leerTarjetas("visitante", "amarilla"),
+    rojas_local:         leerTarjetas("local", "roja"),
+    rojas_visitante:     leerTarjetas("visitante", "roja")
   };
 
-  // -------- PENALTES --------
   const togglePenales = $id(`${cat}_penales_toggle`);
-  if(togglePenales && togglePenales.checked){
+  if (togglePenales && togglePenales.checked) {
     payload.penales = {
-      local: safeInt($id(`${cat}_penales_local`).value),
+      local:     safeInt($id(`${cat}_penales_local`).value),
       visitante: safeInt($id(`${cat}_penales_visitante`).value)
     };
   }
@@ -1003,133 +1089,154 @@ function construirPayload(cat){
   return payload;
 }
 
-function validarFormulario(cat){
-  const validarFilas=(selector,mensaje)=>{
-    const filas=Array.from(document.querySelectorAll(selector));
-    for(const fila of filas){
-      const jugador=fila.querySelector("select")?.value;
-      if(!jugador){Swal.fire("Error",mensaje,"error");return false;}
+function validarFormulario(cat) {
+  const validarFilas = (selector, mensaje) => {
+    const filas = Array.from(document.querySelectorAll(selector));
+    for (const fila of filas) {
+      const jugador = fila.querySelector("select")?.value;
+      if (!jugador) { Swal.fire("Error", mensaje, "error"); return false; }
     }
     return true;
   };
 
-  if(!validarFilas(`#${cat}_goleadores_local_list .list-row,#${cat}_goleadores_visitante_list .list-row`,"Hay goleadores sin jugador seleccionado")) return false;
-  if(!validarFilas(`#${cat}_tarjetas_local_list .list-row,#${cat}_tarjetas_visitante_list .list-row`,"Hay tarjetas cargadas sin jugador seleccionado")) return false;
+  if (!validarFilas(
+    `#${cat}_goleadores_local_list .list-row,#${cat}_goleadores_visitante_list .list-row`,
+    "Hay goleadores sin jugador seleccionado"
+  )) return false;
 
-  const golesLocal=safeInt($id(`${cat}_goles_local`).value);
-  const golesVisitante=safeInt($id(`${cat}_goles_visitante`).value);
-  const suma=side=>Array.from($id(`${cat}_goleadores_${side}_list`).querySelectorAll(".list-row")).reduce((acc,row)=>acc+safeInt(row.querySelector("[data-goles]").value),0);
+  if (!validarFilas(
+    `#${cat}_tarjetas_local_list .list-row,#${cat}_tarjetas_visitante_list .list-row`,
+    "Hay tarjetas cargadas sin jugador seleccionado"
+  )) return false;
 
-  if(golesLocal!==suma("local")){Swal.fire("Error","Los goles del local no coinciden con los goleadores","error");return false;}
-  if(golesVisitante!==suma("visitante")){Swal.fire("Error","Los goles del visitante no coinciden con los goleadores","error");return false;}
+  const golesLocal     = safeInt($id(`${cat}_goles_local`).value);
+  const golesVisitante = safeInt($id(`${cat}_goles_visitante`).value);
+  const suma = side => Array.from(
+    $id(`${cat}_goleadores_${side}_list`).querySelectorAll(".list-row")
+  ).reduce((acc, row) => acc + safeInt(row.querySelector("[data-goles]").value), 0);
+
+  if (golesLocal !== suma("local")) {
+    Swal.fire("Error", "Los goles del local no coinciden con los goleadores", "error");
+    return false;
+  }
+  if (golesVisitante !== suma("visitante")) {
+    Swal.fire("Error", "Los goles del visitante no coinciden con los goleadores", "error");
+    return false;
+  }
 
   return true;
 }
 
-function validarPenalesGlobal(cat){
-
-  const golesLocal = safeInt($id(`${cat}_goles_local`).value);
+function validarPenalesGlobal(cat) {
+  const golesLocal     = safeInt($id(`${cat}_goles_local`).value);
   const golesVisitante = safeInt($id(`${cat}_goles_visitante`).value);
-
   const toggle = $id(`${cat}_penales_toggle`);
-  if(!toggle || !toggle.checked) return true;
+  if (!toggle || !toggle.checked) return true;
 
   const data = $id(`${cat}_partido_data`);
+  if (!data) { console.error("No se encontró el elemento de datos del partido"); return true; }
 
-  if(!data){
-    console.error("No se encontró el elemento de datos del partido");
-    return true;
-  }
-
-  const jornada = safeInt(data.dataset.jornada);
-  const idaVuelta = data.dataset.idaVuelta === "1";
-
-  const idaLocal = safeInt(data.dataset.idaLocal);
+  const jornada    = safeInt(data.dataset.jornada);
+  const idaVuelta  = data.dataset.idaVuelta === "1";
+  const idaLocal   = safeInt(data.dataset.idaLocal);
   const idaVisitante = safeInt(data.dataset.idaVisitante);
 
-  // PARTIDO UNICO
-  if(!idaVuelta){
-    if(golesLocal !== golesVisitante){
-      Swal.fire("Error","No puede haber penales si el partido no terminó empatado","error");
+  if (!idaVuelta) {
+    if (golesLocal !== golesVisitante) {
+      Swal.fire("Error", "No puede haber penales si el partido no terminó empatado", "error");
       return false;
     }
     return true;
   }
 
-  // PARTIDO DE IDA
-  if(jornada === 1){
-    Swal.fire("Error","No se pueden cargar penales en el partido de ida","error");
+  if (jornada === 1) {
+    Swal.fire("Error", "No se pueden cargar penales en el partido de ida", "error");
     return false;
   }
 
-  // PARTIDO DE VUELTA → calcular global
-  const globalLocal = golesLocal + idaLocal;
+  const globalLocal     = golesLocal + idaLocal;
   const globalVisitante = golesVisitante + idaVisitante;
-
-  if(globalLocal !== globalVisitante){
-    Swal.fire(
-      "Error",
-      "No puede haber penales porque el resultado global no está empatado",
-      "error"
-    );
+  if (globalLocal !== globalVisitante) {
+    Swal.fire("Error", "No puede haber penales porque el resultado global no está empatado", "error");
     return false;
   }
 
   return true;
 }
 
-async function guardarCategoria(cat){
-  if(!validarFormulario(cat)) return;
-  if(!validarPenalesGlobal(cat)) return;
-  const payload = construirPayload(cat);
-  const endpoint = cat==="primera"?"/api/guardar_primera":"/api/guardar_reserva";
+async function guardarCategoria(cat) {
+  if (!validarFormulario(cat)) return;
+  if (!validarPenalesGlobal(cat)) return;
 
-  try{
-    const res = await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const payload  = construirPayload(cat);
+  const endpoint = cat === "primera" ? "/api/guardar_primera" : "/api/guardar_reserva";
+
+  try {
+    const res  = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
     const data = await res.json();
-    if(!res.ok || !data.success){Swal.fire("Error",data.message||"Error al guardar","error");return;}
-    Swal.fire("Guardado",`${cat.toUpperCase()} guardado correctamente`,"success");
+    if (!res.ok || !data.success) { Swal.fire("Error", data.message || "Error al guardar", "error"); return; }
+    Swal.fire("Guardado", `${cat.toUpperCase()} guardado correctamente`, "success");
     marcarCategoriaGuardada(cat);
-  }catch(err){console.error(err);Swal.fire("Error","No se pudo guardar","error");}
+  } catch (err) {
+    console.error(err);
+    Swal.fire("Error", "No se pudo guardar", "error");
+  }
 }
 
-function marcarCategoriaGuardada(cat){
-  const cruceId=$id("select-cruce").value;
+function marcarCategoriaGuardada(cat) {
+  const cruceId = $id("select-cruce").value;
   estadoCruces[cruceId] = estadoCruces[cruceId] || {};
-  estadoCruces[cruceId][cat]=true;
-  if(Object.values(estadoCruces[cruceId]).every(v=>v)) finalizarCruce(cruceId);
+  estadoCruces[cruceId][cat] = true;
+
+  const btn = $id(`btn_guardar_${cat}`);
+  btn.disabled = true;
+  btn.classList.add("saved");
+  btn.innerText = "Guardado ✓";
+
+  if (Object.values(estadoCruces[cruceId]).every(v => v)) finalizarCruce(cruceId);
 }
 
-function finalizarCruce(cruceId){
+function finalizarCruce(cruceId) {
   resetFormularioCompleto(false);
-  const sel=$id("select-cruce");
+  const sel = $id("select-cruce");
   sel.querySelector(`option[value="${cruceId}"]`)?.remove();
-  sel.value="";
-  Swal.fire("Cruce completo","Primera y Reserva cargadas","success");
+  sel.value = "";
+  Swal.fire("Cruce completo", "Primera y Reserva cargadas", "success");
+}
+
+/* ================= PENALES TOGGLE ================= */
+function togglePenalesSlide(categoria) {
+  const check = $id(`${categoria}_penales_toggle`);
+  const div   = $id(`${categoria}_penales_inputs`);
+  if (check.checked) div.classList.add("active");
+  else div.classList.remove("active");
 }
 
 function togglePenales(categoria) {
-  const check = document.getElementById(`${categoria}_hubo_penales`);
-  const div = document.getElementById(`${categoria}_penales_inputs`);
+  const check = $id(`${categoria}_hubo_penales`);
+  const div   = $id(`${categoria}_penales_inputs`);
   div.style.display = check.checked ? "block" : "none";
-}
-function togglePenalesSlide(categoria) {
-  const check = document.getElementById(`${categoria}_penales_toggle`);
-  const div = document.getElementById(`${categoria}_penales_inputs`);
-
-  if (check.checked) {
-    div.classList.add("active");
-  } else {
-    div.classList.remove("active");
-  }
 }
 
 function fasePermitePenales(nombreFase) {
   if (!nombreFase) return false;
-
   const fasesConPenales = ["Semifinal", "Final", "Finalísima"];
   return fasesConPenales.includes(nombreFase);
 }
+
+/* ================= FLASH AUTO-HIDE ================= */
+setTimeout(() => {
+  document.querySelectorAll("#flash-container .flash-alert").forEach(a => {
+    a.style.transition = "opacity 0.8s";
+    a.style.opacity    = "0";
+    setTimeout(() => a.remove(), 800);
+  });
+}, 3500);
 </script>
+
 </body>
 </html>
