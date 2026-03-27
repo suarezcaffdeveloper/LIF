@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jornada {{ jornada }} cargada — LIF</title>
+  <title>Bienvenid@ a la LIF</title>
 </head>
 <body style="margin:0; padding:0; background-color:#0a0e14; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;">
 
-  <!-- Preheader (hidden preview text) -->
   <div style="display:none; max-height:0; overflow:hidden; color:#0a0e14;">
-    Los resultados de la Jornada {{ jornada }} ({{ categoria }}) ya están disponibles en la plataforma.
+    Tu registro en la Liga Interprovincial de Fútbol fue exitoso. ¡Ya podés acceder a la plataforma!
   </div>
 
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0e14; padding:40px 16px;">
@@ -17,7 +16,7 @@
       <td align="center">
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;">
 
-          <!-- HEADER -->
+          <!-- LOGO -->
           <tr>
             <td align="center" style="padding-bottom:28px;">
               <table cellpadding="0" cellspacing="0" border="0">
@@ -31,54 +30,74 @@
             </td>
           </tr>
 
-          <!-- CARD PRINCIPAL -->
+          <!-- CARD -->
           <tr>
             <td style="background-color:#111720; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.07);">
 
-              <!-- Franja verde superior -->
+              <!-- Franja verde -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="background:linear-gradient(90deg,#00e676,#00c160); height:4px; font-size:0; line-height:0;">&nbsp;</td>
                 </tr>
               </table>
 
-              <!-- Contenido -->
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="padding:40px 40px 32px;">
+                  <td style="padding:40px 40px 36px;">
 
                     <!-- Eyebrow -->
-                    <p style="margin:0 0 20px 0; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#00e676;">
-                      Resultados disponibles
+                    <p style="margin:0 0 18px 0; font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#00e676;">
+                      Registro exitoso
                     </p>
 
                     <!-- Título -->
-                    <h1 style="margin:0 0 8px 0; font-size:28px; font-weight:900; color:#ffffff; text-transform:uppercase; letter-spacing:1px; line-height:1.1;">
-                      Jornada {{ jornada }}
+                    <h1 style="margin:0 0 24px 0; font-size:28px; font-weight:900; color:#ffffff; text-transform:uppercase; letter-spacing:1px; line-height:1.1;">
+                      Bienvenid@,<br>{{ nombre }}
                     </h1>
-                    <p style="margin:0 0 28px 0; font-size:14px; color:#7a8a9e; text-transform:uppercase; letter-spacing:2px;">
-                      {{ categoria }}
-                    </p>
 
                     <!-- Divider -->
-                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:28px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:24px;">
                       <tr><td style="height:1px; background-color:rgba(255,255,255,0.07); font-size:0;">&nbsp;</td></tr>
                     </table>
 
-                    <!-- Saludo -->
-                    <p style="margin:0 0 14px 0; font-size:15px; color:#e8edf5; line-height:1.6;">
-                      Hola <strong style="color:#ffffff;">{{ nombre }}</strong>,
+                    <p style="margin:0 0 16px 0; font-size:15px; color:#b0bac8; line-height:1.7;">
+                      Tu cuenta fue creada correctamente. A partir de ahora podés acceder a la plataforma y seguir toda la información de la liga: fixture, tabla de posiciones, goleadores y mucho más.
                     </p>
-                    <p style="margin:0 0 28px 0; font-size:15px; color:#b0bac8; line-height:1.7;">
-                      Los resultados de la <strong style="color:#ffffff;">Jornada {{ jornada }}</strong> de <strong style="color:#ffffff;">{{ categoria }}</strong> ya fueron cargados en la plataforma. Podés consultar el fixture completo, la tabla de posiciones actualizada y los goleadores desde el sitio.
-                    </p>
+
+                    <!-- Feature bullets -->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;">
+                      <tr>
+                        <td style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                          <span style="color:#00e676; font-size:13px;">✓</span>
+                          <span style="font-size:14px; color:#e8edf5; margin-left:10px;">Fixture y resultados en tiempo real</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                          <span style="color:#00e676; font-size:13px;">✓</span>
+                          <span style="font-size:14px; color:#e8edf5; margin-left:10px;">Tabla de posiciones actualizada</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                          <span style="color:#00e676; font-size:13px;">✓</span>
+                          <span style="font-size:14px; color:#e8edf5; margin-left:10px;">Estadísticas de goleadores y tarjetas</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:8px 0;">
+                          <span style="color:#00e676; font-size:13px;">✓</span>
+                          <span style="font-size:14px; color:#e8edf5; margin-left:10px;">Noticias y videos de la liga</span>
+                        </td>
+                      </tr>
+                    </table>
 
                     <!-- CTA -->
                     <table cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td style="border-radius:8px; background-color:#00e676;">
                           <a href="https://tusitio.com" style="display:inline-block; padding:13px 30px; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#0a0e14; text-decoration:none;">
-                            Ver resultados →
+                            Ir a la plataforma →
                           </a>
                         </td>
                       </tr>
@@ -87,7 +106,6 @@
                   </td>
                 </tr>
               </table>
-
             </td>
           </tr>
 
@@ -98,7 +116,7 @@
                 Liga Interprovincial de Fútbol · Temporada 2026
               </p>
               <p style="margin:6px 0 0; font-size:11px; color:#3a4455;">
-                Recibís este correo porque estás registrad@ en la plataforma LIF.
+                Recibís este correo porque te registraste en la plataforma LIF.
               </p>
             </td>
           </tr>
