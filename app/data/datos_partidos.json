@@ -1,0 +1,48 @@
+[
+    {
+        "id_partido": 4868,
+        "eventos": [
+            {"id_jugador": 57, "goles": 1, "amarillas": 0, "rojas": 0},
+            {"id_jugador": 59, "goles": 0, "amarillas": 1, "rojas": 0}
+        ]
+    },
+    {
+        "id_partido": 4869,
+        "eventos": [
+            {"id_jugador": 61, "goles": 2, "amarillas": 0, "rojas": 0}
+        ]
+    },
+    {
+        "id_partido": 4934,
+        "eventos": [
+            {"id_jugador": 203, "goles": 0, "amarillas": 0, "rojas": 1},
+            {"id_jugador": 71, "goles": 3, "amarillas": 0, "rojas": 1},
+            {"id_jugador": 72, "goles": 8, "amarillas": 0, "rojas": 0}
+        ]
+    },
+    {
+        "id_partido": 5068,
+        "eventos": [
+            {"id_jugador": 101, "goles": 1, "amarillas": 1, "rojas": 1},
+            {"id_jugador": 103, "goles": 2, "amarillas": 1, "rojas": 0},
+            {"id_jugador": 187, "goles": 2, "amarillas": 0, "rojas": 0}
+        ]
+    },
+    {
+        "id_partido": 5197,
+        "eventos": [
+            {"id_jugador": 233, "goles": 0, "amarillas": 0, "rojas": 0},
+            {"id_jugador": 235, "goles": 1, "amarillas": 0, "rojas": 1},
+            {"id_jugador": 238, "goles": 1, "amarillas": 0, "rojas": 1},
+            {"id_jugador": 237, "goles": 0, "amarillas": 1, "rojas": 0}
+        ]
+    },
+    {
+        "id_partido": 5048,
+        "eventos": [
+            {"id_jugador": 74, "goles": 3, "amarillas": 0, "rojas": 0},
+            {"id_jugador": 110, "goles": 2, "amarillas": 0, "rojas": 1}   
+        ]
+    }
+    
+]

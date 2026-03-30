@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cargar Partidos Playoff</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+  :root {
+    --bg:          #0a0a0f;
+    --border:      rgba(255,255,255,0.07);
+    --accent:      #00e5ff;
+    --accent2:     #7c3aed;
+    --text:        #e8e8f0;
+    --muted:       #6b6b80;
+    --card-bg:     #13131c;
+    --input-bg:    #0f0f18;
+    --gold:        #f5b041;
+    --gold-bg:     rgba(245,176,65,0.07);
+    --gold-border: rgba(245,176,65,0.25);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-bottom: 60px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: .5;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    width: 700px; height: 700px;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrapper {
+    position: relative; z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 64px;
+  }
+
+  .logo-mark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); opacity: .6;
+  }
+
+  .btn-nav {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 20px; border-radius: 100px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500;
+    text-decoration: none; transition: all .25s ease;
+  }
+
+  .btn-nav:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(0,229,255,.06);
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    margin-bottom: 48px;
+    animation: fadeUp .5s ease both;
+  }
+
+  .page-eyebrow {
+    font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: var(--accent); opacity: .7; margin-bottom: 14px;
+  }
+
+  .page-header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    letter-spacing: -1.2px; line-height: 1.05;
+  }
+
+  .page-header h1 span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── MAIN CARD ── */
+  .main-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 40px;
+    margin-bottom: 24px;
+    position: relative; overflow: hidden;
+    animation: fadeUp .5s ease .05s both;
+  }
+
+  .main-card::before {
+    content: '';
+    position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 28px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .section-title i {
+    color: var(--accent); font-size: 0.75rem; opacity: .8;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-divider {
+    height: 1px; background: var(--border); margin: 36px 0;
+  }
+
+  /* ── FIELD GROUP ── */
+  .field-group {
+    display: flex; flex-direction: column;
+    margin-bottom: 20px;
+  }
+
+  .field-group:last-child { margin-bottom: 0; }
+
+  .field-group label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 9px;
+  }
+
+  .field-group select,
+  .field-group input[type="date"],
+  .field-group input[type="time"] {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 40px 12px 15px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    appearance: none; -webkit-appearance: none;
+    cursor: pointer; color-scheme: dark;
+    transition: border-color .25s, box-shadow .25s;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+  }
+
+  .field-group input[type="date"],
+  .field-group input[type="time"] {
+    background-image: none;
+    padding: 12px 15px;
+    cursor: text;
+  }
+
+  .field-group select option,
+  .field-group select optgroup { background: #13131c; color: var(--text); }
+
+  .field-group select:disabled {
+    opacity: .4; cursor: not-allowed;
+  }
+
+  .field-group select:focus,
+  .field-group input[type="date"]:focus,
+  .field-group input[type="time"]:focus {
+    border-color: rgba(0,229,255,.4);
+    box-shadow: 0 0 0 3px rgba(0,229,255,.08);
+  }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(0,229,255,.04);
+    border-left: 2px solid rgba(0,229,255,.25);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+
+  .info-box i { color: var(--accent); opacity: .7; flex-shrink: 0; margin-top: 1px; }
+
+  .info-box.warning {
+    background: rgba(245,176,65,.06);
+    border-left-color: var(--gold-border);
+  }
+
+  .info-box.warning i { color: var(--gold); }
+
+  /* ── CATEGORY BUTTONS ── */
+  .categoria-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .categoria-btn {
+    position: relative;
+    padding: 12px 16px;
+    text-align: center;
+    background: var(--input-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .25s ease;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted);
+    user-select: none;
+  }
+
+  .categoria-btn input[type="radio"] { display: none; }
+
+  .categoria-btn:hover {
+    border-color: rgba(0,229,255,.3);
+    color: var(--accent);
+    background: rgba(0,229,255,.04);
+  }
+
+  .categoria-btn:has(input[type="radio"]:checked) {
+    background: rgba(0,229,255,.1);
+    border-color: rgba(0,229,255,.45);
+    color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,229,255,.07);
+  }
+
+  .categoria-btn:has(input[type="radio"]:checked) span::before {
+    content: "✓ ";
+    color: var(--accent);
+  }
+
+  /* ── TEAMS GRID ── */
+  .teams-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── MATCH INFO BOX ── */
+  #matchInfo { display: none; }
+
+  /* ── DATETIME GRID ── */
+  .datetime-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── SAVE BTN ── */
+  .btn-save {
+    width: 100%; padding: 14px;
+    background: linear-gradient(90deg, var(--accent), #00b8d4);
+    border: none; border-radius: 10px;
+    color: #0a0a0f;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    cursor: pointer; margin-top: 8px;
+    transition: opacity .25s, transform .2s, box-shadow .25s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .btn-save:hover {
+    opacity: .9; transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,229,255,.25);
+  }
+
+  .btn-save:active { transform: translateY(0); }
+
+  .btn-save:disabled {
+    background: rgba(0,229,255,.15);
+    color: rgba(0,229,255,.4);
+    cursor: not-allowed; transform: none; box-shadow: none; opacity: 1;
+  }
+
+  /* ── LOADING ── */
+  .loading {
+    display: none;
+    text-align: center; margin-top: 16px;
+  }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid rgba(0,229,255,.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: inline-block;
+  }
+
+  .loading p {
+    margin-top: 8px;
+    font-size: 0.82rem; color: var(--muted);
+  }
+
+  /* ── BACK LINK ── */
+  .back-link {
+    display: block; text-align: center; margin-top: 32px;
+    color: var(--muted); font-size: 0.85rem;
+    text-decoration: none;
+    transition: color .2s;
+  }
+
+  .back-link:hover { color: var(--accent); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .wrapper { padding: 0 18px; }
+    .main-card { padding: 24px 18px; }
+    .teams-grid { grid-template-columns: 1fr; }
+    .datetime-grid { grid-template-columns: 1fr; }
+    .categoria-group { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+  }
+</style>
+</head>
+
+<body>
+<div class="wrapper">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span class="logo-mark">Admin</span>
+    <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
+  </header>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <p class="page-eyebrow">Playoff</p>
+    <h1>Cargar<br><span>Partidos Playoff</span></h1>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="main-card">
+    <form id="formPartido">
+
+      <!-- SECCIÓN 1: TORNEO Y FASE -->
+      <div class="section-title">
+        <i class="fas fa-calendar-alt"></i> Torneo y Fase
+      </div>
+
+      <div class="field-group">
+        <label>Temporada</label>
+        <select disabled>
+          <option selected>{{ temporada_activa.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Torneo</label>
+        <select id="torneo_id" required>
+          <option value="">-- Seleccionar torneo --</option>
+          {% for t in torneos %}
+            <option value="{{ t.id }}">{{ t.nombre }}</option>
+          {% endfor %}
+        </select>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          Los torneos más recientes aparecen primero
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Fase</label>
+        <select id="fase_nombre" required>
+          <option value="">-- Seleccionar fase --</option>
+          {% for fase in fases %}
+            <option value="{{ fase }}">{{ fase }}</option>
+          {% endfor %}
+        </select>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          Cuartos de Final, Semifinal, Final, Finalísima
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Tipo de Enfrentamiento</label>
+        <select id="tipo_fase" required>
+          <option value="">-- Seleccionar tipo --</option>
+          <option value="0">Solo Ida (1 partido)</option>
+          <option value="1">Ida y Vuelta (2 partidos)</option>
+        </select>
+        <div class="info-box">
+          <i class="fas fa-info-circle"></i>
+          Mayores: Ida y Vuelta &nbsp;|&nbsp; Inferiores: Solo Ida (excepto Final)
+        </div>
+      </div>
+
+      <!-- IDA / VUELTA condicional -->
+      <div id="bloque-ida-vuelta" style="display:none;" class="field-group">
+        <label>Partido</label>
+        <select id="jornada">
+          <option value="1">Ida 🏟️</option>
+          <option value="2">Vuelta 🏟️</option>
+        </select>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- SECCIÓN 2: CATEGORÍA -->
+      <div class="section-title">
+        <i class="fas fa-layer-group"></i> Categoría
+      </div>
+
+      <div class="field-group">
+        <label>Selecciona la Categoría</label>
+        <div class="categoria-group">
+          {% for c in categorias %}
+            <label class="categoria-btn">
+              <input type="radio" name="categoria" value="{{ c|lower }}" required>
+              <span>{{ c }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <div class="info-box" style="margin-top:12px;">
+          <i class="fas fa-info-circle"></i>
+          Elige la categoría para la cual cargar este partido
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- SECCIÓN 3: EQUIPOS -->
+      <div class="section-title">
+        <i class="fas fa-shield-alt"></i> Equipos Clasificados
+      </div>
+
+      <div class="teams-grid" style="margin-bottom:20px;">
+        <div class="field-group" style="margin-bottom:0;">
+          <label>Club Local</label>
+          <select id="club_local_id" required>
+            <option value="">-- Seleccionar club --</option>
+          </select>
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <label>Club Visitante</label>
+          <select id="club_visitante_id" required>
+            <option value="">-- Seleccionar club --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="info-box" id="matchInfo">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="matchInfoText"></span>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- SECCIÓN 4: FECHA Y HORA -->
+      <div class="section-title">
+        <i class="fas fa-clock"></i> Fecha y Hora
+        <span style="font-size:0.6rem; color: var(--muted); letter-spacing:1px; text-transform:uppercase; margin-left:4px;">(Opcional)</span>
+      </div>
+
+      <div class="datetime-grid">
+        <div class="field-group" style="margin-bottom:0;">
+          <label>Fecha del Partido</label>
+          <input type="date" id="fecha_partido">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <label>Hora de Inicio</label>
+          <input type="time" id="hora_partido">
+        </div>
+      </div>
+
+      <!-- BOTÓN -->
+      <button type="button" onclick="guardarPartido()" class="btn-save" id="btnGuardar">
+        <i class="fas fa-save"></i> Guardar Partido
+      </button>
+
+      <div class="loading" id="loading">
+        <span class="spinner"></span>
+        <p>Procesando...</p>
+      </div>
+
+    </form>
+
+    <a href="{{ url_for('views.adminview') }}" class="back-link">← Volver al panel de administrador</a>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+const $id = id => document.getElementById(id);
+const $query = sel => document.querySelector(sel);
+
+// ========== ELEMENTOS DEL FORMULARIO ==========
+const torneo = $id("torneo_id");
+const fase = $id("fase_nombre");
+const tipoFase = $id("tipo_fase");
+const jornada = $id("jornada");
+const bloqueIdaVuelta = $id("bloque-ida-vuelta");
+const categoriaRadios = document.querySelectorAll('input[name="categoria"]');
+const clubLocal = $id("club_local_id");
+const clubVisitante = $id("club_visitante_id");
+const fechaPartido = $id("fecha_partido");
+const horaPartido = $id("hora_partido");
+const btnGuardar = $id("btnGuardar");
+const loading = $id("loading");
+
+// Variables para almacenar clubes disponibles
+let clubesDisponibles = [];
+
+// ========== CARGAR CLUBES CLASIFICADOS ==========
+async function cargarClubesClasificados() {
+  const torneo_id = torneo.value;
+  const fase_nombre = fase.value;
+  const categoria = document.querySelector('input[name="categoria"]:checked')?.value;
+
+  if (!torneo_id || !fase_nombre || !categoria) {
+    clubLocal.innerHTML = '<option value="">-- Seleccionar club --</option>';
+    clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
+    return;
+  }
+
+  try {
+    const url = `/api/playoff/clubes_clasificados?torneo_id=${torneo_id}&nombre_fase=${encodeURIComponent(fase_nombre)}&categoria=${categoria}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.success && data.clubes) {
+      clubesDisponibles = data.clubes;
+      actualizarSelectsClubes();
+    } else {
+      clubLocal.innerHTML = '<option value="">-- Seleccionar club --</option>';
+      clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
+    }
+  } catch (err) {
+    console.error("Error cargando clubes:", err);
+  }
+}
+
+// ========== ACTUALIZAR SELECTS ==========
+function actualizarSelectsClubes() {
+  const localId = clubLocal.value;
+  const visitanteId = clubVisitante.value;
+
+  clubLocal.innerHTML = '<option value="">-- Seleccionar club --</option>';
+  clubVisitante.innerHTML = '<option value="">-- Seleccionar club --</option>';
+
+  clubesDisponibles.forEach(club => {
+    const optLocal = document.createElement('option');
+    optLocal.value = club.id;
+    optLocal.textContent = club.nombre;
+    if (String(club.id) === String(localId)) optLocal.selected = true;
+    clubLocal.appendChild(optLocal);
+
+    if (String(club.id) !== String(localId)) {
+      const optVisit = document.createElement('option');
+      optVisit.value = club.id;
+      optVisit.textContent = club.nombre;
+      if (String(club.id) === String(visitanteId)) optVisit.selected = true;
+      clubVisitante.appendChild(optVisit);
+    }
+  });
+
+  updateMatchInfo();
+}
+
+// ========== EVENTOS ==========
+torneo.addEventListener("change", cargarClubesClasificados);
+fase.addEventListener("change", cargarClubesClasificados);
+categoriaRadios.forEach(radio => {
+  radio.addEventListener("change", cargarClubesClasificados);
+});
+
+tipoFase.addEventListener("change", e => {
+  const idaVuelta = e.target.value === "1";
+  bloqueIdaVuelta.style.display = idaVuelta ? "flex" : "none";
+  if (!idaVuelta) jornada.value = "1";
+});
+
+clubLocal.addEventListener("change", actualizarSelectsClubes);
+
+// ========== INFO PARTIDO ==========
+function updateMatchInfo() {
+  const localId = clubLocal.value;
+  const visitanteId = clubVisitante.value;
+  const matchInfo = $id("matchInfo");
+  const matchInfoText = $id("matchInfoText");
+
+  if (!localId || !visitanteId) {
+    matchInfo.style.display = "none";
+    return;
+  }
+
+  const localName = clubLocal.options[clubLocal.selectedIndex].text;
+  const visitanteName = clubVisitante.options[clubVisitante.selectedIndex].text;
+
+  matchInfo.style.display = "flex";
+
+  if (localId === visitanteId) {
+    matchInfoText.textContent = "No puedes seleccionar el mismo club para ambos equipos";
+    matchInfo.classList.add("warning");
+  } else {
+    matchInfoText.textContent = `${localName} (Local) vs ${visitanteName} (Visitante)`;
+    matchInfo.classList.remove("warning");
+  }
+}
+
+// ========== GUARDAR PARTIDO ==========
+async function guardarPartido() {
+
+  const torneo_id = torneo.value;
+  const fase_nombre = fase.value;
+  const tipo_fase = tipoFase.value;
+  const categoria = document.querySelector('input[name="categoria"]:checked')?.value;
+  const club_local_id = clubLocal.value;
+  const club_visitante_id = clubVisitante.value;
+
+  if (!torneo_id || !fase_nombre || !tipo_fase || !categoria || !club_local_id || !club_visitante_id) {
+    Swal.fire({
+      icon: "warning",
+      title: "Campos incompletos",
+      text: "Por favor completa todos los campos obligatorios",
+      background: "#13131c",
+      color: "#e8e8f0"
+    });
+    return;
+  }
+
+  if (club_local_id === club_visitante_id) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "El club local y visitante no pueden ser el mismo",
+      background: "#13131c",
+      color: "#e8e8f0"
+    });
+    return;
+  }
+
+  btnGuardar.disabled = true;
+  loading.style.display = "block";
+
+  const payload = {
+    torneo_id: parseInt(torneo_id),
+    fase_nombre: fase_nombre,
+    categoria: categoria,
+    club_local_id: parseInt(club_local_id),
+    club_visitante_id: parseInt(club_visitante_id),
+    jornada: parseInt(jornada.value),
+    ida_vuelta: tipo_fase === "1",
+    fecha_partido: fechaPartido.value || null,
+    hora_partido: horaPartido.value || null
+  };
+
+  try {
+    const res = await fetch("/api/playoff/crear_partido", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: data?.message || "No se pudo guardar el partido",
+        background: "#13131c",
+        color: "#e8e8f0"
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Éxito",
+      text: data.message,
+      background: "#13131c",
+      color: "#e8e8f0",
+      timer: 1500,
+      showConfirmButton: false
+    });
+
+    // 🔥 SOLO LIMPIAMOS EQUIPOS Y FECHA
+    clubLocal.value = "";
+    clubVisitante.value = "";
+    fechaPartido.value = "";
+    horaPartido.value = "";
+    jornada.value = "1";
+
+    updateMatchInfo();
+
+    // 🔄 Recargar clubes automáticamente
+    await cargarClubesClasificados();
+
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: "error",
+      title: "Error de conexión",
+      text: "No se pudo conectar con el servidor",
+      background: "#13131c",
+      color: "#e8e8f0"
+    });
+  } finally {
+    btnGuardar.disabled = false;
+    loading.style.display = "none";
+  }
+}
+
+horaPartido.addEventListener("keypress", e => {
+  if (e.key === "Enter") guardarPartido();
+});
+</script>
+
+</body>
+</html>

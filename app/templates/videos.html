@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Todos los Videos{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .media-page {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 48px 2rem 80px;
+    }
+
+    /* ─── HEADER ─── */
+    .media-eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: var(--verde);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .media-eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 32px; height: 1px;
+        background: var(--verde);
+        opacity: .5;
+    }
+    .media-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        color: #fff;
+        line-height: 1;
+        margin: 0 0 10px;
+    }
+    .media-title span { color: var(--verde); }
+
+    /* ─── BACK LINK ─── */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .85rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+        text-decoration: none;
+        margin-bottom: 36px;
+        transition: color .2s;
+    }
+    .back-link:hover { color: var(--verde); }
+    .back-link::before { content: '←'; }
+
+    /* ─── GRID ─── */
+    .videos-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    @media (max-width: 1000px) { .videos-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .videos-grid { grid-template-columns: 1fr; } }
+
+    /* ─── VIDEO CARD ─── */
+    .video-card {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform .25s, border-color .25s;
+    }
+    .video-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255,255,255,.13);
+    }
+
+    .video-wrap {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%;
+        flex-shrink: 0;
+    }
+    .video-wrap iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%; height: 100%;
+        border: 0;
+    }
+
+    .video-card .card-body {
+        padding: 18px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .video-card h2 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #fff;
+        margin: 0;
+        line-height: 1.2;
+    }
+    .video-card p.desc {
+        font-size: .875rem;
+        color: var(--texto-dim);
+        line-height: 1.55;
+        flex-grow: 1;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .video-card .fecha {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .78rem;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--verde);
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="media-page">
+    <p class="media-eyebrow">Multimedia</p>
+    <h1 class="media-title">Todos los <span>Videos</span></h1>
+    <a href="{{ url_for('views.index') }}" class="back-link">Volver al inicio</a>
+
+    <div class="videos-grid">
+        {% for video in videos %}
+        <div class="video-card">
+            <div class="video-wrap">
+                <iframe src="{{ video.url | replace('watch?v=', 'embed/') }}" allowfullscreen></iframe>
+            </div>
+            <div class="card-body">
+                <h2>{{ video.titulo_video }}</h2>
+                <p class="desc">{{ video.descripcion }}</p>
+                <p class="fecha">{{ video.fecha_subida.strftime('%d/%m/%Y') }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

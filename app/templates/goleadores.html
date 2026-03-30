@@ -1,0 +1,447 @@
+{% extends "base.html" %}
+
+{% block title %}Goleadores - {{ categoria.capitalize() }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ─── PAGE ─── */
+    .gol-page {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 48px 2rem 80px;
+    }
+
+    /* ─── HEADER ─── */
+    .gol-eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: var(--verde);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .gol-eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 32px; height: 1px;
+        background: var(--verde);
+        opacity: .5;
+    }
+    .gol-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        color: #fff;
+        line-height: 1;
+        margin: 0 0 40px;
+    }
+    .gol-title span { color: var(--verde); }
+
+    /* ─── CARD BASE ─── */
+    .lif-card {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .lif-card-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--borde);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .lif-card-header h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #fff;
+        margin: 0;
+    }
+    .lif-card-header .dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: var(--verde);
+        box-shadow: 0 0 8px var(--verde);
+        flex-shrink: 0;
+    }
+    .dot-amarilla { background: #f5a623; box-shadow: 0 0 8px rgba(245,166,35,.5); }
+    .dot-roja     { background: #e74c3c; box-shadow: 0 0 8px rgba(231,76,60,.5); }
+
+    /* ─── MAIN GRID ─── */
+    .gol-grid {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1000px) {
+        .gol-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ─── GOLEADORES TABLE ─── */
+    .gol-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .gol-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 480px;
+    }
+    .gol-table thead th {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--borde);
+        text-align: left;
+        white-space: nowrap;
+    }
+    .gol-table thead th:last-child { text-align: center; }
+
+    .gol-table tbody tr {
+        border-bottom: 1px solid rgba(255,255,255,.04);
+        transition: background .18s;
+    }
+    .gol-table tbody tr:last-child { border-bottom: none; }
+    .gol-table tbody tr:hover { background: rgba(255,255,255,.04); }
+
+    /* Top 3 highlight */
+    .gol-table tbody tr:nth-child(1) .rank-num { color: #ffd700; }
+    .gol-table tbody tr:nth-child(2) .rank-num { color: #c0c0c0; }
+    .gol-table tbody tr:nth-child(3) .rank-num { color: #cd7f32; }
+
+    .gol-table td {
+        padding: 13px 16px;
+        font-size: .95rem;
+        color: var(--texto);
+        vertical-align: middle;
+    }
+    .gol-table td:last-child { text-align: center; }
+
+    .rank-num {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .85rem;
+        font-weight: 900;
+        color: var(--texto-dim);
+        display: inline-block;
+        width: 22px;
+        text-align: right;
+        margin-right: 4px;
+    }
+
+    .player-name {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #fff;
+    }
+    .club-name {
+        font-size: .82rem;
+        color: var(--texto-dim);
+        margin-top: 2px;
+        font-family: 'Barlow Condensed', sans-serif;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .badge-goals {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--verde);
+        background: rgba(0,230,118,.1);
+        border: 1px solid rgba(0,230,118,.2);
+        border-radius: 8px;
+        padding: 5px 14px;
+        display: inline-block;
+        min-width: 42px;
+        text-align: center;
+    }
+
+    /* ─── SIDE COLUMN ─── */
+    .side-col {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* ─── TARJETAS TABLE ─── */
+    .panel-scroll {
+        overflow-y: auto;
+        max-height: 340px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255,255,255,.1) transparent;
+    }
+    .panel-scroll::-webkit-scrollbar { width: 4px; }
+    .panel-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,.12);
+        border-radius: 4px;
+    }
+
+    .panel-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .panel-table thead th {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--borde);
+        text-align: left;
+        white-space: nowrap;
+    }
+    .panel-table thead th:last-child { text-align: center; }
+
+    .panel-table tbody tr {
+        border-bottom: 1px solid rgba(255,255,255,.04);
+        transition: background .18s;
+    }
+    .panel-table tbody tr:last-child { border-bottom: none; }
+    .panel-table tbody tr:hover { background: rgba(255,255,255,.04); }
+
+    .panel-table td {
+        padding: 11px 16px;
+        font-size: .88rem;
+        color: var(--texto);
+        vertical-align: middle;
+    }
+    .panel-table td:last-child { text-align: center; }
+
+    .panel-table .player-name { font-size: .9rem; }
+    .panel-table .club-name   { font-size: .75rem; }
+
+    .badge-amarilla {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+        color: #f5a623;
+        background: rgba(245,166,35,.1);
+        border: 1px solid rgba(245,166,35,.25);
+        border-radius: 6px;
+        padding: 4px 12px;
+        display: inline-block;
+        min-width: 36px;
+        text-align: center;
+    }
+    .badge-roja {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+        color: #e74c3c;
+        background: rgba(231,76,60,.1);
+        border: 1px solid rgba(231,76,60,.25);
+        border-radius: 6px;
+        padding: 4px 12px;
+        display: inline-block;
+        min-width: 36px;
+        text-align: center;
+    }
+
+    /* ─── STATS BOTTOM ─── */
+    .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 36px;
+    }
+
+    .stat-card {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        border-radius: 14px;
+        padding: 24px 20px;
+        text-align: center;
+        transition: transform .22s, border-color .22s, box-shadow .22s;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(0,230,118,.25);
+        box-shadow: 0 12px 32px rgba(0,0,0,.35);
+    }
+
+    .stat-icon {
+        font-size: 2.2rem;
+        display: block;
+        margin-bottom: 10px;
+        line-height: 1;
+    }
+    .stat-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--verde);
+        margin-bottom: 6px;
+    }
+    .stat-team {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #fff;
+        letter-spacing: .03em;
+        line-height: 1.1;
+        margin-bottom: 4px;
+    }
+    .stat-value {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 2rem;
+        font-weight: 900;
+        color: var(--verde);
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+    .stat-desc {
+        font-size: .78rem;
+        color: var(--texto-dim);
+    }
+
+    @media (max-width: 600px) {
+        .gol-page { padding: 32px 1rem 60px; }
+        .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="gol-page">
+
+    <!-- HEADER -->
+    <p class="gol-eyebrow">Estadísticas</p>
+    <h1 class="gol-title"><span>{{ categoria.capitalize() }}</span> División</h1>
+
+    <!-- MAIN GRID -->
+    <div class="gol-grid">
+
+        <!-- GOLEADORES -->
+        <div class="lif-card">
+            <div class="lif-card-header">
+                <div class="dot"></div>
+                <h3>Goleadores</h3>
+            </div>
+            <div class="gol-table-wrap">
+                <table class="gol-table">
+                    <thead>
+                        <tr>
+                            <th style="width:55%;">Jugador</th>
+                            <th style="width:35%;">Club</th>
+                            <th style="width:10%;">Goles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for carnet, nombre, apellido, club_nombre, total in goles %}
+                        <tr>
+                            <td>
+                                <span class="rank-num">{{ loop.index }}</span>
+                                <span class="player-name">{{ nombre }} {{ apellido }}</span>
+                            </td>
+                            <td><span class="club-name">{{ club_nombre }}</span></td>
+                            <td><span class="badge-goals">{{ total }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SIDE: TARJETAS -->
+        <div class="side-col">
+
+            <div class="lif-card">
+                <div class="lif-card-header">
+                    <div class="dot dot-amarilla"></div>
+                    <h3>Tarjetas Amarillas</h3>
+                </div>
+                <div class="panel-scroll">
+                    <table class="panel-table">
+                        <thead>
+                            <tr>
+                                <th>Jugador</th>
+                                <th>Equipo</th>
+                                <th>Tarj.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for carnet, nombre, apellido, club_nombre, total in amarillas %}
+                            <tr>
+                                <td>
+                                    <div class="player-name">{{ nombre }} {{ apellido }}</div>
+                                    <div class="club-name">{{ club_nombre }}</div>
+                                </td>
+                                <td><span class="club-name">{{ club_nombre }}</span></td>
+                                <td><span class="badge-amarilla">{{ total }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="lif-card">
+                <div class="lif-card-header">
+                    <div class="dot dot-roja"></div>
+                    <h3>Tarjetas Rojas</h3>
+                </div>
+                <div class="panel-scroll">
+                    <table class="panel-table">
+                        <thead>
+                            <tr>
+                                <th>Jugador</th>
+                                <th>Equipo</th>
+                                <th>Tarj.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for carnet, nombre, apellido, club_nombre, total in rojas %}
+                            <tr>
+                                <td>
+                                    <div class="player-name">{{ nombre }} {{ apellido }}</div>
+                                    <div class="club-name">{{ club_nombre }}</div>
+                                </td>
+                                <td><span class="club-name">{{ club_nombre }}</span></td>
+                                <td><span class="badge-roja">{{ total }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- STATS BOTTOM -->
+    <div class="stats-strip">
+        {% for key, stat in stats.items() %}
+        <div class="stat-card">
+            <span class="stat-icon">{{ stat.icon }}</span>
+            <p class="stat-title">{{ stat.titulo }}</p>
+            <p class="stat-team">{{ stat.equipo }}</p>
+            <p class="stat-value">{{ stat.valor }}</p>
+            <p class="stat-desc">{{ stat.descripcion }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

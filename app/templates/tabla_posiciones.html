@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Tabla de Posiciones - {{ categoria|capitalize }}{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* ─── PAGE ─── */
+    .pos-page {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 48px 2rem 80px;
+    }
+
+    /* ─── PAGE HEADER ─── */
+    .pos-header {
+        margin-bottom: 36px;
+    }
+    .pos-eyebrow {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .8rem;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: var(--verde);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .pos-eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 32px; height: 1px;
+        background: var(--verde);
+        opacity: .5;
+    }
+    .pos-title {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: .02em;
+        color: #fff;
+        line-height: 1;
+        margin: 0;
+    }
+    .pos-title span { color: var(--verde); }
+
+    /* ─── LAYOUT ─── */
+    .pos-layout {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1000px) {
+        .pos-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ─── CARD BASE ─── */
+    .lif-card {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .lif-card-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid var(--borde);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .lif-card-header h3 {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #fff;
+        margin: 0;
+    }
+    .lif-card-header .dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: var(--verde);
+        box-shadow: 0 0 8px var(--verde);
+        flex-shrink: 0;
+    }
+
+    /* ─── MAIN TABLE ─── */
+    .pos-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .pos-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 640px;
+    }
+
+    .pos-table thead th {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+        padding: 12px 14px;
+        text-align: center;
+        border-bottom: 1px solid var(--borde);
+        white-space: nowrap;
+    }
+    .pos-table thead th:first-child { text-align: left; padding-left: 20px; }
+
+    .pos-table tbody tr {
+        border-bottom: 1px solid rgba(255,255,255,.04);
+        transition: background .18s;
+    }
+    .pos-table tbody tr:last-child { border-bottom: none; }
+    .pos-table tbody tr:hover { background: rgba(255,255,255,.04); }
+
+    .pos-table td {
+        padding: 13px 14px;
+        font-size: .95rem;
+        color: var(--texto);
+        text-align: center;
+        white-space: nowrap;
+    }
+    .pos-table td:first-child { text-align: left; padding-left: 20px; }
+
+    /* Row pos indicator */
+    .pos-table tbody tr.clasificado {
+        border-left: 3px solid var(--verde);
+    }
+    .pos-table tbody tr.eliminado {
+        border-left: 3px solid rgba(220, 60, 60, .6);
+    }
+
+    /* Team cell */
+    .team-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .team-pos {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .85rem;
+        font-weight: 700;
+        color: var(--texto-dim);
+        width: 20px;
+        text-align: right;
+        flex-shrink: 0;
+    }
+    .team-cell img {
+        width: 28px; height: 28px;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+        flex-shrink: 0;
+    }
+    .team-name {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: .03em;
+        color: #fff;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+    }
+
+    /* PTS badge */
+    .pts-badge {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+        color: #fff;
+        background: rgba(255,255,255,.07);
+        border-radius: 6px;
+        padding: 4px 10px;
+        display: inline-block;
+        min-width: 36px;
+        text-align: center;
+    }
+
+    /* Racha */
+    .racha { display: flex; align-items: center; gap: 4px; justify-content: center; }
+    .circulo {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .G { background: var(--verde); box-shadow: 0 0 6px rgba(0,230,118,.5); }
+    .E { background: #f5a623; box-shadow: 0 0 6px rgba(245,166,35,.4); }
+    .P { background: #e74c3c; box-shadow: 0 0 6px rgba(231,76,60,.4); }
+
+    /* ─── LEGEND ─── */
+    .legend {
+        display: flex;
+        gap: 20px;
+        padding: 14px 20px;
+        border-top: 1px solid var(--borde);
+        flex-wrap: wrap;
+    }
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .78rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--texto-dim);
+    }
+    .legend-line {
+        width: 18px; height: 3px;
+        border-radius: 2px;
+        flex-shrink: 0;
+    }
+    .legend-line.clas { background: var(--verde); }
+    .legend-line.elim { background: rgba(220,60,60,.6); }
+
+    /* ─── SIDE PANELS ─── */
+    .side-col { display: flex; flex-direction: column; gap: 18px; }
+
+    .stat-row {
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--borde);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: var(--verde);
+        margin-bottom: 4px;
+    }
+    .stat-value {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #fff;
+        text-transform: uppercase;
+    }
+    .stat-sub {
+        font-size: .8rem;
+        color: var(--texto-dim);
+        margin-top: 1px;
+    }
+
+    /* Cruces */
+    .cruce-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--borde);
+        gap: 8px;
+    }
+    .cruce-row:last-child { border-bottom: none; }
+    .cruce-team {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .92rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: var(--texto);
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .cruce-team:last-child { text-align: right; }
+    .cruce-vs {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-size: .75rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+        color: var(--verde);
+        padding: 3px 8px;
+        border: 1px solid rgba(0,230,118,.25);
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+        .pos-page { padding: 32px 1rem 60px; }
+        .team-name { max-width: 110px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pos-page">
+
+    <!-- HEADER -->
+    <div class="pos-header">
+        <p class="pos-eyebrow">Temporada 2026</p>
+        <h1 class="pos-title">Tabla de <span>Posiciones</span><br>{{ categoria|capitalize }}</h1>
+    </div>
+
+    <div class="pos-layout">
+
+        <!-- TABLA PRINCIPAL -->
+        <div class="lif-card">
+            <div class="lif-card-header">
+                <div class="dot"></div>
+                <h3>Clasificación — {{ categoria|capitalize }}</h3>
+            </div>
+            <div class="pos-table-wrap">
+                <table class="pos-table">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>PJ</th>
+                            <th>G</th>
+                            <th>E</th>
+                            <th>P</th>
+                            <th>GF</th>
+                            <th>GC</th>
+                            <th>DIF</th>
+                            <th>PTS</th>
+                            <th>Racha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fila in tabla %}
+                        <tr class="{% if loop.index <= 8 %}clasificado{% else %}eliminado{% endif %}">
+                            <td>
+                                <div class="team-cell">
+                                    <span class="team-pos">{{ loop.index }}</span>
+                                    <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo|replace(' ', '_') + '.jpg') }}" alt="">
+                                    <span class="team-name">{{ fila.nombre_equipo }}</span>
+                                </div>
+                            </td>
+                            <td>{{ fila.partidos_jugados }}</td>
+                            <td>{{ fila.partidos_ganados }}</td>
+                            <td>{{ fila.partidos_empatados }}</td>
+                            <td>{{ fila.partidos_perdidos }}</td>
+                            <td>{{ fila.goles_a_favor }}</td>
+                            <td>{{ fila.goles_en_contra }}</td>
+                            <td>{{ fila.diferencia_gol }}</td>
+                            <td><span class="pts-badge">{{ fila.cantidad_puntos }}</span></td>
+                            <td>
+                                <div class="racha">
+                                    {% if rachas[fila.nombre_equipo] %}
+                                        {% for r in rachas[fila.nombre_equipo] %}
+                                            <div class="circulo {{ r }}"></div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span style="color:var(--texto-dim); font-size:.8rem;">—</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-line clas"></div> Clasificado</div>
+                <div class="legend-item"><div class="legend-line elim"></div> Eliminado</div>
+            </div>
+        </div>
+
+        <!-- PANEL LATERAL -->
+        <div class="side-col">
+
+            <!-- Estadísticas -->
+            <div class="lif-card">
+                <div class="lif-card-header">
+                    <div class="dot"></div>
+                    <h3>Estadísticas</h3>
+                </div>
+                {% if stats %}
+                <div class="stat-row">
+                    <p class="stat-label">Más goleador</p>
+                    <p class="stat-value">{{ stats.mas_goleador.nombre_equipo }}</p>
+                    <p class="stat-sub">{{ stats.mas_goleador.goles_a_favor }} goles a favor</p>
+                </div>
+                <div class="stat-row">
+                    <p class="stat-label">Menos goleado</p>
+                    <p class="stat-value">{{ stats.menos_goleado.nombre_equipo }}</p>
+                    <p class="stat-sub">{{ stats.menos_goleado.goles_en_contra }} goles en contra</p>
+                </div>
+                <div class="stat-row">
+                    <p class="stat-label">Mejor diferencia</p>
+                    <p class="stat-value">{{ stats.mejor_diferencia.nombre_equipo }}</p>
+                    <p class="stat-sub">+{{ stats.mejor_diferencia.diferencia_gol }} de diferencia</p>
+                </div>
+                {% else %}
+                <div class="stat-row"><p class="stat-sub">No hay estadísticas disponibles.</p></div>
+                {% endif %}
+            </div>
+
+            <!-- Cruces -->
+            <div class="lif-card">
+                <div class="lif-card-header">
+                    <div class="dot"></div>
+                    <h3>Cuartos de final</h3>
+                </div>
+                {% if cruces %}
+                    {% for a, b in cruces %}
+                    <div class="cruce-row">
+                        <span class="cruce-team">{{ a.nombre_equipo }}</span>
+                        <span class="cruce-vs">VS</span>
+                        <span class="cruce-team">{{ b.nombre_equipo }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="cruce-row">
+                    <span class="stat-sub">No hay suficientes equipos para definir cruces.</span>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
