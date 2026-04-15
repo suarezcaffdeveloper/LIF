@@ -2450,7 +2450,7 @@ def validar_y_guardar_estadisticas(data, categoria):
                 
                 if usuarios:
                     # Enviar IDs en lugar de objetos (para serializable con JSON)
-                    usuario_ids = [u.id for u in usuarios]
+                    usuario_ids = [u.id_usuario for u in usuarios]
                     enviar_mail_jornada(usuario_ids, partido.jornada, "Mayores")
                     return {
                         "success": True, 
