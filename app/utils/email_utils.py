@@ -1,9 +1,10 @@
 from flask_mail import Message
-from flask import current_app, render_template
+from flask import current_app
 from app import mail
 import smtplib
 from email.mime.text import MIMEText
-from ..models.models import Partido, Usuario
+from ..models.models import Partido
+from flask import render_template
 from sqlalchemy import func
 
 def enviar_mail_bienvenida(destinatario, nombre):
@@ -147,99 +148,37 @@ def jornada_completa(jornada, categoria):
 # AUTOMATIZAR ENVIO DE MAIL CUANDO SE CARGA JORNADA
 # --------------------------------------------------------------
 
-# Importar celery solo cuando esté disponible
-try:
-    from app.celery_app import celery
-    HAS_CELERY = True
-except (ImportError, RuntimeError):
-    HAS_CELERY = False
-    celery = None
-
-
-@celery.task(bind=True) if HAS_CELERY else lambda f: f
-def enviar_mail_jornada_async(self, usuario_ids, jornada, categoria):
-    """
-    Tarea asincrónica que envía mails cuando completa una jornada.
-    usuario_ids: lista de IDs de usuarios (no objetos, para serializar con JSON)
-    jornada: número de la jornada
-    categoria: 'Mayores' o 'Inferiores'
-    """
-    from .. import create_app
-    
-    # Crear contexto de aplicación si no existe
-    try:
-        app = current_app._get_current_object()
-    except (RuntimeError, AttributeError):
-        app = create_app()
-    
-    with app.app_context():
-        subject = f"⚽ Jornada {jornada} de {categoria} — Resultados disponibles"
-        
-        usuarios = Usuario.query.filter(Usuario.id.in_(usuario_ids)).all()
-        
-        if not usuarios:
-            print(f"⚠️ No hay usuarios para notificar de jornada {jornada}")
-            return {"sent": 0, "status": "no_users"}
-        
-        sent_count = 0
-        for u in usuarios:
-            try:
-                msg = Message(
-                    subject=subject,
-                    recipients=[u.email]
-                )
-                
-                msg.body = (
-                    f"Hola {u.nombre_completo},\n\n"
-                    f"Los resultados de la Jornada {jornada} de {categoria} "
-                    f"ya están disponibles en la plataforma.\n\n"
-                    f"Podés ver el fixture completo, la tabla de posiciones actualizada "
-                    f"y los goleadores desde:\n"
-                    f"https://lif-1.onrender.com\n\n"
-                    f"Liga Interprovincial de Fútbol — Temporada 2026"
-                )
-                
-                msg.html = render_template(
-                    "emails/jornada_cargada.html",
-                    nombre=u.nombre_completo,
-                    jornada=jornada,
-                    categoria=categoria
-                )
-                
-                mail.send(msg)
-                sent_count += 1
-                print(f"📧 Mail enviado a {u.email}")
-                
-            except Exception as e:
-                print(f"❌ Error enviando mail a {u.email}: {e}")
-                continue
-        
-        return {
-            "sent": sent_count,
-            "total": len(usuarios),
-            "status": "completed"
-        }
-
-
 def enviar_mail_jornada(usuarios, jornada, categoria):
     """
     Envía un mail a los usuarios notificando que se cargó la jornada.
-    Usa Celery para envío asincrónico si está disponible.
-    usuarios: lista de objetos Usuario o list de IDs
+    usuarios: lista de objetos Usuario con atributo email y nombre_completo
     jornada: número de la jornada
     categoria: 'Mayores' o 'Inferiores'
     """
-    # Convertir a IDs si son objetos Usuario
-    if usuarios and hasattr(usuarios[0], 'id'):
-        usuario_ids = [u.id for u in usuarios]
-    else:
-        usuario_ids = usuarios
-    
-    if HAS_CELERY and celery:
-        # Enviar tarea de forma asincrónica
-        enviar_mail_jornada_async.delay(usuario_ids, jornada, categoria)
-        print(f"✅ Tarea de envío de mails para jornada {jornada} encolada en Celery")
-    else:
-        # Fallback sincrónico si Celery no está disponible
-        print(f"⚠️ Celery no disponible, ejecutando envío sincrónico")
-        enviar_mail_jornada_async(None, usuario_ids, jornada, categoria)
+    subject = f"⚽ Jornada {jornada} de {categoria} — Resultados disponibles"
+ 
+    for u in usuarios:
+        msg = Message(
+            subject=subject,
+            recipients=[u.email]
+        )
+ 
+        # Fallback texto plano
+        msg.body = (
+            f"Hola {u.nombre_completo},\n\n"
+            f"Los resultados de la Jornada {jornada} de {categoria} "
+            f"ya están disponibles en la plataforma.\n\n"
+            f"Podés ver el fixture completo, la tabla de posiciones actualizada "
+            f"y los goleadores desde:\n"
+            f"https://lif-1.onrender.com\n\n"
+            f"Liga Interprovincial de Fútbol — Temporada 2026"
+        )
+ 
+        msg.html = render_template(
+            "emails/jornada_cargada.html",
+            nombre=u.nombre_completo,
+            jornada=jornada,
+            categoria=categoria
+        )
+ 
+        mail.send(msg)

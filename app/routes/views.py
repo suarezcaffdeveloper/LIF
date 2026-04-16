@@ -2449,12 +2449,10 @@ def validar_y_guardar_estadisticas(data, categoria):
                 usuarios = Usuario.query.filter_by(rol="usuario").all()
                 
                 if usuarios:
-                    # Enviar IDs en lugar de objetos (para serializable con JSON)
-                    usuario_ids = [u.id for u in usuarios]
-                    enviar_mail_jornada(usuario_ids, partido.jornada, "Mayores")
+                    enviar_mail_jornada(usuarios, partido.jornada, categoria="Mayores")
                     return {
                         "success": True, 
-                        "message": f"Jornada {partido.jornada} de Mayores completa. Estadísticas actualizadas y mails encolados",
+                        "message": f"Jornada {partido.jornada} de Mayores completa. Estadísticas actualizadas y mails enviados",
                         "jornada_completa": True
                     }, 200
                 else:
@@ -2470,7 +2468,7 @@ def validar_y_guardar_estadisticas(data, categoria):
             print(f"⚠️ Error en envío de mails para mayores: {e}")
             return {
                 "success": True,
-                "message": "Estadísticas guardadas pero hubo error encolando mails",
+                "message": "Estadísticas guardadas pero hubo error enviando mails",
                 "error_mail": str(e),
                 "jornada_completa": False
             }, 200
