@@ -175,7 +175,7 @@ def enviar_mail_jornada_async(self, usuario_ids, jornada, categoria):
     with app.app_context():
         subject = f"⚽ Jornada {jornada} de {categoria} — Resultados disponibles"
         
-        usuarios = Usuario.query.filter(Usuario.id_usuario.in_(usuario_ids)).all()
+        usuarios = Usuario.query.filter(Usuario.id.in_(usuario_ids)).all()
         
         if not usuarios:
             print(f"⚠️ No hay usuarios para notificar de jornada {jornada}")
@@ -230,8 +230,8 @@ def enviar_mail_jornada(usuarios, jornada, categoria):
     categoria: 'Mayores' o 'Inferiores'
     """
     # Convertir a IDs si son objetos Usuario
-    if usuarios and hasattr(usuarios[0], 'id_usuario'):
-        usuario_ids = [u.id_usuario for u in usuarios]
+    if usuarios and hasattr(usuarios[0], 'id'):
+        usuario_ids = [u.id for u in usuarios]
     else:
         usuario_ids = usuarios
     
