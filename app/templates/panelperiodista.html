@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Panel del Periodista — LIF</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
       --verde: #00e676;
@@ -15,6 +15,8 @@
       --borde: rgba(255,255,255,0.07);
       --texto: #e8edf5;
       --texto-dim: #7a8a9e;
+      --accent: #00e5ff;
+      --muted: #6b6b80;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,7 +41,7 @@
       pointer-events: none;
     }
 
-    /* ─── TOPBAR ─── */
+    /* ── TOPBAR ── */
     .topbar {
       display: flex;
       align-items: center;
@@ -53,41 +55,47 @@
       top: 0;
       z-index: 100;
     }
-    .topbar-logo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 1.5rem;
-      font-weight: 900;
-      letter-spacing: .1em;
-      color: #fff;
-      text-decoration: none;
-    }
-    .topbar-logo em { color: var(--verde); font-style: normal; }
 
-    .topbar-actions { display: flex; gap: 10px; }
-    .topbar-btn {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: .85rem;
-      font-weight: 700;
-      letter-spacing: .07em;
+    .logo-mark {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      text-decoration: none;
-      padding: 7px 18px;
-      border-radius: 7px;
+      color: var(--accent);
+      opacity: .6;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      border-radius: 100px;
       border: 1px solid var(--borde);
-      color: var(--texto-dim);
-      background: rgba(255,255,255,.04);
-      transition: color .2s, border-color .2s, background .2s;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .25s ease;
+      letter-spacing: .3px;
     }
-    .topbar-btn:hover {
-      color: #fff;
-      border-color: rgba(255,255,255,.18);
-      background: rgba(255,255,255,.08);
+
+    .btn-nav:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,229,255,.06);
     }
-    .topbar-btn.danger:hover {
-      color: #e74c3c;
-      border-color: rgba(231,76,60,.35);
-      background: rgba(231,76,60,.07);
-    }
+
+    .btn-nav .icon { font-style: normal; font-size: 1rem; }
 
     /* ─── PAGE ─── */
     .panel-page {
@@ -226,10 +234,14 @@
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <a href="{{ url_for('views.index') }}" class="topbar-logo">L<em>I</em>F</a>
-    <div class="topbar-actions">
-      <a href="{{ url_for('views.index') }}" class="topbar-btn">Inicio</a>
-      <a href="{{ url_for('views.logout') }}" class="topbar-btn danger">Cerrar sesión</a>
+    <span class="logo-mark">Periodista</span>
+    <div class="top-actions">
+      <a href="{{ url_for('views.index') }}" class="btn-nav">
+        <i class="icon">⌂</i> Inicio
+      </a>
+      <a href="{{ url_for('views.logout') }}" class="btn-nav">
+        <i class="icon">→</i> Cerrar Sesión
+      </a>
     </div>
   </header>
 
