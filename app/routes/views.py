@@ -3200,11 +3200,37 @@ def guardar_inferiores():
 
         db.session.commit()
 
-        return jsonify(
-            success=True,
-            message="Partido guardado correctamente",
-            jornada_completa=False
-        )
+        # -------------------- ENVÍO AUTOMÁTICO DE MAIL PARA INFERIORES --------------------
+        try:
+            if partido.jornada and jornada_completa(partido.jornada, categoria="Inferiores"):
+                usuarios = Usuario.query.filter_by(rol="usuario").all()
+                if usuarios:
+                    enviar_mail_jornada(usuarios, partido.jornada, categoria="Inferiores")
+                    return jsonify(
+                        success=True,
+                        message=f"Jornada {partido.jornada} de Inferiores completa. Estadísticas actualizadas y mails enviados",
+                        jornada_completa=True
+                    )
+                else:
+                    return jsonify(
+                        success=True,
+                        message=f"Estadísticas guardadas. Jornada {partido.jornada} completa pero no hay usuarios para notificar",
+                        jornada_completa=True
+                    )
+            else:
+                return jsonify(
+                    success=True,
+                    message="Partido guardado correctamente",
+                    jornada_completa=False
+                )
+        except Exception as e:
+            print(f"⚠️ Error en envío de mails para inferiores: {e}")
+            return jsonify(
+                success=True,
+                message="Estadísticas guardadas pero hubo error enviando mails",
+                error_mail=str(e),
+                jornada_completa=False
+            )
 
     except Exception as e:
         db.session.rollback()
