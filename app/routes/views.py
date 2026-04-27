@@ -2953,6 +2953,59 @@ def guardar_inferiores():
             return jsonify(success=False, message="Los goles del visitante no coinciden"), 400
 
         # =====================================================
+        # VALIDAR GOLEADORES DUPLICADOS
+        # =====================================================
+        for lado, lista in [("local", goleadores_local), ("visitante", goleadores_visitante)]:
+            vistos = {}
+            for item in lista:
+                jid = item.get("jugador_id")
+                if jid is None:
+                    continue
+                if jid in vistos:
+                    j = Jugador.query.get(int(jid))
+                    nombre = f"{j.nombre} {j.apellido}" if j else f"ID {jid}"
+                    return jsonify(
+                        success=False,
+                        message=f"El jugador {nombre} ({lado}) aparece más de una vez en los goleadores. Cargá todos sus goles en una sola entrada."
+                    ), 400
+                vistos[jid] = True
+
+        # =====================================================
+        # VALIDAR TARJETAS DUPLICADAS / MIXTAS
+        # =====================================================
+        # Tras normalizar, el valor del dict es la cantidad de tarjetas por jugador
+        for jid_str, cant in {**amarillas_local, **amarillas_visitante}.items():
+            if cant > 1:
+                j = Jugador.query.get(int(jid_str))
+                nombre = f"{j.nombre} {j.apellido}" if j else f"ID {jid_str}"
+                return jsonify(
+                    success=False,
+                    message=f"Un jugador no puede tener dos tarjetas amarillas en el mismo partido: {nombre}."
+                ), 400
+
+        for jid_str, cant in {**rojas_local, **rojas_visitante}.items():
+            if cant > 1:
+                j = Jugador.query.get(int(jid_str))
+                nombre = f"{j.nombre} {j.apellido}" if j else f"ID {jid_str}"
+                return jsonify(
+                    success=False,
+                    message=f"Un jugador no puede tener dos tarjetas rojas en el mismo partido: {nombre}."
+                ), 400
+
+        todos_amarillas = set(amarillas_local.keys()) | set(amarillas_visitante.keys())
+        todos_rojas = set(rojas_local.keys()) | set(rojas_visitante.keys())
+        conflictos = todos_amarillas & todos_rojas
+        if conflictos:
+            nombres = []
+            for jid_str in conflictos:
+                j = Jugador.query.get(int(jid_str))
+                nombres.append(f"{j.nombre} {j.apellido}" if j else f"ID {jid_str}")
+            return jsonify(
+                success=False,
+                message=f"Un jugador no puede tener amarilla y roja en el mismo partido: {', '.join(nombres)}."
+            ), 400
+
+        # =====================================================
         # PARTIDO
         # =====================================================
         partido = Partido.query.get_or_404(partido_id)
