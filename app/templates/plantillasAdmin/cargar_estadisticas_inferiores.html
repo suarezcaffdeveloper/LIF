@@ -1007,6 +1007,8 @@ async function cargarCrucesRegularesInferiores(jornada) {
     data.forEach(c=>{
       const o = document.createElement("option");
       o.value=c.id; o.textContent=c.texto;
+      o.style.background = "#13131c";
+      o.style.color = "#e8e8f0";
       selectCruce.appendChild(o);
     });
     $id("cruces-container").style.display="block";
@@ -1030,6 +1032,8 @@ async function cargarCrucesPlayoffInferiores(faseId, categoria, idaVuelta) {
     data.forEach(c=>{
       const o = document.createElement("option");
       o.value=c.id; o.textContent=c.texto;
+      o.style.background = "#13131c";
+      o.style.color = "#e8e8f0";
       selectCruce.appendChild(o);
     });
     $id("cruces-container").style.display="block";
@@ -1151,6 +1155,8 @@ async function cargarCrucesPendientes(id_jornada) {
     data.forEach(c => {
       const opt = document.createElement("option");
       opt.value = c.id; opt.textContent = c.texto;
+      opt.style.background = "#13131c";
+      opt.style.color = "#e8e8f0";
       selectCruce.appendChild(opt);
     });
     console.log("✅ Cruces cargados en el select");
