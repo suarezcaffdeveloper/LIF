@@ -2280,7 +2280,37 @@ def validar_y_guardar_estadisticas(data, categoria):
     if total_local != goles_local or total_visitante != goles_visitante:
         return {"success": False, "message": "Los goles no coinciden con los goleadores."}, 400
 
-    # Guardar penales y definido_por_penales solo si el global está empatado (ida/vuelta)
+    # ── Validar goleadores duplicados (mismo jugador_id en dos entradas) ──
+    for lado, lista in [("local", goleadores_local), ("visitante", goleadores_visitante)]:
+        vistos = {}
+        for item in lista:
+            jid = item.get("jugador_id")
+            if jid is None:
+                continue
+            if jid in vistos:
+                jugador = Jugador.query.get(jid)
+                nombre = f"{jugador.nombre} {jugador.apellido}" if jugador else f"ID {jid}"
+                return {
+                    "success": False,
+                    "message": f"El jugador {nombre} ({lado}) aparece más de una vez en los goleadores. Cargá todos sus goles en una sola entrada."
+                }, 400
+            vistos[jid] = True
+
+    # ── Validar que un jugador no tenga amarilla Y roja en el mismo partido ──
+    todos_amarillas = set(int(j) for j in (amarillas_local + amarillas_visitante))
+    todos_rojas = set(int(j) for j in (rojas_local + rojas_visitante))
+    conflictos = todos_amarillas & todos_rojas
+    if conflictos:
+        nombres = []
+        for jid in conflictos:
+            jugador = Jugador.query.get(jid)
+            nombres.append(f"{jugador.nombre} {jugador.apellido}" if jugador else f"ID {jid}")
+        return {
+            "success": False,
+            "message": f"Un jugador no puede tener amarilla y roja en el mismo partido: {', '.join(nombres)}."
+        }, 400
+
+
     penales = data.get("penales")
     print("PENALES RECIBIDOS:", penales)
     print("TIPO:", type(penales))
