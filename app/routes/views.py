@@ -2296,15 +2296,49 @@ def validar_y_guardar_estadisticas(data, categoria):
                 }, 400
             vistos[jid] = True
 
-    # ── Validar que un jugador no tenga amarilla Y roja en el mismo partido ──
-    todos_amarillas = set(int(j) for j in (amarillas_local + amarillas_visitante))
-    todos_rojas = set(int(j) for j in (rojas_local + rojas_visitante))
-    conflictos = todos_amarillas & todos_rojas
+    # ── Validar tarjetas duplicadas y combinación amarilla+roja ──
+    def _ids(lista):
+        return [int(j) for j in lista if j is not None]
+
+    def _duplicados(lista):
+        vistos, dups = set(), set()
+        for jid in lista:
+            if jid in vistos:
+                dups.add(jid)
+            vistos.add(jid)
+        return dups
+
+    lista_amarillas = _ids(amarillas_local + amarillas_visitante)
+    lista_rojas = _ids(rojas_local + rojas_visitante)
+
+    dup_amarillas = _duplicados(lista_amarillas)
+    if dup_amarillas:
+        nombres = []
+        for jid in dup_amarillas:
+            j = Jugador.query.get(jid)
+            nombres.append(f"{j.nombre} {j.apellido}" if j else f"ID {jid}")
+        return {
+            "success": False,
+            "message": f"Un jugador no puede tener dos tarjetas amarillas en el mismo partido: {', '.join(nombres)}."
+        }, 400
+
+    dup_rojas = _duplicados(lista_rojas)
+    if dup_rojas:
+        nombres = []
+        for jid in dup_rojas:
+            j = Jugador.query.get(jid)
+            nombres.append(f"{j.nombre} {j.apellido}" if j else f"ID {jid}")
+        return {
+            "success": False,
+            "message": f"Un jugador no puede tener dos tarjetas rojas en el mismo partido: {', '.join(nombres)}."
+        }, 400
+
+    conflictos = set(lista_amarillas) & set(lista_rojas)
     if conflictos:
         nombres = []
         for jid in conflictos:
-            jugador = Jugador.query.get(jid)
-            nombres.append(f"{jugador.nombre} {jugador.apellido}" if jugador else f"ID {jid}")
+            j = Jugador.query.get(jid)
+            nombres.append(f"{j.nombre} {j.apellido}" if j else f"ID {jid}")
         return {
             "success": False,
             "message": f"Un jugador no puede tener amarilla y roja en el mismo partido: {', '.join(nombres)}."
