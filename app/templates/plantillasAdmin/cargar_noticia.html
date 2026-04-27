@@ -312,7 +312,11 @@
 
     <!-- TOPBAR -->
     <header class="topbar">
+      {% if current_user.rol == 'administrador' %}
       <span class="logo-mark">Admin</span>
+      {% elif current_user.rol == 'periodista' %}
+      <span class="logo-mark">Periodista</span>
+      {% endif %}
       {% if current_user.rol == 'administrador' %}
         <a href="{{ url_for('views.adminview') }}" class="btn-nav">← Panel</a>
       {% elif current_user.rol == 'periodista' %}

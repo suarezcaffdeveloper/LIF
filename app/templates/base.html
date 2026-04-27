@@ -354,7 +354,7 @@
                     <a href="{{ url_for('views.adminview') }}" class="btn-lif-admin" style="margin-left:6px;">Panel Admin</a>
                 {% endif %}
                 {% if current_user.rol == 'periodista' %}
-                    <a href="{{ url_for('views.panelperiodista') }}" class="btn-lif-admin" style="margin-left:6px;">Panel Periodista</a>
+                    <a href="{{ url_for('views.panel_periodista') }}" class="btn-lif-admin" style="margin-left:6px;">Panel Periodista</a>
                 {% endif %}
             {% else %}
                 <a href="{{ url_for('views.login') }}" class="btn-lif-outline" style="margin-left:8px;">Log-In</a>
@@ -410,7 +410,7 @@
                     <a href="{{ url_for('views.adminview') }}">Panel Admin</a>
                 {% endif %}
                 {% if current_user.rol == 'periodista' %}
-                    <a href="{{ url_for('views.panelperiodista') }}">Panel Periodista</a>
+                    <a href="{{ url_for('views.panel_periodista') }}">Panel Periodista</a>
                 {% endif %}
             {% else %}
                 <a href="{{ url_for('views.login') }}">Log-In</a>
