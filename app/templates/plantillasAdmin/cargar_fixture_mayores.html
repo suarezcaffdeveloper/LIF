@@ -455,6 +455,59 @@
       100% { content: '...'; }
     }
 
+    /* ── CONFIRMATION MODAL ── */
+    #modal-confirmar {
+      display: none;
+      position: fixed; inset: 0; z-index: 9998;
+      background: rgba(10,10,15,0.88);
+      backdrop-filter: blur(14px);
+      align-items: center; justify-content: center;
+    }
+    #modal-confirmar.active { display: flex; }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 44px 40px;
+      max-width: 460px; width: 90%;
+      text-align: center;
+      animation: modalIn .32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(.85) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-icon { font-size: 3rem; margin-bottom: 20px; }
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem; font-weight: 800;
+      margin-bottom: 12px;
+    }
+    .modal-desc {
+      font-size: 0.85rem; color: var(--muted);
+      line-height: 1.75; margin-bottom: 32px;
+    }
+    .modal-actions { display: flex; gap: 12px; justify-content: center; }
+    .btn-modal-cancel {
+      padding: 11px 28px; border-radius: 10px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-family: 'Syne', sans-serif;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; cursor: pointer; transition: all .2s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--muted); color: var(--text); }
+    .btn-modal-confirm {
+      padding: 11px 28px; border-radius: 10px;
+      background: linear-gradient(90deg, var(--accent2), #9333ea);
+      border: none; color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; cursor: pointer;
+      transition: opacity .2s, transform .2s;
+    }
+    .btn-modal-confirm:hover { opacity: .85; transform: translateY(-1px); }
+
     /* ── ANIMATION ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(18px); }
@@ -478,6 +531,22 @@
 
   <!-- FLASH -->
   <div id="flash-container"></div>
+
+  <!-- CONFIRMATION MODAL -->
+  <div id="modal-confirmar">
+    <div class="modal-box">
+      <div class="modal-icon">🎲</div>
+      <div class="modal-title">Generar Fixture Automático</div>
+      <div class="modal-desc">
+        Se van a crear todos los partidos del torneo activo usando el algoritmo de round-robin.<br><br>
+        Los cruces se distribuirán equitativamente entre todas las jornadas. Asegurate de que no haya partidos cargados previamente.
+      </div>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="btn-modal-cancel">Cancelar</button>
+        <button class="btn-modal-confirm" id="btn-modal-confirm">🎲 Realizar Sorteo</button>
+      </div>
+    </div>
+  </div>
 
   <!-- OVERLAY SORTEO -->
   <div id="overlay-sorteo">
@@ -725,8 +794,23 @@
 
     // ── Flash ──
     // ── Fixture Automático ──
-    document.getElementById("btn-auto-fixture").addEventListener("click", async () => {
-      const overlay = document.getElementById("overlay-sorteo");
+    const modal   = document.getElementById("modal-confirmar");
+    const overlay = document.getElementById("overlay-sorteo");
+
+    document.getElementById("btn-auto-fixture").addEventListener("click", () => {
+      modal.classList.add("active");
+    });
+
+    document.getElementById("btn-modal-cancel").addEventListener("click", () => {
+      modal.classList.remove("active");
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("active");
+    });
+
+    document.getElementById("btn-modal-confirm").addEventListener("click", async () => {
+      modal.classList.remove("active");
       overlay.classList.add("active");
 
       try {
@@ -739,7 +823,6 @@
           return;
         }
 
-        // Redirigir a la vista del fixture generado
         window.location.href = data.redirect;
 
       } catch (err) {

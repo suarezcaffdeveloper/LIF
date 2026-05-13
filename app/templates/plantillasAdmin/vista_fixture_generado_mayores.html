@@ -431,7 +431,7 @@
     <!-- PAGE HEADER -->
     <div class="page-header">
       <p class="page-eyebrow">Sorteo completado</p>
-      <h1>Fixture <span>{{ torneo.nombre }}</span><br>{{ temporada.nombre }}</h1>
+      <h1>Fixture <span>{{ torneo.nombre }}</span><br>{{ temporada.nombre }} · Mayores</h1>
     </div>
 
     {% if jornadas %}
@@ -450,18 +450,10 @@
       </div>
       <div class="stat-pill">
         <div class="dot"></div>
-        <span class="label">Total partidos</span>
+        <span class="label">Total cruces</span>
         {% set ns = namespace(total=0) %}{% for v in jornadas.values() %}{% set ns.total = ns.total + (v | length) %}{% endfor %}<span class="value">{{ ns.total }}</span>
       </div>
-      {% if fechas_clasico %}
-      <div class="stat-pill gold">
-        <div class="dot"></div>
-        <span class="label">Fecha clásicos</span>
-        <span class="value">
-          {{ fechas_clasico.values() | list | first | default('—') }}
-        </span>
-      </div>
-      {% endif %}
+      
     </div>
 
     <!-- JORNADAS GRID -->

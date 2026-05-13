@@ -440,11 +440,7 @@
     {% if jornadas %}
 
     <!-- CATEGORY LEGEND -->
-    <div class="cat-legend">
-      <span class="cat-pill quinta">● Quinta</span>
-      <span class="cat-pill sexta">● Sexta</span>
-      <span class="cat-pill septima">● Séptima</span>
-    </div>
+    
 
     <!-- SUMMARY STRIP -->
     <div class="summary-strip">
@@ -491,11 +487,7 @@
                 <div class="team-name">{{ cruce.local_nombre }}</div>
                 <div class="vs-badge">VS</div>
                 <div class="team-name">{{ cruce.visit_nombre }}</div>
-                <div class="cat-badges">
-                  {% for cat in cruce.categorias %}
-                    <span class="cat-badge {{ cat }}">{{ cat | capitalize }}</span>
-                  {% endfor %}
-                </div>
+                
                 {% if cruce.es_clasico %}
                   <div class="clasico-tag">Clásico</div>
                 {% endif %}
