@@ -155,7 +155,11 @@
       border: 1px solid var(--border);
       border-radius: 18px;
       overflow: hidden;
-      animation: fadeUp .5s ease both;
+      opacity: 0;
+    }
+
+    .jornada-card.card-in {
+      animation: cardReveal .55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
     .jornada-header {
@@ -297,6 +301,91 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes cardReveal {
+      0%   { opacity: 0; transform: translate(var(--ox,0px), var(--oy,0px)) scale(0.12); filter: blur(8px); }
+      55%  { opacity: 1; filter: blur(0); transform: translate(calc(var(--ox,0px)*.04), calc(var(--oy,0px)*.04)) scale(1.04); }
+      100% { opacity: 1; transform: translate(0,0) scale(1); filter: blur(0); }
+    }
+
+    /* ── BOMBO OVERLAY ── */
+    #bombo-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    #bombo-overlay.hide {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.08);
+    }
+
+    .bombo-orb {
+      position: relative;
+      width: 110px; height: 110px;
+    }
+    .bombo-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: var(--accent);
+      border-bottom-color: var(--accent2);
+      animation: orbSpin .9s linear infinite;
+      box-shadow: 0 0 40px rgba(0,229,255,.25), inset 0 0 30px rgba(124,58,237,.1);
+    }
+    .bombo-ring-2 {
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      border-left-color: rgba(0,229,255,.4);
+      border-right-color: rgba(124,58,237,.4);
+      animation: orbSpin .6s linear infinite reverse;
+    }
+    .bombo-icon-inner {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      animation: iconPulse 1.4s ease-in-out infinite;
+    }
+    .bombo-glow {
+      position: absolute; inset: -30px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,229,255,.12) 0%, transparent 65%);
+      animation: glowPulse 1.4s ease-in-out infinite;
+    }
+    .bombo-label {
+      font-family: 'Syne', sans-serif;
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: .75;
+    }
+    .bombo-dots {
+      display: flex; gap: 7px;
+    }
+    .bombo-dots span {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: .4;
+      animation: dotBounce .9s ease-in-out infinite;
+    }
+    .bombo-dots span:nth-child(2) { animation-delay: .15s; }
+    .bombo-dots span:nth-child(3) { animation-delay: .3s; }
+
+    @keyframes orbSpin    { to { transform: rotate(360deg); } }
+    @keyframes iconPulse  { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+    @keyframes glowPulse  { 0%,100% { opacity: .6; } 50% { opacity: 1; } }
+    @keyframes dotBounce  { 0%,100% { transform: translateY(0); opacity:.4; } 50% { transform: translateY(-5px); opacity:1; } }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 640px) {
       .wrapper { padding: 0 16px 60px; }
@@ -305,6 +394,18 @@
   </style>
 </head>
 <body>
+
+  <!-- BOMBO OVERLAY -->
+  <div id="bombo-overlay">
+    <div class="bombo-orb">
+      <div class="bombo-glow"></div>
+      <div class="bombo-ring"></div>
+      <div class="bombo-ring-2"></div>
+      <div class="bombo-icon-inner">⚽</div>
+    </div>
+    <div class="bombo-label">Distribuyendo fixture</div>
+    <div class="bombo-dots"><span></span><span></span><span></span></div>
+  </div>
 
   <div id="flash-container"></div>
 
@@ -366,7 +467,7 @@
     <!-- JORNADAS GRID -->
     <div class="jornadas-grid">
       {% for jornada_num, partidos in jornadas | dictsort %}
-        <div class="jornada-card" style="animation-delay: {{ loop.index0 * 0.04 }}s">
+        <div class="jornada-card">
 
           <div class="jornada-header">
             <span class="jornada-num">Jornada {{ jornada_num }}</span>
@@ -405,10 +506,46 @@
   </div>
 
   <script>
-    // Stagger animation on cards
-    document.querySelectorAll(".jornada-card").forEach((card, i) => {
-      card.style.animationDelay = `${i * 0.045}s`;
-    });
+    // ── BOMBO REVEAL ──────────────────────────────────────────────────────
+    (function () {
+      const overlay = document.getElementById('bombo-overlay');
+      const cards   = Array.from(document.querySelectorAll('.jornada-card'));
+      const INTRO_MS   = 1400;   // how long bombo spins
+      const STAGGER_MS = 75;     // delay between each card
+
+      function revealCards() {
+        // Pre-calculate origin offsets (distance from viewport center to each card center)
+        const vCX = window.innerWidth  / 2;
+        const vCY = window.innerHeight / 2;
+
+        cards.forEach(card => {
+          const r  = card.getBoundingClientRect();
+          const dx = vCX - (r.left + r.width  / 2);
+          const dy = vCY - (r.top  + r.height / 2);
+          card.style.setProperty('--ox', `${dx}px`);
+          card.style.setProperty('--oy', `${dy}px`);
+        });
+
+        // Fade out overlay
+        overlay.classList.add('hide');
+        setTimeout(() => { overlay.style.display = 'none'; }, 650);
+
+        // Reveal cards one by one
+        cards.forEach((card, i) => {
+          setTimeout(() => {
+            card.classList.add('card-in');
+          }, i * STAGGER_MS);
+        });
+      }
+
+      // Wait for page to be fully laid out, then start
+      if (document.readyState === 'complete') {
+        setTimeout(revealCards, INTRO_MS);
+      } else {
+        window.addEventListener('load', () => setTimeout(revealCards, INTRO_MS));
+      }
+    })();
+    // ─────────────────────────────────────────────────────────────────────
 
     function mostrarFlash(msg, tipo = "success") {
       const container = document.getElementById("flash-container");
