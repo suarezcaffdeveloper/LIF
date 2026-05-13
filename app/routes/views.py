@@ -19,6 +19,8 @@ import os
 import datetime as dt
 import string
 import secrets
+import re
+import pandas as pd
 from slugify import slugify
 
 views = Blueprint('views', __name__)
@@ -1058,6 +1060,172 @@ def cargar_jugadores():
         clubes=clubes,
         form_data={}
     )
+
+
+# ============================================================
+#   IMPORTAR JUGADORES DESDE EXCEL / GOOGLE SHEETS
+# ============================================================
+@views.route('/importar_jugadores_excel', methods=['GET', 'POST'])
+@login_required
+def importar_jugadores_excel():
+
+    if request.method == 'POST':
+        resultados = {'creados': 0, 'omitidos': 0, 'errores': []}
+
+        try:
+            fuente = request.form.get('fuente')  # 'archivo' o 'sheets'
+
+            if fuente == 'sheets':
+                url = request.form.get('sheets_url', '').strip()
+                match_id = re.search(r'/spreadsheets/d/([a-zA-Z0-9-_]+)', url)
+                match_gid = re.search(r'gid=(\d+)', url)
+                if not match_id:
+                    flash("URL de Google Sheets inválida.", "danger")
+                    return redirect(url_for('views.importar_jugadores_excel'))
+                sheet_id = match_id.group(1)
+                gid = match_gid.group(1) if match_gid else '0'
+                csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}"
+                df = pd.read_csv(csv_url)
+
+            else:
+                archivo = request.files.get('archivo')
+                if not archivo or archivo.filename == '':
+                    flash("Debe seleccionar un archivo.", "danger")
+                    return redirect(url_for('views.importar_jugadores_excel'))
+                nombre_archivo = secure_filename(archivo.filename)
+                contenido = archivo.read()
+                if nombre_archivo.endswith('.csv'):
+                    df = pd.read_csv(io.BytesIO(contenido))
+                elif nombre_archivo.endswith(('.xlsx', '.xls')):
+                    df = pd.read_excel(io.BytesIO(contenido))
+                else:
+                    flash("Formato no soportado. Use .xlsx, .xls o .csv", "danger")
+                    return redirect(url_for('views.importar_jugadores_excel'))
+
+            # Normalizar nombres de columnas
+            df.columns = [str(c).strip().lower() for c in df.columns]
+
+            columnas_requeridas = {'numero_carnet', 'nombre', 'apellido', 'club'}
+            faltantes = columnas_requeridas - set(df.columns)
+            if faltantes:
+                flash(f"El archivo no tiene las columnas: {', '.join(faltantes)}", "danger")
+                return redirect(url_for('views.importar_jugadores_excel'))
+
+            for idx, row in df.iterrows():
+                # Savepoint por fila: un error en una fila no afecta las demás
+                sp = db.session.begin_nested()
+                try:
+                    numero_carnet_raw = row.get('numero_carnet')
+                    nombre = str(row.get('nombre', '')).strip()
+                    apellido = str(row.get('apellido', '')).strip()
+                    club_nombre = str(row.get('club', '')).strip()
+                    categoria_raw = row.get('categoria')
+                    fecha_nac_raw = row.get('fecha_nacimiento')
+
+                    categoria = str(categoria_raw).strip().lower() if pd.notna(categoria_raw) else None
+
+                    # Validar campos obligatorios
+                    if pd.isna(numero_carnet_raw) or not nombre or not apellido or not club_nombre:
+                        resultados['errores'].append(f"Fila {idx + 2}: datos incompletos, se omite.")
+                        sp.rollback()
+                        continue
+
+                    numero_carnet = int(numero_carnet_raw)
+
+                    # Buscar club por nombre (insensible a mayúsculas)
+                    club = Club.query.filter(
+                        func.lower(Club.nombre) == club_nombre.lower()
+                    ).first()
+                    if not club:
+                        resultados['errores'].append(
+                            f"Fila {idx + 2}: Club '{club_nombre}' no encontrado en la base de datos."
+                        )
+                        sp.rollback()
+                        continue
+
+                    jugador = Jugador.query.filter_by(numero_carnet=numero_carnet).first()
+
+                    if jugador:
+                        # El jugador ya existe: solo contabilizar como omitido
+                        resultados['omitidos'] += 1
+                    else:
+                        # Parsear fecha de nacimiento
+                        fecha_nac = None
+                        if fecha_nac_raw and pd.notna(fecha_nac_raw):
+                            if isinstance(fecha_nac_raw, str):
+                                for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+                                    try:
+                                        fecha_nac = datetime.strptime(fecha_nac_raw.strip(), fmt).date()
+                                        break
+                                    except ValueError:
+                                        pass
+                            else:
+                                try:
+                                    fecha_nac = pd.Timestamp(fecha_nac_raw).date()
+                                except Exception:
+                                    pass
+
+                        jugador = Jugador(
+                            numero_carnet=numero_carnet,
+                            nombre=nombre,
+                            apellido=apellido,
+                            fecha_nacimiento=fecha_nac,
+                            club_id=club.id
+                        )
+                        db.session.add(jugador)
+                        resultados['creados'] += 1
+
+                    # Asignar al equipo siempre (tanto jugadores nuevos como ya existentes)
+                    if categoria:
+                        equipo = Equipo.query.filter(
+                            Equipo.club_id == club.id,
+                            func.lower(Equipo.categoria) == categoria
+                        ).first()
+
+                        if equipo:
+                            ya_asignado = JugadorEquipo.query.filter_by(
+                                numero_carnet=numero_carnet,
+                                equipo_id=equipo.id
+                            ).first()
+                            if not ya_asignado:
+                                db.session.add(JugadorEquipo(
+                                    numero_carnet=numero_carnet,
+                                    equipo_id=equipo.id
+                                ))
+                        else:
+                            resultados['errores'].append(
+                                f"Fila {idx + 2}: Jugador {apellido}, {nombre}: "
+                                f"el equipo '{categoria}' de '{club_nombre}' no existe en la BD."
+                            )
+
+                    sp.commit()
+
+                except Exception as e:
+                    sp.rollback()
+                    resultados['errores'].append(f"Fila {idx + 2}: {str(e)}")
+
+            db.session.commit()
+
+            msg = (
+                f"Importación completada: {resultados['creados']} jugadores creados, "
+                f"{resultados['omitidos']} omitidos (ya existían)."
+            )
+            if resultados['errores']:
+                msg += f" {len(resultados['errores'])} advertencias."
+            flash(msg, "success" if not resultados['errores'] else "warning")
+
+        except Exception as e:
+            db.session.rollback()
+            print("❌ ERROR importar_jugadores_excel:", e)
+            flash(f"Error al procesar el archivo: {str(e)}", "danger")
+            resultados = {'creados': 0, 'omitidos': 0, 'errores': [str(e)]}
+
+        return render_template(
+            'plantillasAdmin/importar_jugadores_excel.html',
+            resultados=resultados
+        )
+
+    return render_template('plantillasAdmin/importar_jugadores_excel.html', resultados=None)
 
 
 @views.route('/obtener_datos_club/<int:club_id>')
