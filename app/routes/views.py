@@ -100,11 +100,9 @@ def crear_temporada():
     # Convertir a int
     nombre_int = int(nombre)
 
-    # Desactivar la temporada activa actual
-    temporada_activa = Temporada.query.filter_by(activa=True).first()
-    if temporada_activa:
-        temporada_activa.activa = False
-        db.session.add(temporada_activa)
+    # Desactivar TODAS las temporadas y torneos anteriores (garantía global)
+    Temporada.query.filter_by(activa=True).update({"activa": False})
+    Torneo.query.filter_by(activo=True).update({"activo": False})
 
     # Crear la nueva temporada y activarla
     nueva_temporada = Temporada(nombre=str(nombre_int), activa=True)
@@ -147,13 +145,10 @@ def activar_torneo(torneo_id):
 
     torneo = Torneo.query.get_or_404(torneo_id)
 
-    # desactivar todos los torneos de la temporada
-    torneos = Torneo.query.filter_by(temporada_id=torneo.temporada_id).all()
+    # Desactivar TODOS los torneos de cualquier temporada
+    Torneo.query.filter_by(activo=True).update({"activo": False})
 
-    for t in torneos:
-        t.activo = False
-
-    # activar el seleccionado
+    # activar solo el seleccionado
     torneo.activo = True
 
     db.session.commit()
@@ -2086,7 +2081,206 @@ def guardar_partido_inferiores():
         print("❌ ERROR guardar_partido_inferiores:", e)
         return jsonify({"error": "Error interno del servidor"}), 500
 
-    
+
+# ====================================================
+# GENERADOR AUTOMÁTICO DE FIXTURE INFERIORES
+# ====================================================
+
+@views.route('/generar_fixture_automatico_inferiores', methods=['POST'])
+@login_required
+def generar_fixture_automatico_inferiores():
+    import random as _rnd
+    from datetime import date as _date, timedelta as _td
+
+    if current_user.rol != 'administrador':
+        return jsonify({"error": "Sin permisos de administrador."}), 403
+
+    try:
+        # ── Temporada / torneo activo ──────────────────────────────────────
+        temporada_activa = Temporada.query.filter_by(activa=True).first()
+        if not temporada_activa:
+            return jsonify({"error": "No hay temporada activa."}), 400
+
+        torneo_activo = Torneo.query.filter_by(
+            activo=True, temporada_id=temporada_activa.id
+        ).first()
+        if not torneo_activo:
+            return jsonify({"error": "No hay torneo activo."}), 400
+
+        # ── Verificar que no existan partidos ya cargados ─────────────────
+        existentes = Partido.query.filter(
+            Partido.torneo_id == torneo_activo.id,
+            func.lower(func.trim(Partido.categoria)).in_(['quinta', 'sexta', 'septima'])
+        ).count()
+        if existentes > 0:
+            return jsonify({
+                "error": (
+                    f"Ya existen {existentes} partido(s) de inferiores en este torneo. "
+                    "Borrelos antes de generar el fixture automático."
+                )
+            }), 400
+
+        # ── Mapear clubes → equipos de inferiores ─────────────────────────
+        CATS_INF = ['quinta', 'sexta', 'septima']
+        equipos_inf = Equipo.query.filter(
+            func.lower(func.trim(Equipo.categoria)).in_(CATS_INF)
+        ).all()
+
+        club_cats = {}  # {club_id: {cat: equipo}}
+        for e in equipos_inf:
+            cat = e.categoria.strip().lower()
+            club_cats.setdefault(e.club_id, {})[cat] = e
+
+        club_ids_validos = list(club_cats.keys())
+        if len(club_ids_validos) < 2:
+            return jsonify({
+                "error": "Se necesitan al menos 2 clubes con categorías inferiores."
+            }), 400
+
+        # ── Torneo invertido (Apertura ↔ Clausura) ─────────────────────────
+        nombre_invertido = "Apertura" if torneo_activo.nombre == "Clausura" else "Clausura"
+        torneo_invertido = Torneo.query.filter_by(
+            temporada_id=temporada_activa.id, nombre=nombre_invertido
+        ).first()
+
+        # ── Generar schedule ───────────────────────────────────────────────
+        rounds = _round_robin(club_ids_validos)
+
+        for jornada_num, matches in enumerate(rounds, start=1):
+            for local_club_id, visita_club_id in matches:
+                cats_local = club_cats.get(local_club_id, {})
+                cats_visit = club_cats.get(visita_club_id, {})
+                cats_comunes = set(cats_local.keys()) & set(cats_visit.keys())
+
+                for cat in cats_comunes:
+                    eq_local = cats_local[cat]
+                    eq_visit = cats_visit[cat]
+
+                    db.session.add(Partido(
+                        jornada=jornada_num,
+                        fecha_partido=None,
+                        hora_partido=None,
+                        categoria=cat,
+                        equipo_local_id=eq_local.id,
+                        equipo_visitante_id=eq_visit.id,
+                        torneo_id=torneo_activo.id,
+                        jugado=False
+                    ))
+
+                    if torneo_invertido:
+                        db.session.add(Partido(
+                            jornada=jornada_num,
+                            fecha_partido=None,
+                            hora_partido=None,
+                            categoria=cat,
+                            equipo_local_id=eq_visit.id,
+                            equipo_visitante_id=eq_local.id,
+                            torneo_id=torneo_invertido.id,
+                            jugado=False
+                        ))
+
+        db.session.commit()
+
+        return jsonify({
+            "ok": True,
+            "redirect": url_for("views.vista_fixture_generado_inferiores"),
+            "total_jornadas": len(rounds),
+            "total_clubes": len(club_ids_validos)
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        print("❌ ERROR generar_fixture_automatico_inferiores:", e)
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@views.route('/vista_fixture_generado_inferiores')
+@login_required
+def vista_fixture_generado_inferiores():
+    temporada_activa = Temporada.query.filter_by(activa=True).first()
+    torneo_activo = (
+        Torneo.query.filter_by(activo=True, temporada_id=temporada_activa.id).first()
+        if temporada_activa else None
+    )
+
+    if not torneo_activo:
+        flash("No hay torneo activo.", "danger")
+        return redirect(url_for("views.cargar_fixture_inferiores"))
+
+    CATS_INF = ['quinta', 'sexta', 'septima']
+    partidos = (
+        Partido.query
+        .filter(
+            Partido.torneo_id == torneo_activo.id,
+            func.lower(func.trim(Partido.categoria)).in_(CATS_INF)
+        )
+        .order_by(Partido.jornada, Partido.categoria)
+        .all()
+    )
+
+    clubes_map = {c.id: c for c in Club.query.all()}
+
+    jornadas_raw = {}   # {jornada_num: {(min_cid, max_cid): cruce_dict}}
+    fechas_clasico = {}
+
+    for p in partidos:
+        if not p.equipo_local or not p.equipo_visitante:
+            continue
+
+        loc_cid = p.equipo_local.club_id
+        vis_cid = p.equipo_visitante.club_id
+        key = (min(loc_cid, vis_cid), max(loc_cid, vis_cid))
+
+        if p.jornada not in jornadas_raw:
+            jornadas_raw[p.jornada] = {}
+
+        if key not in jornadas_raw[p.jornada]:
+            lc = clubes_map.get(loc_cid)
+            vc = clubes_map.get(vis_cid)
+            loc_l = (lc.localidad or '').strip().lower() if lc else ''
+            loc_v = (vc.localidad or '').strip().lower() if vc else ''
+            jornadas_raw[p.jornada][key] = {
+                'local_nombre': lc.nombre if lc else '?',
+                'visit_nombre': vc.nombre if vc else '?',
+                'local_club_id': loc_cid,
+                'visit_club_id': vis_cid,
+                'categorias': [],
+                'es_clasico': bool(loc_l and loc_v and loc_l == loc_v)
+            }
+
+        cat = p.categoria.strip().lower()
+        if cat not in jornadas_raw[p.jornada][key]['categorias']:
+            jornadas_raw[p.jornada][key]['categorias'].append(cat)
+
+        if p.fecha_partido and p.jornada not in fechas_clasico:
+            fechas_clasico[p.jornada] = p.fecha_partido
+
+    # Sort categories within each cruce
+    cat_order = {'quinta': 0, 'sexta': 1, 'septima': 2}
+    jornadas = {}
+    for jornada_num in sorted(jornadas_raw.keys()):
+        cruces = list(jornadas_raw[jornada_num].values())
+        for c in cruces:
+            c['categorias'].sort(key=lambda x: cat_order.get(x, 99))
+        jornadas[jornada_num] = cruces
+
+    # Detect jornada where ALL cruces are clásicos
+    clasicos_jornada = None
+    for jornada_num, cruces in jornadas.items():
+        if cruces and all(c['es_clasico'] for c in cruces):
+            clasicos_jornada = jornada_num
+            break
+
+    return render_template(
+        'plantillasAdmin/vista_fixture_generado_inferiores.html',
+        jornadas=jornadas,
+        torneo=torneo_activo,
+        temporada=temporada_activa,
+        fechas_clasico=fechas_clasico,
+        clasicos_jornada=clasicos_jornada
+    )
+
+
 # ====================================================
 # 1) CARGAR ESTADÍSTICAS MAYORES
 # ====================================================

@@ -373,10 +373,72 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
-      .panel-grid { grid-template-columns: 1fr; }
-      .right-card { max-height: none; }
+    /* ── AUTO-GENERATE BANNER ── */
+    .autogen-banner {
+      margin-top: 32px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      animation: fadeUp .5s ease .16s both;
+    }
+
+    .autogen-text h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem; font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .autogen-text p {
+      font-size: 0.82rem; color: var(--muted); max-width: 500px; line-height: 1.6;
+    }
+
+    .autogen-actions { display: flex; gap: 12px; flex-shrink: 0; }
+
+    .btn-autogen {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 13px 28px; border-radius: 10px;
+      background: linear-gradient(90deg, var(--accent), #00b8d4);
+      border: none; color: #0a0a0f;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .25s, transform .2s, box-shadow .25s;
+    }
+
+    .btn-autogen:hover {
+      opacity: .9; transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,229,255,.25);
+    }
+
+    .btn-autogen:disabled {
+      opacity: .4; cursor: not-allowed; transform: none; box-shadow: none;
+    }
+
+    .btn-ver-fixture {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 13px 28px; border-radius: 10px;
+      background: transparent;
+      border: 1px solid var(--border); color: var(--muted);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      text-decoration: none;
+      transition: all .25s;
+    }
+
+    .btn-ver-fixture:hover {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(0,229,255,.06);
+    }
+
+    @media (max-width: 780px) {
+      .autogen-banner { flex-direction: column; align-items: flex-start; }
     }
 
     @media (max-width: 640px) {
@@ -483,6 +545,19 @@
       </div>
 
     </div>
+
+    <!-- AUTO-GENERATE BANNER -->
+    <div class="autogen-banner">
+      <div class="autogen-text">
+        <h3>⚡ Generar Fixture Automático</h3>
+        <p>Genera el calendario completo de inferiores (Quinta, Sexta y Séptima) de forma automática usando el algoritmo de round-robin. Todos los cruces se distribuirán equitativamente entre las jornadas del torneo activo.</p>
+      </div>
+      <div class="autogen-actions">
+        <a href="{{ url_for('views.vista_fixture_generado_inferiores') }}" class="btn-ver-fixture">Ver Fixture</a>
+        <button id="btn-autogen" class="btn-autogen">Generar Fixture</button>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -615,6 +690,37 @@
         mostrarFlash("Error del servidor.", "danger");
       }
     }
+
+    // ── Auto-generate fixture ──
+    document.getElementById("btn-autogen").addEventListener("click", async function () {
+      const btn = this;
+      if (!confirm("¿Generar el fixture automático de inferiores? Esto creará todos los partidos del torneo activo.")) return;
+
+      btn.disabled = true;
+      btn.textContent = "Generando…";
+
+      try {
+        const res  = await fetch("/generar_fixture_automatico_inferiores", {
+          method: "POST",
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+        const data = await res.json();
+
+        if (data.ok && data.redirect) {
+          mostrarFlash(`Fixture generado: ${data.total_jornadas} jornadas para ${data.total_clubes} clubes.`, "success");
+          setTimeout(() => { window.location.href = data.redirect; }, 900);
+        } else {
+          mostrarFlash(data.error || "No se pudo generar el fixture.", "danger");
+          btn.disabled = false;
+          btn.textContent = "Generar Fixture";
+        }
+      } catch (err) {
+        console.error(err);
+        mostrarFlash("Error del servidor.", "danger");
+        btn.disabled = false;
+        btn.textContent = "Generar Fixture";
+      }
+    });
 
     // ── Eventos ──
     jornadaSelect.addEventListener("change", () => cargarPartidos(jornadaSelect.value));
