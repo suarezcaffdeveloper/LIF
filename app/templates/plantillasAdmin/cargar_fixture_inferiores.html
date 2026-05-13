@@ -366,6 +366,26 @@
       background: rgba(255,82,82,.12); color: #ff5252;
       border: 1px solid rgba(255,82,82,.25);
     }
+    /* ── AUTO-FIXTURE BUTTON ── */
+    .btn-auto {
+      display: inline-flex; align-items: center; gap: 10px;
+      width: 100%; padding: 13px;
+      background: linear-gradient(90deg, var(--accent2), #9333ea);
+      border: none; border-radius: 10px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity .25s, transform .2s, box-shadow .25s;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .btn-auto:hover {
+      opacity: .88; transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(124,58,237,.35);
+    }
+    .btn-auto:active { transform: translateY(0); }
 
     /* ── ANIMATION ── */
     @keyframes fadeUp {
