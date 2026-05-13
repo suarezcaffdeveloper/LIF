@@ -350,7 +350,7 @@
       <div class="stat-pill">
         <div class="dot"></div>
         <span class="label">Total partidos</span>
-        <span class="value">{{ jornadas.values() | sum(attribute='__len__') }}</span>
+        {% set ns = namespace(total=0) %}{% for v in jornadas.values() %}{% set ns.total = ns.total + (v | length) %}{% endfor %}<span class="value">{{ ns.total }}</span>
       </div>
       {% if fechas_clasico %}
       <div class="stat-pill gold">
