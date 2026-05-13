@@ -1620,6 +1620,229 @@ def fixture_ocupados(jornada):
     })
 
 
+# ====================================================
+# GENERADOR AUTOMÁTICO DE FIXTURE MAYORES
+# ====================================================
+
+def _round_robin(club_ids):
+    """
+    Algoritmo del círculo para round-robin.
+    Retorna lista de jornadas; cada jornada es lista de (local_id, visitante_id).
+    """
+    import random as _rnd
+    equipos = list(club_ids)
+    _rnd.shuffle(equipos)
+
+    n = len(equipos)
+    if n % 2 == 1:
+        equipos.append(None)   # bye
+        n += 1
+
+    rounds = []
+    for _ in range(n - 1):
+        round_matches = []
+        for i in range(n // 2):
+            home = equipos[i]
+            away = equipos[n - 1 - i]
+            if home is not None and away is not None:
+                round_matches.append((home, away))
+        rounds.append(round_matches)
+        # Rotar: fijo el elemento en posición 0, el resto rota
+        equipos = [equipos[0]] + [equipos[-1]] + equipos[1:-1]
+
+    return rounds
+
+
+@views.route('/generar_fixture_automatico_mayores', methods=['POST'])
+@login_required
+def generar_fixture_automatico_mayores():
+    import random as _rnd
+    from datetime import date as _date, timedelta as _td
+
+    if current_user.rol != 'administrador':
+        return jsonify({"error": "Sin permisos de administrador."}), 403
+
+    try:
+        # ── Temporada / torneo activo ──────────────────────────────────────
+        temporada_activa = Temporada.query.filter_by(activa=True).first()
+        if not temporada_activa:
+            return jsonify({"error": "No hay temporada activa."}), 400
+
+        torneo_activo = Torneo.query.filter_by(
+            activo=True, temporada_id=temporada_activa.id
+        ).first()
+        if not torneo_activo:
+            return jsonify({"error": "No hay torneo activo."}), 400
+
+        # ── Verificar que no existan partidos ya cargados ─────────────────
+        existentes = Partido.query.filter(
+            Partido.torneo_id == torneo_activo.id,
+            func.lower(func.trim(Partido.categoria)) == 'primera'
+        ).count()
+        if existentes > 0:
+            return jsonify({
+                "error": (
+                    f"Ya existen {existentes} partido(s) de Primera en este torneo. "
+                    "Borrelos antes de generar el fixture automático."
+                )
+            }), 400
+
+        # ── Clubes con equipo de Primera Y Reserva ────────────────────────
+        ids_primera = {
+            e.club_id for e in
+            Equipo.query.filter(func.lower(func.trim(Equipo.categoria)) == 'primera').all()
+        }
+        ids_reserva = {
+            e.club_id for e in
+            Equipo.query.filter(func.lower(func.trim(Equipo.categoria)) == 'reserva').all()
+        }
+        club_ids_validos = list(ids_primera & ids_reserva)
+
+        if len(club_ids_validos) < 2:
+            return jsonify({
+                "error": "Se necesitan al menos 2 clubes con equipos de Primera y Reserva."
+            }), 400
+
+        clubes_map = {c.id: c for c in Club.query.filter(Club.id.in_(club_ids_validos)).all()}
+
+        # ── Identificar clásicos (misma localidad) ─────────────────────────
+        clasico_pares = set()
+        for id_a in club_ids_validos:
+            for id_b in club_ids_validos:
+                if id_a < id_b:
+                    loc_a = (clubes_map[id_a].localidad or '').strip().lower()
+                    loc_b = (clubes_map[id_b].localidad or '').strip().lower()
+                    if loc_a and loc_b and loc_a == loc_b:
+                        clasico_pares.add((id_a, id_b))
+
+        # ── Fecha del clásico: sábado aleatorio entre 8 y 20 semanas ──────
+        hoy = _date.today()
+        semanas = _rnd.randint(8, 20)
+        fecha_base = hoy + _td(weeks=semanas)
+        dias_a_sabado = (5 - fecha_base.weekday()) % 7
+        fecha_clasico = fecha_base + _td(days=dias_a_sabado)
+
+        # ── Torneo invertido (Apertura ↔ Clausura) ─────────────────────────
+        nombre_invertido = "Apertura" if torneo_activo.nombre == "Clausura" else "Clausura"
+        torneo_invertido = Torneo.query.filter_by(
+            temporada_id=temporada_activa.id, nombre=nombre_invertido
+        ).first()
+
+        # ── Generar schedule ───────────────────────────────────────────────
+        rounds = _round_robin(club_ids_validos)
+        categorias = ['primera', 'reserva']
+
+        for jornada_num, matches in enumerate(rounds, start=1):
+            for local_club_id, visita_club_id in matches:
+                par = (min(local_club_id, visita_club_id), max(local_club_id, visita_club_id))
+                fecha = fecha_clasico if par in clasico_pares else None
+
+                for cat in categorias:
+                    eq_local = Equipo.query.filter(
+                        Equipo.club_id == local_club_id,
+                        func.lower(func.trim(Equipo.categoria)) == cat
+                    ).first()
+                    eq_visit = Equipo.query.filter(
+                        Equipo.club_id == visita_club_id,
+                        func.lower(func.trim(Equipo.categoria)) == cat
+                    ).first()
+
+                    if not eq_local or not eq_visit:
+                        continue
+
+                    # Partido torneo activo
+                    db.session.add(Partido(
+                        jornada=jornada_num,
+                        fecha_partido=fecha,
+                        hora_partido=None,
+                        categoria=cat,
+                        equipo_local_id=eq_local.id,
+                        equipo_visitante_id=eq_visit.id,
+                        torneo_id=torneo_activo.id,
+                        jugado=False
+                    ))
+
+                    # Partido torneo invertido (local ↔ visitante)
+                    if torneo_invertido:
+                        db.session.add(Partido(
+                            jornada=jornada_num,
+                            fecha_partido=fecha,
+                            hora_partido=None,
+                            categoria=cat,
+                            equipo_local_id=eq_visit.id,
+                            equipo_visitante_id=eq_local.id,
+                            torneo_id=torneo_invertido.id,
+                            jugado=False
+                        ))
+
+        db.session.commit()
+
+        return jsonify({
+            "ok": True,
+            "redirect": url_for("views.vista_fixture_generado_mayores"),
+            "clasico_fecha": fecha_clasico.strftime("%d/%m/%Y"),
+            "total_jornadas": len(rounds),
+            "total_clubes": len(club_ids_validos),
+            "clasicos": len(clasico_pares)
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        print("❌ ERROR generar_fixture_automatico_mayores:", e)
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@views.route('/vista_fixture_generado_mayores')
+@login_required
+def vista_fixture_generado_mayores():
+    temporada_activa = Temporada.query.filter_by(activa=True).first()
+    torneo_activo = (
+        Torneo.query.filter_by(activo=True, temporada_id=temporada_activa.id).first()
+        if temporada_activa else None
+    )
+
+    if not torneo_activo:
+        flash("No hay torneo activo.", "danger")
+        return redirect(url_for("views.cargar_fixture_mayores_view"))
+
+    partidos = (
+        Partido.query
+        .filter(
+            Partido.torneo_id == torneo_activo.id,
+            func.lower(func.trim(Partido.categoria)) == 'primera'
+        )
+        .order_by(Partido.jornada)
+        .all()
+    )
+
+    jornadas = {}
+    fechas_clasico = {}
+    for p in partidos:
+        jornadas.setdefault(p.jornada, []).append(p)
+        if p.fecha_partido:
+            fechas_clasico[p.jornada] = p.fecha_partido
+
+    # Detectar clásicos: partidos con misma localidad entre los clubes
+    clubes_map = {c.id: c for c in Club.query.all()}
+
+    def es_clasico(partido):
+        eq_l = partido.equipo_local
+        eq_v = partido.equipo_visitante
+        if not eq_l or not eq_v:
+            return False
+        loc_l = (clubes_map.get(eq_l.club_id, Club()).localidad or '').strip().lower()
+        loc_v = (clubes_map.get(eq_v.club_id, Club()).localidad or '').strip().lower()
+        return bool(loc_l and loc_v and loc_l == loc_v)
+
+    return render_template(
+        'plantillasAdmin/vista_fixture_generado_mayores.html',
+        jornadas=jornadas,
+        torneo=torneo_activo,
+        temporada=temporada_activa,
+        es_clasico=es_clasico,
+        fechas_clasico=fechas_clasico
+    )
+
 
 # ====================================================
 # CARGAR FIXTURE INFERIORES
@@ -3760,8 +3983,6 @@ def crear_partido_playoff():
         data = request.get_json()
         if not data:
             return jsonify(success=False, message="JSON inválido"), 400
-
-        # ============== CAMPOS OBLIGATORIOS ==============
 
         # ============== CAMPOS OBLIGATORIOS ==============
         required = ["torneo_id","categoria","club_local_id","club_visitante_id"]
