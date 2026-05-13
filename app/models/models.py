@@ -74,8 +74,17 @@ class Torneo(db.Model):
     
     activo = db.Column(db.Boolean, default=False)  # 👈 torneo visible en la web
 
-    partidos = db.relationship('Partido', back_populates='torneo')
-    fases = db.relationship('Fase', back_populates='torneo')
+    partidos = db.relationship(
+        'Partido',
+        back_populates='torneo',
+        cascade='all, delete-orphan'
+    )
+
+    fases = db.relationship(
+        'Fase',
+        back_populates='torneo',
+        cascade='all, delete-orphan'
+    )
 
     def __repr__(self):
         return f"<Torneo {self.nombre} - {self.temporada.nombre}>"
@@ -90,7 +99,11 @@ class Fase(db.Model):
     ida_vuelta = db.Column(db.Boolean, default=False, nullable=False)
 
     torneo = db.relationship('Torneo', back_populates='fases')
-    partidos = db.relationship('Partido', back_populates='fase')
+    partidos = db.relationship(
+        'Partido',
+        back_populates='fase',
+        cascade='all, delete-orphan'
+    )
 
 class Jugador(db.Model):
     __tablename__ = 'jugador'
