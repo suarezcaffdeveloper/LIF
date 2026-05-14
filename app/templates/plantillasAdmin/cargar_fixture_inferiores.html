@@ -715,7 +715,6 @@
 
     // ── Fixture Automático ──
     const modal   = document.getElementById("modal-confirmar");
-    const overlay = document.getElementById("overlay-sorteo");
 
     document.getElementById("btn-auto-fixture").addEventListener("click", () => {
       modal.classList.add("active");
@@ -731,7 +730,6 @@
 
     document.getElementById("btn-modal-confirm").addEventListener("click", async () => {
       modal.classList.remove("active");
-      overlay.classList.add("active");
 
       try {
         const res  = await fetch("/generar_fixture_automatico_inferiores", {
@@ -743,11 +741,9 @@
         if (data.ok && data.redirect) {
           window.location.href = data.redirect;
         } else {
-          overlay.classList.remove("active");
           mostrarFlash(data.error || "No se pudo generar el fixture.", "danger");
         }
       } catch (err) {
-        overlay.classList.remove("active");
         console.error(err);
         mostrarFlash("Error del servidor al generar el fixture.", "danger");
       }

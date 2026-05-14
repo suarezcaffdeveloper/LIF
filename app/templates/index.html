@@ -493,7 +493,7 @@
     </div>
     <div class="equipos-grid">
         {% for club in clubes %}
-        <a href="{{ url_for('views.club_plantel', club_id=club.id) }}" class="card-equipo" target="_blank">
+        <a href="{{ url_for('views.club_plantel', club_id=club.id) }}" class="card-equipo" target="_self">
             <img src="{{ club.escudo_url }}" alt="Escudo {{ club.nombre }}">
             <h3>{{ club.nombre }}</h3>
         </a>
