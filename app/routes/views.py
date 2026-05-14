@@ -42,6 +42,43 @@ def index():
         videos=videos
     )
   
+@views.route('/club/<int:club_id>')
+def club_plantel(club_id):
+    club = Club.query.get_or_404(club_id)
+
+    CATEGORIAS = ['primera', 'reserva', 'quinta', 'sexta', 'septima']
+    LABELS = {
+        'primera': 'Primera División',
+        'reserva': 'Reserva',
+        'quinta': 'Quinta División',
+        'sexta': 'Sexta División',
+        'septima': 'Séptima División',
+    }
+
+    planteles = {}
+    for cat in CATEGORIAS:
+        equipo = Equipo.query.filter(
+            Equipo.club_id == club_id,
+            func.lower(Equipo.categoria) == cat
+        ).first()
+        if equipo:
+            jugadores = (
+                db.session.query(Jugador)
+                .join(JugadorEquipo, JugadorEquipo.numero_carnet == Jugador.numero_carnet)
+                .filter(JugadorEquipo.equipo_id == equipo.id)
+                .order_by(Jugador.apellido, Jugador.nombre)
+                .all()
+            )
+        else:
+            jugadores = []
+        planteles[cat] = {
+            'label': LABELS[cat],
+            'jugadores': jugadores,
+        }
+
+    return render_template('club_plantel.html', club=club, planteles=planteles, categorias=CATEGORIAS)
+
+
 @views.route('/noticias')
 def todas_noticias():
     noticias = Noticia.query.order_by(Noticia.fecha_publicacion.desc()).all()
@@ -95,6 +132,10 @@ def crear_temporada():
 
     if not nombre or not nombre.isdigit():
         flash("Nombre de temporada inválido.", "danger")
+        return redirect(url_for("views.administrar_temporadas_view"))
+    
+    if nombre in [t.nombre for t in Temporada.query.all()]:
+        flash("Ya existe una temporada con ese nombre.", "danger")
         return redirect(url_for("views.administrar_temporadas_view"))
 
     # Convertir a int

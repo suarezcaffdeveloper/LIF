@@ -210,7 +210,9 @@
         align-items: center;
         gap: 12px;
         transition: transform .25s, border-color .25s, box-shadow .25s;
-        cursor: default;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
     }
     .card-equipo:hover {
         transform: translateY(-5px);
@@ -491,10 +493,10 @@
     </div>
     <div class="equipos-grid">
         {% for club in clubes %}
-        <div class="card-equipo">
+        <a href="{{ url_for('views.club_plantel', club_id=club.id) }}" class="card-equipo" target="_blank">
             <img src="{{ club.escudo_url }}" alt="Escudo {{ club.nombre }}">
             <h3>{{ club.nombre }}</h3>
-        </div>
+        </a>
         {% endfor %}
     </div>
 </section>
