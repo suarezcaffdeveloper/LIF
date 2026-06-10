@@ -550,7 +550,7 @@ Desarrollador Backend Python | Flask · PostgreSQL · SQLAlchemy
 
 | Red | Enlace |
 |---|---|
-| 💼 LinkedIn | [Tu perfil de LinkedIn] |
+| 💼 LinkedIn | www.linkedin.com/in/santiago-suarez-482164400 |
 | 🐙 GitHub | [github.com/suarezcaffdeveloper](https://github.com/suarezcaffdeveloper) |
 
 ---
