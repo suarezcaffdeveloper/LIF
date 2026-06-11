@@ -348,7 +348,7 @@
                         {% for partido in partidos_ida %}
                         <div class="partido {% if mostrar_resultados and partido.jugado %}jugado{% endif %}">
                             <div class="equipo">
-                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}" alt="">
+                                <img src="{{ partido.equipo_local.club.escudo_url }}" alt="">
                                 <div class="club-name">{{ partido.equipo_local.club.nombre }}</div>
                                 {% if partido.goleadores_local %}
                                 <div class="goleadores">
@@ -371,7 +371,7 @@
                             </div>
 
                             <div class="equipo">
-                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}" alt="">
+                                <img src="{{ partido.equipo_visitante.club.escudo_url }}" alt="">
                                 <div class="club-name">{{ partido.equipo_visitante.club.nombre }}</div>
                                 {% if partido.goleadores_visitante %}
                                 <div class="goleadores">
@@ -390,7 +390,7 @@
                         {% for partido in partidos_vuelta %}
                         <div class="partido {% if mostrar_resultados and partido.jugado %}jugado{% endif %}">
                             <div class="equipo">
-                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}" alt="">
+                                <img src="{{ partido.equipo_local.club.escudo_url }}" alt="">
                                 <div class="club-name">{{ partido.equipo_local.club.nombre }}</div>
                                 {% if partido.goleadores_local %}
                                 <div class="goleadores">
@@ -413,7 +413,7 @@
                             </div>
 
                             <div class="equipo">
-                                <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}" alt="">
+                                <img src="{{ partido.equipo_visitante.club.escudo_url }}" alt="">
                                 <div class="club-name">{{ partido.equipo_visitante.club.nombre }}</div>
                                 {% if partido.goleadores_visitante %}
                                 <div class="goleadores">
@@ -429,7 +429,7 @@
                     {% for partido in partidos %}
                     <div class="partido {% if mostrar_resultados and partido.jugado %}jugado{% endif %}">
                         <div class="equipo">
-                            <img src="{{ url_for('static', filename='escudos/' + partido.equipo_local.club.nombre|replace(' ', '_') + '.jpg') }}" alt="">
+                            <img src="{{ partido.equipo_local.club.escudo_url }}" alt="">
                             <div class="club-name">{{ partido.equipo_local.club.nombre }}</div>
                             {% if partido.goleadores_local %}
                             <div class="goleadores">
@@ -452,7 +452,7 @@
                         </div>
 
                         <div class="equipo">
-                            <img src="{{ url_for('static', filename='escudos/' + partido.equipo_visitante.club.nombre|replace(' ', '_') + '.jpg') }}" alt="">
+                            <img src="{{ partido.equipo_visitante.club.escudo_url }}" alt="">
                             <div class="club-name">{{ partido.equipo_visitante.club.nombre }}</div>
                             {% if partido.goleadores_visitante %}
                             <div class="goleadores">

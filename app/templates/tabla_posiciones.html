@@ -336,7 +336,7 @@
                             <td>
                                 <div class="team-cell">
                                     <span class="team-pos">{{ loop.index }}</span>
-                                    <img src="{{ url_for('static', filename='escudos/' + fila.nombre_equipo|replace(' ', '_') + '.jpg') }}" alt="">
+                                    <img src="{{ fila.escudo_url }}" alt="">
                                     <span class="team-name">{{ fila.nombre_equipo }}</span>
                                 </div>
                             </td>

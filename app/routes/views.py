@@ -489,6 +489,7 @@ def recalcular_tabla_posiciones(categoria):
         tabla.append({
             'id_equipo': e.id,
             'nombre_equipo': e.club.nombre if e.club else "Sin Club",
+            'escudo_url': e.club.escudo_url if e.club else None,
             'categoria': e.categoria,
             'partidos_jugados': 0,
             'partidos_ganados': 0,
