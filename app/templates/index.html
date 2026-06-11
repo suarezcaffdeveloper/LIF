@@ -223,7 +223,11 @@
     .card-equipo img {
         width: 72px; height: 72px;
         object-fit: contain;
-        filter: drop-shadow(0 4px 8px rgba(0,0,0,.4));
+        padding: 8px;
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 12px;
+        box-sizing: border-box;
         transition: transform .25s;
     }
     .card-equipo:hover img { transform: scale(1.08); }
