@@ -1,6 +1,7 @@
 from flask import Flask, request, session
 import re
 import os
+import sqlalchemy as sa
 from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_login import LoginManager, user_logged_in, user_logged_out
@@ -39,6 +40,35 @@ def youtube_id(url):
     return url
 
 
+def _normalizar_db_url(nombre_var, valor):
+    """Limpia errores comunes de copy/paste (comillas, espacios) al setear una
+    URL de base de datos como variable de entorno, normaliza el esquema
+    'postgres://' -> 'postgresql://', y valida que sea parseable ANTES de
+    llegar a db.init_app(), para que un error de configuración se vea claro
+    (qué variable y qué valor) en vez de un stack trace de SQLAlchemy.
+    """
+    valor = valor.strip()
+    if len(valor) >= 2 and valor[0] == valor[-1] and valor[0] in ("'", '"'):
+        valor = valor[1:-1].strip()
+
+    if valor.startswith("postgres://"):
+        valor = valor.replace("postgres://", "postgresql://", 1)
+
+    try:
+        sa.engine.make_url(valor)
+    except sa.exc.ArgumentError as e:
+        pistas = ""
+        if " " in valor or "\n" in valor:
+            pistas = " (parece tener espacios o saltos de línea de más)"
+        elif valor.count("://") == 0:
+            pistas = " (falta el esquema, ej. 'postgresql://...')"
+        raise RuntimeError(
+            f"{nombre_var} no es una URL de base de datos válida{pistas}: {valor!r}"
+        ) from e
+
+    return valor
+
+
 def create_app():
     app = Flask(__name__)
     app.cli.add_command(create_admin)
@@ -58,8 +88,7 @@ def create_app():
     if not DATABASE_URL:
         raise RuntimeError("DATABASE_URL no está definida")
 
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = _normalizar_db_url("DATABASE_URL", DATABASE_URL)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -76,8 +105,8 @@ def create_app():
     if not DEMO_DATABASE_URL:
         os.makedirs(app.instance_path, exist_ok=True)
         DEMO_DATABASE_URL = "sqlite:///" + os.path.join(app.instance_path, "demo.db")
-    elif DEMO_DATABASE_URL.startswith("postgres://"):
-        DEMO_DATABASE_URL = DEMO_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    else:
+        DEMO_DATABASE_URL = _normalizar_db_url("DEMO_DATABASE_URL", DEMO_DATABASE_URL)
 
     app.config["SQLALCHEMY_BINDS"] = {DEMO_BIND_KEY: DEMO_DATABASE_URL}
 
