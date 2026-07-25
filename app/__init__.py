@@ -1,16 +1,16 @@
-from flask import Flask
+from flask import Flask, request, session
 import re
 import os
 from dotenv import load_dotenv
 from flask_migrate import Migrate
-from flask_login import LoginManager
+from flask_login import LoginManager, user_logged_in, user_logged_out
 from flask_mail import Mail
-from app.commands import create_admin
+from app.commands import create_admin, reset_demo_db
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
-from .database.db import db
+from .database.db import db, DEMO_BIND_KEY, DEMO_ROLE, is_demo_mode, set_demo_mode
 from .models.models import Usuario
 
 mail = Mail()
@@ -42,6 +42,7 @@ def youtube_id(url):
 def create_app():
     app = Flask(__name__)
     app.cli.add_command(create_admin)
+    app.cli.add_command(reset_demo_db)
     # -----------------------
     # CONFIG GENERAL
     # -----------------------
@@ -63,8 +64,82 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    # -----------------------
+    # DATABASE DEMO (para reclutadores)
+    # -----------------------
+    # Base de datos secundaria, aislada de la real, a la que se desvían todas
+    # las consultas cuando inicia sesión un usuario con rol 'demo'. Si no se
+    # define DEMO_DATABASE_URL (por ejemplo, un Postgres dedicado en producción),
+    # se usa un sqlite local dentro de la carpeta instance/ para que funcione
+    # sin configuración adicional en desarrollo.
+    DEMO_DATABASE_URL = os.environ.get("DEMO_DATABASE_URL")
+    if not DEMO_DATABASE_URL:
+        os.makedirs(app.instance_path, exist_ok=True)
+        DEMO_DATABASE_URL = "sqlite:///" + os.path.join(app.instance_path, "demo.db")
+    elif DEMO_DATABASE_URL.startswith("postgres://"):
+        DEMO_DATABASE_URL = DEMO_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    app.config["SQLALCHEMY_BINDS"] = {DEMO_BIND_KEY: DEMO_DATABASE_URL}
+
     db.init_app(app)
     Migrate(app, db)
+
+    # -----------------------
+    # RUTEO A BASE DE DATOS DEMO
+    # -----------------------
+    # Un usuario con rol 'demo' debe quedar aislado en la base demo durante
+    # toda su sesión, usando el mismo `db.session`/`Modelo.query` de siempre
+    # en las rutas existentes (ver DemoRoutingSession en database/db.py).
+    #
+    # El desafío es el intento de login en sí: en ese momento todavía no hay
+    # un current_user autenticado que nos diga "soy demo", así que la ruta
+    # /login no sabría en qué base buscar el email. Para resolverlo sin tocar
+    # el código de la ruta de login:
+    #   1) Antes de cada request restauramos el modo demo desde un marcador
+    #      firmado en la sesión de Flask (session['_demo_mode']), ANTES de que
+    #      Flask-Login intente cargar al current_user (por eso este
+    #      before_request se registra antes de login_manager.init_app).
+    #   2) Si el request es justo un POST a /login, primero "espiamos" (sin
+    #      loguear a nadie) si el email enviado corresponde a una cuenta con
+    #      rol 'demo' en la base demo, y si es así activamos el modo demo
+    #      para ese request: la consulta que ya hace login() por su cuenta
+    #      queda automáticamente apuntando a la base demo.
+    #   3) Cuando login_user()/logout_user() se ejecutan dentro de login()/
+    #      logout() (código ya existente, sin tocar), las señales de
+    #      Flask-Login nos avisan para grabar o borrar ese marcador.
+    def _email_es_de_demo(email):
+        if not email:
+            return False
+        estaba_en_demo = is_demo_mode()
+        set_demo_mode(True)
+        try:
+            return (
+                db.session.query(Usuario.id_usuario)
+                .filter_by(email=email, rol=DEMO_ROLE)
+                .first()
+                is not None
+            )
+        finally:
+            set_demo_mode(estaba_en_demo)
+
+    @app.before_request
+    def _sincronizar_modo_demo():
+        if request.method == "POST" and request.endpoint == "views.login":
+            set_demo_mode(_email_es_de_demo(request.form.get("email")))
+        else:
+            set_demo_mode(session.get("_demo_mode", False))
+
+    @app.context_processor
+    def _inject_demo_mode():
+        return {"demo_mode": is_demo_mode()}
+
+    @user_logged_in.connect_via(app)
+    def _marcar_sesion_demo(sender, user):
+        session["_demo_mode"] = getattr(user, "rol", None) == DEMO_ROLE
+
+    @user_logged_out.connect_via(app)
+    def _limpiar_sesion_demo(sender, user):
+        session.pop("_demo_mode", None)
 
     # -----------------------
     # LOGIN
