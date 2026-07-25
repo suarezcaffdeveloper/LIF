@@ -215,6 +215,10 @@ class Usuario(db.Model):
     email = db.Column(db.String(200), nullable=False, unique=True)
     contraseña = db.Column(db.String(300), nullable=False)
     rol = db.Column(db.String(30), nullable=False, default='usuario')
+    # Marca cuentas "sandbox" para reclutadores cuyo rol no es 'demo' (por
+    # ejemplo, un administrador de prueba). Junto con rol == 'demo', decide
+    # si la sesión se desvía a la base demo (ver app/__init__.py / database/db.py).
+    es_demo = db.Column(db.Boolean, nullable=False, default=False, server_default=db.false())
     telefono = db.Column(db.String(50), nullable=True)
     fecha_registro = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
 

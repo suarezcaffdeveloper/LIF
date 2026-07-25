@@ -107,18 +107,29 @@ def create_app():
     #   3) Cuando login_user()/logout_user() se ejecutan dentro de login()/
     #      logout() (código ya existente, sin tocar), las señales de
     #      Flask-Login nos avisan para grabar o borrar ese marcador.
+    def _es_cuenta_demo(usuario):
+        # rol == 'demo' cubre la cuenta pública de solo-lectura del sitio;
+        # es_demo permite además sandboxes con otros roles (p. ej. un
+        # 'administrador' de demo) sin perder los permisos de ese rol.
+        return getattr(usuario, "rol", None) == DEMO_ROLE or bool(getattr(usuario, "es_demo", False))
+
     def _email_es_de_demo(email):
         if not email:
             return False
         estaba_en_demo = is_demo_mode()
         set_demo_mode(True)
         try:
-            return (
-                db.session.query(Usuario.id_usuario)
-                .filter_by(email=email, rol=DEMO_ROLE)
+            # Traemos sólo columnas (no la entidad completa) para no dejar un
+            # Usuario de la base demo cacheado en el identity map de la sesión:
+            # como real y demo comparten la misma clase/PKs, un objeto completo
+            # ahí podría "filtrarse" y devolverse por error en una consulta
+            # posterior contra la base real con el mismo id.
+            fila = (
+                db.session.query(Usuario.rol, Usuario.es_demo)
+                .filter_by(email=email)
                 .first()
-                is not None
             )
+            return fila is not None and (fila.rol == DEMO_ROLE or bool(fila.es_demo))
         finally:
             set_demo_mode(estaba_en_demo)
 
@@ -135,7 +146,7 @@ def create_app():
 
     @user_logged_in.connect_via(app)
     def _marcar_sesion_demo(sender, user):
-        session["_demo_mode"] = getattr(user, "rol", None) == DEMO_ROLE
+        session["_demo_mode"] = _es_cuenta_demo(user)
 
     @user_logged_out.connect_via(app)
     def _limpiar_sesion_demo(sender, user):

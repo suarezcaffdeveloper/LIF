@@ -66,7 +66,8 @@ def reset_demo_db(seed):
         _seed_demo_data()
         db.session.commit()
         click.echo("✅ Datos de ejemplo cargados en la base demo")
-        click.echo("   Login demo -> email: demo@liga.com / password: demo123")
+        click.echo("   Login demo (sitio público) -> demo@liga.com / demo123")
+        click.echo("   Login demo (panel admin)   -> administrador.demo@liga.com / demo123")
     except Exception as e:
         db.session.rollback()
         click.echo(f"❌ Error al poblar la base demo: {e}")
@@ -99,6 +100,20 @@ def _seed_demo_data():
     )
     periodista_demo.set_password("demo123")
     db.session.add(periodista_demo)
+
+    # Cuenta con rol 'administrador' pero marcada es_demo=True: pasa los
+    # chequeos de permisos de las rutas de admin (current_user.rol ==
+    # 'administrador') y, gracias a es_demo, sigue quedando aislada en la
+    # base demo (ver _es_cuenta_demo en app/__init__.py).
+    admin_demo = Usuario(
+        nombre_completo="Administrador Demo",
+        email="administrador.demo@liga.com",
+        rol="administrador",
+        es_demo=True,
+        fecha_registro=datetime.utcnow(),
+    )
+    admin_demo.set_password("demo123")
+    db.session.add(admin_demo)
     db.session.flush()
 
     temporada = Temporada(nombre="2026-demo", activa=True)
