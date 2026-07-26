@@ -292,10 +292,84 @@
       .card-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
       .topbar { flex-direction: column; gap: 16px; align-items: flex-start; }
     }
+
+    /* ── DEMO MODE FLOATING BANNER ── */
+    .demo-float-banner {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 2000;
+      max-width: 340px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: var(--card-bg);
+      border: 1px solid rgba(0,229,255,.25);
+      box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(0,229,255,.08);
+      animation: fadeUp .5s ease both;
+    }
+
+    .demo-float-banner__icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+
+    .demo-float-banner__body { flex: 1; }
+
+    .demo-float-banner__title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 5px;
+    }
+
+    .demo-float-banner__text {
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .demo-float-banner__close {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px;
+      flex-shrink: 0;
+      transition: color .2s;
+    }
+
+    .demo-float-banner__close:hover { color: var(--text); }
+
+    @media (max-width: 640px) {
+      .demo-float-banner { left: 18px; right: 18px; bottom: 18px; max-width: none; }
+    }
   </style>
 </head>
 
 <body>
+
+  {% if demo_mode %}
+  <div class="demo-float-banner" id="demoBanner">
+    <span class="demo-float-banner__icon">🧪</span>
+    <div class="demo-float-banner__body">
+      <div class="demo-float-banner__title">Modo Demo</div>
+      <p class="demo-float-banner__text">
+        Estás en una base de datos aislada de prueba. Probá lo que quieras:
+        nada de esto afecta los datos reales de la liga.
+      </p>
+    </div>
+    <button type="button" class="demo-float-banner__close" onclick="document.getElementById('demoBanner').remove()" aria-label="Cerrar aviso">✕</button>
+  </div>
+  {% endif %}
+
 <div class="wrapper">
 
   <!-- TOPBAR -->

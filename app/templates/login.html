@@ -214,6 +214,32 @@
       margin: 14px 0;
     }
 
+    /* Demo btn */
+    .btn-demo {
+      width: 100%;
+      margin-top: 10px;
+      background: transparent;
+      color: var(--verde);
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      border: 1px dashed rgba(0,229,255,.35);
+      border-radius: 9px;
+      padding: 11px;
+      cursor: pointer;
+      transition: background .2s, border-color .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-demo:hover {
+      background: rgba(0,229,255,.08);
+      border-color: rgba(0,229,255,.6);
+    }
+
     @media (max-width: 480px) {
       .auth-card { padding: 36px 24px; border-radius: 14px; }
     }
@@ -230,7 +256,7 @@
     {% endwith %}
   </div>
 
-  <form method="POST" class="auth-card">
+  <div class="auth-card">
 
     <div class="auth-logo">
       <span>L<em>I</em>F</span>
@@ -239,16 +265,24 @@
 
     <h2 class="auth-title">Iniciar sesión</h2>
 
-    <div class="auth-field">
-      <input type="email" name="email" placeholder="Email" required>
-    </div>
+    <form method="POST" action="{{ url_for('views.login') }}">
+      <div class="auth-field">
+        <input type="email" name="email" placeholder="Email" required>
+      </div>
 
-    <div class="auth-field">
-      <input type="password" id="password" name="password" placeholder="Contraseña" required style="padding-right: 44px;">
-      <i class="bi bi-eye password-toggle" data-target="password"></i>
-    </div>
+      <div class="auth-field">
+        <input type="password" id="password" name="password" placeholder="Contraseña" required style="padding-right: 44px;">
+        <i class="bi bi-eye password-toggle" data-target="password"></i>
+      </div>
 
-    <button type="submit" class="btn-auth">Ingresar</button>
+      <button type="submit" class="btn-auth">Ingresar</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('views.login') }}">
+      <input type="hidden" name="email" value="demo@liga.com">
+      <input type="hidden" name="password" value="demo123">
+      <button type="submit" class="btn-demo">🧪 Probar demo (vista de administrador)</button>
+    </form>
 
     <div class="auth-links">
       <p>¿No tenés cuenta? <a href="{{ url_for('views.register') }}" class="auth-link">Creá una</a></p>
@@ -256,7 +290,7 @@
       <a href="{{ url_for('views.index') }}" class="auth-link-ghost">Entrar sin iniciar sesión →</a>
     </div>
 
-  </form>
+  </div>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
