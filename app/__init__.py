@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_login import LoginManager, user_logged_in, user_logged_out
 from flask_mail import Mail
-from app.commands import create_admin, reset_demo_db
+from app.commands import create_admin, reset_demo_db, _seed_demo_data
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
@@ -114,6 +114,36 @@ def create_app():
     Migrate(app, db)
 
     # -----------------------
+    # INICIALIZACIÓN DE LA BASE DEMO
+    # -----------------------
+    # `flask db upgrade` sólo migra la base real (ver migrations/env.py); la
+    # base demo nunca pasa por Alembic, así que si nadie corrió a mano
+    # `flask reset-demo-db` contra ella (ej. tras el primer deploy en Render)
+    # la tabla 'usuario' no existe y cualquier login explota. Para no
+    # depender de ese paso manual, nos aseguramos acá, en cada arranque, de
+    # que el esquema exista y esté poblado (es barato e idempotente). Si la
+    # base demo está inalcanzable, sólo lo logueamos: no debe tumbar el
+    # arranque de la app ni el login de cuentas reales.
+    with app.app_context():
+        try:
+            demo_engine = db.engines[DEMO_BIND_KEY]
+            db.metadata.create_all(bind=demo_engine)
+
+            set_demo_mode(True)
+            try:
+                ya_poblada = db.session.query(Usuario.id_usuario).filter_by(
+                    email="demo@liga.com"
+                ).first()
+                if not ya_poblada:
+                    _seed_demo_data()
+                    db.session.commit()
+            finally:
+                db.session.remove()
+                set_demo_mode(False)
+        except Exception:
+            app.logger.exception("No se pudo inicializar la base de datos demo")
+
+    # -----------------------
     # RUTEO A BASE DE DATOS DEMO
     # -----------------------
     # Un usuario con rol 'demo' debe quedar aislado en la base demo durante
@@ -159,6 +189,15 @@ def create_app():
                 .first()
             )
             return fila is not None and (fila.rol == DEMO_ROLE or bool(fila.es_demo))
+        except Exception:
+            # La base demo puede estar caída/sin migrar sin que eso deba
+            # tumbar el login real: si no podemos confirmar que el email es
+            # de demo, seguimos como si no lo fuera.
+            app.logger.exception(
+                "No se pudo consultar la base demo para %r; se continúa sin modo demo", email
+            )
+            db.session.rollback()
+            return False
         finally:
             set_demo_mode(estaba_en_demo)
 

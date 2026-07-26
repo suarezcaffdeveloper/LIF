@@ -3,7 +3,7 @@ import click
 from datetime import datetime, date, time
 from werkzeug.security import generate_password_hash
 
-from app.database.db import db, DEMO_BIND_KEY, DEMO_ROLE, set_demo_mode
+from app.database.db import db, DEMO_BIND_KEY, set_demo_mode
 from app.models.models import Usuario
 
 
@@ -66,8 +66,8 @@ def reset_demo_db(seed):
         _seed_demo_data()
         db.session.commit()
         click.echo("✅ Datos de ejemplo cargados en la base demo")
-        click.echo("   Login demo (sitio público) -> demo@liga.com / demo123")
-        click.echo("   Login demo (panel admin)   -> administrador.demo@liga.com / demo123")
+        click.echo("   Login demo (panel admin) -> demo@liga.com / demo123")
+        click.echo("   Login demo (periodista)  -> periodista.demo@liga.com / demo123")
     except Exception as e:
         db.session.rollback()
         click.echo(f"❌ Error al poblar la base demo: {e}")
@@ -83,10 +83,14 @@ def _seed_demo_data():
         Partido, EstadoJugadorPartido, Noticia, Video,
     )
 
+    # Cuenta demo=administrador: rol 'administrador' (pasa los chequeos de
+    # permisos de las rutas de admin, ej. adminview) y es_demo=True (queda
+    # aislada en la base demo, ver _es_cuenta_demo en app/__init__.py).
     demo_user = Usuario(
-        nombre_completo="Usuario Demo",
+        nombre_completo="Administrador Demo",
         email="demo@liga.com",
-        rol=DEMO_ROLE,
+        rol="administrador",
+        es_demo=True,
         fecha_registro=datetime.utcnow(),
     )
     demo_user.set_password("demo123")
@@ -96,24 +100,11 @@ def _seed_demo_data():
         nombre_completo="Periodista Demo",
         email="periodista.demo@liga.com",
         rol="periodista",
+        es_demo=True,
         fecha_registro=datetime.utcnow(),
     )
     periodista_demo.set_password("demo123")
     db.session.add(periodista_demo)
-
-    # Cuenta con rol 'administrador' pero marcada es_demo=True: pasa los
-    # chequeos de permisos de las rutas de admin (current_user.rol ==
-    # 'administrador') y, gracias a es_demo, sigue quedando aislada en la
-    # base demo (ver _es_cuenta_demo en app/__init__.py).
-    admin_demo = Usuario(
-        nombre_completo="Administrador Demo",
-        email="administrador.demo@liga.com",
-        rol="administrador",
-        es_demo=True,
-        fecha_registro=datetime.utcnow(),
-    )
-    admin_demo.set_password("demo123")
-    db.session.add(admin_demo)
     db.session.flush()
 
     temporada = Temporada(nombre="2026-demo", activa=True)

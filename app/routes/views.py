@@ -765,31 +765,38 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        usuario = Usuario.query.filter_by(email=email).first()
+        try:
+            usuario = Usuario.query.filter_by(email=email).first()
 
-        if not usuario:
-            flash("El email no está registrado.", "warning")
+            if not usuario:
+                flash("El email no está registrado.", "warning")
+                return redirect(url_for('views.login'))
+
+            # Verifica contraseña
+            if not usuario.check_password(password):
+                flash("Contraseña incorrecta.", "danger")
+                return redirect(url_for('views.login'))
+
+            # Iniciar sesión
+            login_user(usuario)
+
+            # Redirigir según el rol
+            rol = usuario.rol.lower().strip()  # Normalizamos capitalización y espacios
+
+            if rol == "administrador":
+                return redirect(url_for('views.adminview'))
+
+            if rol == "periodista":
+                return redirect(url_for('views.panel_periodista'))
+
+            # Si no es administrador o periodista → va a la página normal
+            return redirect(url_for('views.index'))
+
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception("Error al iniciar sesión")
+            flash("Ocurrió un error al iniciar sesión. Probá de nuevo en unos segundos.", "danger")
             return redirect(url_for('views.login'))
-
-        # Verifica contraseña
-        if not usuario.check_password(password):
-            flash("Contraseña incorrecta.", "danger")
-            return redirect(url_for('views.login'))
-
-        # Iniciar sesión
-        login_user(usuario)
-
-        # Redirigir según el rol
-        rol = usuario.rol.lower().strip()  # Normalizamos capitalización y espacios
-
-        if rol == "administrador":
-            return redirect(url_for('views.adminview'))
-        
-        if rol == "periodista":
-            return redirect(url_for('views.panel_periodista'))
-
-        # Si no es administrador o periodista → va a la página normal
-        return redirect(url_for('views.index'))
 
     return render_template('login.html')
 
