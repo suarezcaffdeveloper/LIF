@@ -181,6 +181,21 @@ def crear_temporada():
     flash(f"Temporada {nombre} creada y activada correctamente.", "success")
     return redirect(url_for("views.administrar_temporadas_view"))
 
+@views.route("/admin/activar_temporada/<int:temporada_id>", methods=["POST"])
+def activar_temporada(temporada_id):
+
+    temporada = Temporada.query.get_or_404(temporada_id)
+
+    # Desactivar TODAS las temporadas y torneos (misma garantía que crear_temporada)
+    Temporada.query.filter_by(activa=True).update({"activa": False})
+    Torneo.query.filter_by(activo=True).update({"activo": False})
+
+    temporada.activa = True
+    db.session.commit()
+
+    flash(f"Temporada {temporada.nombre} activada. Elegí el torneo correspondiente abajo.", "success")
+    return redirect(url_for("views.administrar_temporadas_view"))
+
 @views.route("/admin/activar_torneo/<int:torneo_id>", methods=["POST"])
 def activar_torneo(torneo_id):
 

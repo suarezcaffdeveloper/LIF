@@ -441,6 +441,7 @@
             <tr>
               <th>Año</th>
               <th>Estado</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
@@ -451,6 +452,13 @@
                   <span class="badge-active {% if t.activa %}yes{% else %}no{% endif %}">
                     {% if t.activa %}Activa{% else %}Inactiva{% endif %}
                   </span>
+                </td>
+                <td>
+                  {% if not t.activa %}
+                    <form method="POST" action="{{ url_for('views.activar_temporada', temporada_id=t.id) }}">
+                      <button type="submit" class="btn-torneo">Activar</button>
+                    </form>
+                  {% endif %}
                 </td>
               </tr>
             {% endfor %}
