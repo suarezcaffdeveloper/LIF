@@ -1,7 +1,7 @@
 from flask import Blueprint, current_app, render_template, jsonify, json, request, redirect, url_for, flash, abort
 from ..models.models import (
     Equipo, Partido, Jugador, Club, Video, Noticia, Usuario, JugadorEquipo, TablaPosiciones,
-     EstadoJugadorPartido, Temporada, Torneo, Fase
+     EstadoJugadorPartido, Temporada, Torneo, Fase, CapturaJornada
 )
 from sqlalchemy.exc import IntegrityError
 from collections import defaultdict
@@ -9,6 +9,7 @@ from ..database.db import db
 from sqlalchemy import func, or_, and_, literal
 from sqlalchemy.orm import joinedload
 from app.utils.email_utils import enviar_mail_bienvenida, enviar_mail_jornada, jornada_completa
+from app.utils.capturas_redes import generar_capturas_jornada, BLOQUES_CATEGORIAS
 from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -935,6 +936,76 @@ def adminview():
         flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
         return redirect(url_for('views.index'))
     return render_template('adminview.html', usuario=current_user)
+
+
+# ---------------- CAPTURAS PARA REDES SOCIALES ----------------
+TIPOS_CAPTURA_LABEL = {
+    "tabla_posiciones": "Tabla de posiciones",
+    "resultados": "Resultados de la fecha",
+    "proxima_fecha": "Próxima fecha",
+}
+
+
+@views.route('/admin/capturas')
+@login_required
+def admin_capturas():
+    if current_user.rol != 'administrador':
+        flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
+        return redirect(url_for('views.index'))
+
+    temporada_activa = Temporada.query.filter_by(activa=True).first()
+
+    capturas = []
+    if temporada_activa:
+        capturas = (
+            CapturaJornada.query
+            .filter_by(temporada_id=temporada_activa.id)
+            .order_by(CapturaJornada.jornada.desc(), CapturaJornada.bloque, CapturaJornada.categoria, CapturaJornada.tipo)
+            .all()
+        )
+
+    grupos = defaultdict(lambda: defaultdict(dict))
+    for c in capturas:
+        grupos[(c.bloque, c.jornada)][c.categoria][c.tipo] = c
+
+    grupos_ordenados = sorted(grupos.items(), key=lambda kv: (-kv[0][1], kv[0][0]))
+
+    return render_template(
+        'plantillasAdmin/capturas_redes.html',
+        temporada=temporada_activa,
+        grupos=grupos_ordenados,
+        tipos_label=TIPOS_CAPTURA_LABEL,
+        bloques=list(BLOQUES_CATEGORIAS.keys()),
+    )
+
+
+@views.route('/admin/capturas/generar', methods=['POST'])
+@login_required
+def generar_capturas_manual():
+    if current_user.rol != 'administrador':
+        flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
+        return redirect(url_for('views.index'))
+
+    bloque = (request.form.get('bloque') or '').strip().lower()
+    jornada_raw = (request.form.get('jornada') or '').strip()
+
+    if bloque not in BLOQUES_CATEGORIAS:
+        flash('Bloque inválido.', 'danger')
+        return redirect(url_for('views.admin_capturas'))
+
+    try:
+        jornada = int(jornada_raw)
+    except ValueError:
+        flash('Número de jornada inválido.', 'danger')
+        return redirect(url_for('views.admin_capturas'))
+
+    generadas = generar_capturas_jornada(bloque=bloque, jornada=jornada)
+    if generadas:
+        flash(f'Se generaron {len(generadas)} capturas para {bloque.capitalize()} - Jornada {jornada}.', 'success')
+    else:
+        flash('No se generó ninguna captura. Revisá que existan partidos cargados para esa jornada.', 'danger')
+
+    return redirect(url_for('views.admin_capturas'))
 
 
 
@@ -3159,6 +3230,11 @@ def validar_y_guardar_estadisticas(data, categoria):
         # -------------------- ENVÍO AUTOMÁTICO DE MAIL PARA MAYORES --------------------
         try:
             if jornada_completa(partido.jornada, categoria="Mayores"):
+                try:
+                    generar_capturas_jornada(bloque="mayores", jornada=partido.jornada)
+                except Exception as e:
+                    print(f"⚠️ Error generando capturas para redes (mayores): {e}")
+
                 usuarios = Usuario.query.filter_by(rol="usuario").all()
                 
                 if usuarios:
@@ -3852,6 +3928,11 @@ def guardar_inferiores():
         # -------------------- ENVÍO AUTOMÁTICO DE MAIL PARA INFERIORES --------------------
         try:
             if partido.jornada and jornada_completa(partido.jornada, categoria="Inferiores"):
+                try:
+                    generar_capturas_jornada(bloque="inferiores", jornada=partido.jornada)
+                except Exception as e:
+                    print(f"⚠️ Error generando capturas para redes (inferiores): {e}")
+
                 usuarios = Usuario.query.filter_by(rol="usuario").all()
                 if usuarios:
                     enviar_mail_jornada(usuarios, partido.jornada, categoria="Inferiores")

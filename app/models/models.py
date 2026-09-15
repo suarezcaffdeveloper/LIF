@@ -315,6 +315,36 @@ class TablaPosiciones(db.Model):
 
 
 # ---------------------------
+# CAPTURAS PARA REDES SOCIALES
+# ---------------------------
+class CapturaJornada(db.Model):
+    __tablename__ = 'captura_jornada'
+    __table_args__ = (
+        UniqueConstraint(
+            'temporada_id', 'categoria', 'jornada', 'tipo',
+            name='uq_captura_temporada_categoria_jornada_tipo'
+        ),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    temporada_id = db.Column(db.Integer, db.ForeignKey('temporada.id'), nullable=False)
+    bloque = db.Column(db.String(20), nullable=False)  # 'mayores' / 'inferiores'
+    categoria = db.Column(db.String(50), nullable=False)
+    jornada = db.Column(db.Integer, nullable=False)
+    tipo = db.Column(db.String(30), nullable=False)  # tabla_posiciones / resultados / proxima_fecha
+
+    cloudinary_url = db.Column(db.String(500), nullable=False)
+    cloudinary_public_id = db.Column(db.String(300), nullable=False)
+
+    creado_en = db.Column(db.DateTime, default=datetime.datetime.utcnow, nullable=False)
+
+    temporada = db.relationship('Temporada')
+
+    def __repr__(self):
+        return f"<CapturaJornada {self.categoria} J{self.jornada} {self.tipo}>"
+
+
+# ---------------------------
 # INDEXES UTILES
 # ---------------------------
 Index('ix_equipo_club_categoria', Equipo.club_id, Equipo.categoria)

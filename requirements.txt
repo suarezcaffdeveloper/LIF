@@ -12,3 +12,6 @@ python-slugify
 cloudinary
 pandas
 openpyxl
+
+Pillow
+requests
