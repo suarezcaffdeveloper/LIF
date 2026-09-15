@@ -234,7 +234,7 @@ def _partidos_de_jornada(categoria, torneo, jornada, jugado=None):
     return query.order_by(Partido.fecha_partido, Partido.hora_partido).all()
 
 
-def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, kicker):
+def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, kicker, mostrar_marcador):
     img = Image.new("RGB", (SIZE, SIZE), BG)
     draw = ImageDraw.Draw(img)
     y = _dibujar_header(
@@ -249,10 +249,8 @@ def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, k
     alto_total = alto_fila * n
     y0 = y + max(0, (disponible - alto_total) // 2)
 
-    font_equipo = _font("BarlowCondensed-SemiBold", 30)
     font_score = _font("BarlowCondensed-Bold", 46)
     font_fecha = _font("Barlow-SemiBold", 24)
-    font_hora = _font("Barlow-Regular", 20)
 
     for i, partido in enumerate(partidos):
         top = y0 + i * alto_fila
@@ -290,14 +288,16 @@ def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, k
         draw.text((rx - 16, cy), nombre_visit, font=font_visit, fill=TEXTO, anchor="rm")
 
         cx = SIZE // 2
-        if partido.jugado:
+        if mostrar_marcador and partido.jugado:
             marcador = f"{partido.goles_local} - {partido.goles_visitante}"
             draw.text((cx, cy), marcador, font=font_score, fill=VERDE, anchor="mm")
+        elif partido.fecha_partido or partido.hora_partido:
+            draw.text((cx, cy - 12), "VS", font=font_score, fill=TEXTO_DIM, anchor="mm")
+            fecha_str = partido.fecha_partido.strftime("%d/%m") if partido.fecha_partido else ""
+            hora_str = partido.hora_partido.strftime("%H:%M") if partido.hora_partido else ""
+            draw.text((cx, cy + 24), " ".join(filter(None, [fecha_str, hora_str])), font=font_fecha, fill=TEXTO_DIM, anchor="mm")
         else:
-            fecha_str = partido.fecha_partido.strftime("%d/%m") if partido.fecha_partido else "A confirmar"
-            draw.text((cx, cy - 12), fecha_str, font=font_fecha, fill=TEXTO, anchor="mm")
-            if partido.hora_partido:
-                draw.text((cx, cy + 16), partido.hora_partido.strftime("%H:%M"), font=font_hora, fill=TEXTO_DIM, anchor="mm")
+            draw.text((cx, cy), "VS", font=font_score, fill=TEXTO_DIM, anchor="mm")
 
     _dibujar_pie(draw)
     return img
@@ -307,7 +307,7 @@ def generar_imagen_resultados_fecha(categoria, jornada, temporada_nombre, torneo
     partidos = _partidos_de_jornada(categoria, torneo, jornada, jugado=True)
     if not partidos:
         return None
-    return _dibujar_partidos(categoria, jornada, temporada_nombre, partidos, "RESULTADOS DE LA FECHA")
+    return _dibujar_partidos(categoria, jornada, temporada_nombre, partidos, "RESULTADOS DE LA FECHA", mostrar_marcador=True)
 
 
 def generar_imagen_proxima_fecha(categoria, jornada, temporada_nombre, torneo):
@@ -315,7 +315,7 @@ def generar_imagen_proxima_fecha(categoria, jornada, temporada_nombre, torneo):
     partidos = _partidos_de_jornada(categoria, torneo, jornada_siguiente)
     if not partidos:
         return None
-    return _dibujar_partidos(categoria, jornada_siguiente, temporada_nombre, partidos, "PRÓXIMA FECHA")
+    return _dibujar_partidos(categoria, jornada_siguiente, temporada_nombre, partidos, "PRÓXIMA FECHA", mostrar_marcador=False)
 
 
 # ---------------------------------------------------------------------------
