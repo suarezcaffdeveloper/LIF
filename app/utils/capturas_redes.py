@@ -213,23 +213,28 @@ def generar_imagen_tabla_posiciones(categoria, jornada, temporada_nombre):
 # ---------------------------------------------------------------------------
 # Resultados de la fecha / próxima fecha
 # ---------------------------------------------------------------------------
-def _partidos_de_jornada(categoria, torneo, jornada, jugado):
-    return (
+def _partidos_de_jornada(categoria, torneo, jornada, jugado=None):
+    """Partidos de una categoría/jornada en el torneo dado. `jugado=None` trae
+    todos (jugados y pendientes) — es lo que necesita "próxima fecha", ya que
+    algunas categorías pueden llevar cargados de antemano algunos resultados
+    de la ronda siguiente mientras otras todavía no; la ronda sigue siendo
+    "la próxima fecha" aunque ya tenga uno o dos resultados cargados."""
+    query = (
         Partido.query
         .outerjoin(Partido.fase)
         .filter(
             Partido.torneo_id == torneo.id,
             func.lower(Partido.categoria) == categoria.lower(),
             Partido.jornada == jornada,
-            Partido.jugado == jugado,
             or_(Partido.fase_id.is_(None), ~Fase.nombre.in_(FASES_PLAYOFF)),
         )
-        .order_by(Partido.fecha_partido, Partido.hora_partido)
-        .all()
     )
+    if jugado is not None:
+        query = query.filter(Partido.jugado == jugado)
+    return query.order_by(Partido.fecha_partido, Partido.hora_partido).all()
 
 
-def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, kicker, mostrar_resultado):
+def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, kicker):
     img = Image.new("RGB", (SIZE, SIZE), BG)
     draw = ImageDraw.Draw(img)
     y = _dibujar_header(
@@ -285,7 +290,7 @@ def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, k
         draw.text((rx - 16, cy), nombre_visit, font=font_visit, fill=TEXTO, anchor="rm")
 
         cx = SIZE // 2
-        if mostrar_resultado:
+        if partido.jugado:
             marcador = f"{partido.goles_local} - {partido.goles_visitante}"
             draw.text((cx, cy), marcador, font=font_score, fill=VERDE, anchor="mm")
         else:
@@ -302,15 +307,15 @@ def generar_imagen_resultados_fecha(categoria, jornada, temporada_nombre, torneo
     partidos = _partidos_de_jornada(categoria, torneo, jornada, jugado=True)
     if not partidos:
         return None
-    return _dibujar_partidos(categoria, jornada, temporada_nombre, partidos, "RESULTADOS DE LA FECHA", mostrar_resultado=True)
+    return _dibujar_partidos(categoria, jornada, temporada_nombre, partidos, "RESULTADOS DE LA FECHA")
 
 
 def generar_imagen_proxima_fecha(categoria, jornada, temporada_nombre, torneo):
     jornada_siguiente = jornada + 1
-    partidos = _partidos_de_jornada(categoria, torneo, jornada_siguiente, jugado=False)
+    partidos = _partidos_de_jornada(categoria, torneo, jornada_siguiente)
     if not partidos:
         return None
-    return _dibujar_partidos(categoria, jornada_siguiente, temporada_nombre, partidos, "PRÓXIMA FECHA", mostrar_resultado=False)
+    return _dibujar_partidos(categoria, jornada_siguiente, temporada_nombre, partidos, "PRÓXIMA FECHA")
 
 
 # ---------------------------------------------------------------------------
