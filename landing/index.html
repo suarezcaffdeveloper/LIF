@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ElTablón · La tribuna digital de tu liga</title>
+<meta name="description" content="El sitio web de tu liga de fútbol: fixture, tabla de posiciones, goleadores, noticias y videos, con el nombre, el escudo y los colores de tu liga.">
+<meta name="theme-color" content="#F3F4F1">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ElTablón · La tribuna digital de tu liga">
+<meta property="og:description" content="Fixture, tabla, goleadores, noticias y videos de tu liga, en un sitio propio y pensado para el celular.">
+<meta property="og:image" content="assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&family=Caveat:wght@600&family=Onest:wght@400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+
+<!-- ═════════ Barra superior con el reloj del partido ═════════ -->
+<header class="barra" id="barra">
+  <a href="#hero" class="marca" aria-label="ElTablón, ir al inicio"><i class="banderin" aria-hidden="true"></i><b>El</b>Tablón</a>
+  <div class="reloj" aria-hidden="true"><b id="min">0</b><span>'</span><small id="tiempo">1.er tiempo</small></div>
+  <a href="#contacto" class="btn btn-banderin btn-chico" data-wa>Consultá</a>
+</header>
+
+<main id="contenido">
+
+<!-- ═════════ 0' · Hero ═════════ -->
+<section class="hero" id="hero" data-minuto="0">
+  <div class="cinta cinta-arriba" aria-hidden="true">
+    <div class="cinta-pista" id="cinta"></div>
+  </div>
+  <div class="hero-grid">
+    <div class="hero-texto">
+      <h1 class="titular" id="titular" aria-label="La tribuna digital de tu liga">
+        <span class="linea"><span class="w">La</span> <span class="w">tribuna</span></span>
+        <span class="linea"><span class="w">digital</span></span>
+        <span class="linea"><span class="w">de tu</span> <span class="w">liga</span></span>
+      </h1>
+      <p class="bajada">El sitio de tu liga de fútbol: fixture, posiciones, goleadores, noticias y videos, con tu nombre, tu escudo y tus colores.</p>
+      <div class="acciones">
+        <a href="#contacto" class="btn btn-banderin" data-wa>Escribinos por WhatsApp</a>
+        <a href="#disenos" class="btn btn-linea">Ver la demo</a>
+      </div>
+    </div>
+    <div class="escenario" id="escenario" aria-hidden="true">
+      <div class="laptop">
+        <div class="pantalla">
+          <img src="assets/img/var-cancha-original.webp" alt="" class="vista on" width="1200" height="750">
+          <img src="assets/img/var-reflectores-original.webp" alt="" class="vista" width="1200" height="750">
+          <img src="assets/img/var-clasico-original.webp" alt="" class="vista" width="1200" height="750">
+        </div>
+        <div class="base"></div>
+      </div>
+      <div class="celu">
+        <div class="pantalla-celu">
+          <img src="assets/img/cancha-m-home.webp" alt="" class="vista on" width="780" height="1688">
+          <img src="assets/img/reflectores-m-home.webp" alt="" class="vista" width="780" height="1688">
+          <img src="assets/img/clasico-m-home.webp" alt="" class="vista" width="780" height="1688">
+        </div>
+      </div>
+      <div class="etiqueta-diseno" id="etiquetaDiseno">Diseño Cancha</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ 12' · Del caos al sitio ═════════ -->
+<section class="caos" id="caos" data-minuto="12">
+  <div class="caos-fijo">
+    <div class="caos-texto">
+      <h2 class="caos-titulo" id="caosTitulo">
+        <span class="hoy">Hoy tu liga vive en chats, planillas y papeles.</span>
+        <span class="ahora">Con ElTablón vive en un solo lugar.</span>
+      </h2>
+      <p class="caos-sub" id="caosSub">
+        <span class="hoy">La tabla la tiene uno. El fixture, otro. Y los goles, la memoria de alguien.</span>
+        <span class="ahora">Se cargan los resultados una vez y el sitio se actualiza: fecha, tabla y goleadores.</span>
+      </p>
+    </div>
+    <div class="caos-escenario" id="caosEscenario">
+      <div class="st st-chat" data-x="-38" data-y="-30" data-r="-7"><small>Grupo de dirigentes</small><p>¿Alguien sabe a qué hora juega la Sexta?</p></div>
+      <div class="st st-excel" data-x="30" data-y="-34" data-r="5">
+        <table aria-hidden="true"><tr><th>Club</th><th>PJ</th><th>Pts</th></tr><tr><td>Norte</td><td>4</td><td>9</td></tr><tr><td>Sur</td><td>4</td><td>7</td></tr><tr><td>???</td><td>3</td><td>6</td></tr></table>
+        <small>tabla_FINAL_v3(2).xlsx</small>
+      </div>
+      <div class="st st-papel" data-x="-28" data-y="4" data-r="4"><p>Fecha 4: Norte 2 - Sur ?<br>(confirmar con el árbitro)</p></div>
+      <div class="st st-chat st-chat-b" data-x="34" data-y="8" data-r="-4"><small>Reenviado muchas veces</small><p>Mandame la tabla por favor</p></div>
+      <div class="st st-foto" data-x="-6" data-y="-8" data-r="-3"><span>foto de la pizarra</span></div>
+      <div class="st st-pdf" data-x="8" data-y="34" data-r="6"><b>PDF</b><span>Fixture_definitivo.pdf</span></div>
+      <div class="st st-chat st-chat-c" data-x="-34" data-y="36" data-r="3"><small>Hincha</small><p>¿Quién cargó los goles del sábado?</p></div>
+      <div class="sitio-final" id="sitioFinal">
+        <div class="ventana"><i></i><i></i><i></i><span>tuliga.eltablon</span></div>
+        <img src="assets/img/cancha-d-tabla.webp" alt="Tabla de posiciones de una liga en un sitio de ElTablón" width="1440" height="900" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ 25' · Elegí cómo se ve tu liga ═════════ -->
+<section class="disenos" id="disenos" data-minuto="25">
+  <div class="wrap disenos-grid">
+    <div class="disenos-control">
+      <h2 class="titulo-seccion">Elegí cómo se ve tu liga</h2>
+      <p class="texto-lead">Tres diseños listos y los colores de tu escudo. El resto del sistema es el mismo.</p>
+
+      <div class="grupo" role="radiogroup" aria-label="Diseño">
+        <button type="button" role="radio" class="opcion" data-tema="cancha" aria-checked="true"><b>Cancha</b><span>Claro y editorial, ideal para el celular.</span></button>
+        <button type="button" role="radio" class="opcion" data-tema="reflectores" aria-checked="false"><b>Reflectores</b><span>Oscuro y de estadio nocturno.</span></button>
+        <button type="button" role="radio" class="opcion" data-tema="clasico" aria-checked="false"><b>Clásico</b><span>Sobrio y directo, con tarjetas.</span></button>
+      </div>
+
+      <p class="rotulo" id="rotuloColor">Color de marca</p>
+      <div class="colores" role="radiogroup" aria-labelledby="rotuloColor">
+        <button type="button" role="radio" class="color color-original" data-color="original" aria-checked="true" aria-label="Color original del diseño"></button>
+        <button type="button" role="radio" class="color" data-color="naranja" style="--c:#e2731f" aria-checked="false" aria-label="Naranja"></button>
+        <button type="button" role="radio" class="color" data-color="violeta" style="--c:#6b54d6" aria-checked="false" aria-label="Violeta"></button>
+        <button type="button" role="radio" class="color" data-color="rojo" style="--c:#d42e5b" aria-checked="false" aria-label="Rojo"></button>
+        <button type="button" role="radio" class="color" data-color="turquesa" style="--c:#0e8f8f" aria-checked="false" aria-label="Turquesa"></button>
+        <button type="button" role="radio" class="color" data-color="azul" style="--c:#3d6bff" aria-checked="false" aria-label="Azul"></button>
+      </div>
+      <p class="nota" id="notaDemo">Son capturas de una liga de ejemplo. Los clubes y los datos son ficticios.</p>
+      <a href="#" class="btn btn-linea btn-chico" id="abrirDemo" target="_blank" rel="noopener" hidden>Abrir la demo completa</a>
+    </div>
+
+    <div class="disenos-vista" id="disenosVista">
+      <div class="navegador">
+        <div class="navegador-barra"><i></i><i></i><i></i><span>tuliga.eltablon</span></div>
+        <div class="navegador-cuerpo" id="navegadorCuerpo">
+          <img id="vistaDiseno" src="assets/img/var-cancha-original.webp" alt="Sitio de ejemplo con el diseño Cancha" width="1200" height="750" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ 40' · Tres perfiles ═════════ -->
+<section class="perfiles" id="perfiles" data-minuto="40">
+  <div class="perfiles-fijo">
+    <div class="wrap">
+    <h2 class="titulo-seccion titulo-corto">Tres maneras de usar tu liga</h2>
+    <div class="perfiles-grid">
+      <div class="perfiles-izq">
+        <div class="pestanas" role="tablist" aria-label="Tipo de usuario">
+          <button type="button" role="tab" class="pestana" id="tab-hincha" aria-selected="true" aria-controls="panel-hincha"><b>Hincha</b><span>Mira, sigue y se entera</span></button>
+          <button type="button" role="tab" class="pestana" id="tab-periodista" aria-selected="false" aria-controls="panel-periodista"><b>Periodista</b><span>Publica noticias y videos</span></button>
+          <button type="button" role="tab" class="pestana" id="tab-admin" aria-selected="false" aria-controls="panel-admin"><b>Administrador</b><span>Maneja toda la liga</span></button>
+        </div>
+        <div class="paneles">
+          <div class="panel on" role="tabpanel" id="panel-hincha" aria-labelledby="tab-hincha">
+            <ul>
+              <li>Ve la fecha, la tabla y los goleadores de su categoría desde el celular.</li>
+              <li>Consulta el fixture completo, con el resultado y los goles de cada partido.</li>
+              <li>Mira el plantel de cada club, por categoría.</li>
+              <li>Lee las noticias y ve los videos de la liga.</li>
+              <li>Si crea su cuenta, recibe un mail cuando se completa una jornada.</li>
+            </ul>
+          </div>
+          <div class="panel" role="tabpanel" id="panel-periodista" aria-labelledby="tab-periodista" hidden>
+            <ul>
+              <li>Su cuenta la crea el administrador y le llega el usuario y la clave por mail.</li>
+              <li>Publica noticias con título, texto, categoría y foto.</li>
+              <li>Carga videos de YouTube pegando el enlace.</li>
+              <li>Tiene un panel con solo lo que necesita: no toca la administración de la liga.</li>
+            </ul>
+          </div>
+          <div class="panel" role="tabpanel" id="panel-admin" aria-labelledby="tab-admin" hidden>
+            <ul>
+              <li>Carga clubes con su escudo, equipos por categoría y jugadores, de a uno o con una planilla de Excel.</li>
+              <li>Arma el fixture a mano o con el sorteo automático, con vista previa.</li>
+              <li>Registra goles, tarjetas y penales; la tabla se recalcula sola.</li>
+              <li>Define los playoffs según la tabla, con ida y vuelta.</li>
+              <li>Administra temporadas y torneos, y da de alta periodistas.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="perfiles-der" aria-hidden="true">
+        <div class="escena on" data-escena="hincha">
+          <div class="celu celu-a"><div class="pantalla-celu"><img src="assets/img/cancha-m-tabla.webp" alt="" loading="lazy" width="780" height="1688"></div></div>
+          <div class="celu celu-b"><div class="pantalla-celu"><img src="assets/img/reflectores-m-fecha.webp" alt="" loading="lazy" width="780" height="1688"></div></div>
+        </div>
+        <div class="escena" data-escena="periodista">
+          <div class="navegador"><div class="navegador-barra"><i></i><i></i><i></i><span>tuliga.eltablon/panel_periodista</span></div><img src="assets/img/periodista-noticia.webp" alt="" loading="lazy" width="1440" height="900"></div>
+        </div>
+        <div class="escena" data-escena="admin">
+          <div class="navegador"><div class="navegador-barra"><i></i><i></i><i></i><span>tuliga.eltablon/adminview</span></div><img src="assets/img/admin-panel.webp" alt="" loading="lazy" width="1440" height="900"></div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ 55' · Ventajas ═════════ -->
+<section class="ventajas" id="ventajas" data-minuto="55">
+  <div class="wrap">
+    <h2 class="titulo-seccion">Una liga online es una liga que se mira más</h2>
+    <div class="ventajas-cols">
+      <div class="ventajas-col">
+        <h3>Para el hincha</h3>
+        <ul class="frases">
+          <li>Sabe cuándo juega su equipo sin preguntar en el grupo.</li>
+          <li>Ve la tabla apenas se cargan los resultados.</li>
+          <li>Sigue a su club y a su goleador desde el celular.</li>
+          <li>Encuentra las noticias y los videos de la liga en un solo lugar.</li>
+        </ul>
+      </div>
+      <div class="ventajas-col">
+        <h3>Para quien organiza</h3>
+        <ul class="frases">
+          <li>Carga los resultados una vez y se actualizan la tabla, los goleadores y las imágenes para redes.</li>
+          <li>Recibe menos mensajes de «¿cómo quedó?».</li>
+          <li>Tiene un sitio con el nombre, el escudo y los colores de la liga.</li>
+          <li>Suma periodistas que publican sin tocar el resto del sistema.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ 65' · Instagram ═════════ -->
+<section class="redes" id="redes" data-minuto="65">
+  <div class="wrap redes-grid">
+    <div class="redes-texto">
+      <h2 class="titulo-seccion">Cada fecha, tres imágenes listas para publicar</h2>
+      <p class="texto-lead">Cuando se completa una jornada, el sistema arma la tabla de posiciones, los resultados y la próxima fecha, con el escudo y los colores de tu liga.</p>
+      <p class="nota">Las imágenes quedan guardadas en el panel. Las publica la liga en sus redes.</p>
+    </div>
+    <div class="abanico" id="abanico" aria-hidden="true">
+      <img class="carta c1" src="assets/img/instagram-resultados.webp" alt="" loading="lazy" width="900" height="900">
+      <img class="carta c2" src="assets/img/instagram-tabla.webp" alt="" loading="lazy" width="900" height="900">
+      <img class="carta c3" src="assets/img/instagram-proxima.webp" alt="" loading="lazy" width="900" height="900">
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ 75' · Cómo funciona ═════════ -->
+<section class="pasos" id="pasos" data-minuto="75">
+  <div class="wrap">
+    <h2 class="titulo-seccion">Cómo se arma tu sitio</h2>
+    <ol class="pasos-lista" id="pasosLista">
+      <li><span class="num">1</span><div><h3>Elegís el diseño y los colores</h3><p>Mirás los diseños, elegís uno y lo vestimos con el nombre, el escudo y los colores de tu liga.</p></div></li>
+      <li><span class="num">2</span><div><h3>Adaptamos el sistema a tu torneo</h3><p>Cada liga juega distinto: cantidad de clubes, categorías, fases y cruces. Lo ajustamos al formato del tuyo y cargamos tus datos.</p></div></li>
+      <li><span class="num">3</span><div><h3>Tu liga queda online</h3><p>Tu equipo maneja todo desde el panel: clubes, fixture, resultados, noticias y videos.</p></div></li>
+    </ol>
+    <p class="origen">ElTablón nació dentro de una liga regional de verdad. Se armó resolviendo lo que un torneo necesita: fixture, tabla, goleadores, playoffs con ida y vuelta y categorías juveniles.</p>
+  </div>
+</section>
+
+<!-- ═════════ 82' · Cotización ═════════ -->
+<section class="cotiza" id="cotizacion" data-minuto="82">
+  <div class="wrap cotiza-grid">
+    <div>
+      <h2 class="titulo-seccion">No hay un precio único, porque cada liga es distinta</h2>
+      <p class="texto-lead">El presupuesto depende de tres cosas. Contanos cómo es tu liga y te respondemos.</p>
+      <a href="#contacto" class="btn btn-banderin" data-wa>Pedí tu presupuesto</a>
+    </div>
+    <ul class="factores">
+      <li><b>El formato de tu torneo</b><span>Cantidad de clubes, fases y cruces.</span></li>
+      <li><b>Las categorías</b><span>Mayores, inferiores y las que tenga tu liga.</span></li>
+      <li><b>El diseño y los colores</b><span>El que elijas, con la marca de tu liga.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═════════ Preguntas frecuentes ═════════ -->
+<section class="faq" id="faq" data-minuto="86">
+  <div class="wrap faq-grid">
+    <h2 class="titulo-seccion">Preguntas frecuentes</h2>
+    <div class="faq-lista">
+      <details><summary>¿Necesito saber de tecnología?</summary><p>No. El panel es una serie de formularios: cargás los resultados y el resto se actualiza solo.</p></details>
+      <details><summary>Mi liga juega con un formato distinto. ¿Se puede adaptar?</summary><p>Sí. Cada liga tiene su formato y lo adaptamos: cantidad de clubes, fases, cruces de playoffs y categorías.</p></details>
+      <details><summary>¿Puedo usar el nombre, el escudo y los colores de mi liga?</summary><p>Sí. Elegís uno de los diseños y lo vestimos con tu marca.</p></details>
+      <details><summary>¿Qué pasa con los datos de mi liga?</summary><p>Cada liga tiene su propio sitio y su propia base de datos, separada de la de las demás.</p></details>
+      <details><summary>¿Se publica solo en Instagram?</summary><p>No. El sistema prepara las imágenes de cada fecha y quedan guardadas en el panel; la liga las publica en sus redes.</p></details>
+      <details><summary>¿Puedo probarlo antes?</summary><p>Sí. La demo tiene datos ficticios y podés entrar con el panel de administrador para ver cómo se carga todo.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ 90' · Contacto ═════════ -->
+<section class="contacto" id="contacto" data-minuto="90">
+  <div class="wrap contacto-grid">
+    <div>
+      <h2 class="contacto-titulo">Armemos el sitio de tu liga.</h2>
+      <p class="texto-lead">Escribinos y te mostramos cómo quedaría con el escudo y los colores de tu liga.</p>
+      <div class="acciones">
+        <a href="#" class="btn btn-banderin" data-wa>Escribinos por WhatsApp</a>
+        <a href="#" class="btn btn-claro" data-mail>Enviar un email</a>
+      </div>
+    </div>
+    <form class="formulario" id="formulario" novalidate>
+      <label>Tu nombre<input type="text" name="nombre" autocomplete="name" required></label>
+      <label>Tu liga<input type="text" name="liga" autocomplete="organization"></label>
+      <label>Email o teléfono<input type="text" name="contacto" autocomplete="email" required></label>
+      <label>Contanos un poco<textarea name="mensaje" rows="3"></textarea></label>
+      <button type="submit" class="btn btn-banderin">Enviar consulta</button>
+      <p class="estado" id="estadoForm" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="pie">
+  <div class="wrap pie-in">
+    <b class="pie-marca">ElTablón</b>
+    <p>La tribuna digital de tu liga.<br><span id="anio"></span> ElTablón</p>
+  </div>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="js/landing.js"></script>
+</body>
+</html>
