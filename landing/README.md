@@ -55,6 +55,16 @@ flask reset-demo-db
 
 Están en `assets/img/` y salen de la demo real: capturas de los diseños (escritorio y celular), variantes de color, paneles de administrador y periodista, y las imágenes de Instagram que genera el sistema. Si cambia un diseño, hay que volver a capturarlas (ver la carpeta `app/themes/README.md`, sección "Modo escaparate", para elegir diseño y color por URL).
 
+### Sumar o actualizar un diseño en la landing
+
+Con un solo comando (desde la raíz del proyecto) se generan las siete imágenes de un diseño con la liga demo, sin tocar ninguna base real:
+
+```
+venv\Scripts\python.exe landing\herramientas\capturar_diseno.py cuaderno
+```
+
+Después hay que agregar el diseño en `index.html` (una imagen más en el notebook y en el celular del hero, y un botón en la sección "Elegí cómo se ve tu liga") y su nombre en la lista `nombres` de `js/landing.js`. Hoy la landing muestra Cancha, Reflectores y Cuaderno; Marcador y Clásico quedaron afuera a propósito.
+
 ## Lo que la landing promete (y lo que no)
 
 Solo dice lo que el sistema hace hoy. En particular: **prepara** las imágenes para Instagram pero no las publica, y no menciona integraciones que no están conectadas.

@@ -30,7 +30,7 @@
   }
 
   /* ───── Hero: los diseños rotan en la maqueta ───── */
-  var nombres = ['Cancha', 'Reflectores'];
+  var nombres = ['Cancha', 'Reflectores', 'Cuaderno'];
   var vistas = $$('#escenario .laptop .vista'), vistasCelu = $$('#escenario .celu .vista'), etiqueta = $('#etiquetaDiseno');
   var actual = 0;
   function mostrarDiseno(i) {
