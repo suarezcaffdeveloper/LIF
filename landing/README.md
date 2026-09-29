@@ -53,7 +53,7 @@ flask reset-demo-db
 
 ## Imágenes
 
-Están en `assets/img/` y salen de la demo real: capturas de los tres diseños (escritorio y celular), variantes de color, paneles de administrador y periodista, y las imágenes de Instagram que genera el sistema. Si cambia un diseño, hay que volver a capturarlas (ver la carpeta `app/themes/README.md`, sección "Modo escaparate", para elegir diseño y color por URL).
+Están en `assets/img/` y salen de la demo real: capturas de los diseños (escritorio y celular), variantes de color, paneles de administrador y periodista, y las imágenes de Instagram que genera el sistema. Si cambia un diseño, hay que volver a capturarlas (ver la carpeta `app/themes/README.md`, sección "Modo escaparate", para elegir diseño y color por URL).
 
 ## Lo que la landing promete (y lo que no)
 

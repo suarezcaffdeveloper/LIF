@@ -29,8 +29,8 @@
     cinta.innerHTML = un + un + un + un;
   }
 
-  /* ───── Hero: los tres diseños rotan en la maqueta ───── */
-  var nombres = ['Cancha', 'Reflectores', 'Clásico'];
+  /* ───── Hero: los diseños rotan en la maqueta ───── */
+  var nombres = ['Cancha', 'Reflectores'];
   var vistas = $$('#escenario .laptop .vista'), vistasCelu = $$('#escenario .celu .vista'), etiqueta = $('#etiquetaDiseno');
   var actual = 0;
   function mostrarDiseno(i) {
@@ -65,6 +65,37 @@
     if (document.fonts.ready) document.fonts.ready.then(ajustarTitular);
   }
   if ('ResizeObserver' in window && titular) new ResizeObserver(ajustarTitular).observe(titular.parentElement);
+
+  /* ───── Textos gigantes del final: se ajustan al ancho de su columna para no pisar ni cortarse ───── */
+  function medirTexto(el, texto) {
+    var s = document.createElement('span');
+    s.textContent = texto;
+    s.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;font:inherit;letter-spacing:inherit;text-transform:inherit;font-variation-settings:inherit';
+    el.appendChild(s);
+    var ancho = s.getBoundingClientRect().width;
+    s.remove();
+    return ancho;
+  }
+  function ajustarFinal() {
+    var t = $('.contacto-titulo');
+    if (t) {
+      t.style.fontSize = '100px';
+      var palabra = medirTexto(t, 'ARMEMOS'); // la palabra más larga define el ancho mínimo
+      if (palabra) t.style.fontSize = Math.max(34, Math.min(112, 100 * t.parentElement.clientWidth / palabra * 0.97)) + 'px';
+    }
+    var m = $('.pie-marca');
+    if (m) {
+      m.style.fontSize = '100px';
+      var total = medirTexto(m, m.textContent);
+      var cs = getComputedStyle(m.parentElement);
+      var util = m.parentElement.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight); // ancho sin los márgenes internos
+      if (total) m.style.fontSize = Math.max(40, Math.min(260, 100 * util / total * 0.99)) + 'px';
+    }
+  }
+  ajustarFinal();
+  window.addEventListener('resize', ajustarFinal);
+  window.addEventListener('load', ajustarFinal);
+  if (document.fonts && document.fonts.load) document.fonts.load('900 100px Anybody').then(ajustarFinal);
 
   /* ───── Scroll suave (Lenis) y anclas ───── */
   var lenis = null;
