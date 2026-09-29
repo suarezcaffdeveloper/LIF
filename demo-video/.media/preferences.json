@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "preferences": {
+    "destination": {
+      "value": "youtube",
+      "confirmed_in": [
+        "demo-video"
+      ],
+      "updated_at": "2026-09-13T22:03:00.692Z"
+    },
+    "aspect": {
+      "value": "1920x1080",
+      "confirmed_in": [
+        "demo-video"
+      ],
+      "updated_at": "2026-09-13T22:03:00.798Z"
+    },
+    "language": {
+      "value": "es",
+      "confirmed_in": [
+        "demo-video"
+      ],
+      "updated_at": "2026-09-13T22:03:00.926Z"
+    },
+    "flow": {
+      "value": "automation",
+      "confirmed_in": [
+        "demo-video"
+      ],
+      "updated_at": "2026-09-13T22:03:01.045Z"
+    },
+    "storyboard": {
+      "value": "yes",
+      "confirmed_in": [
+        "demo-video"
+      ],
+      "updated_at": "2026-09-13T22:03:01.150Z"
+    }
+  },
+  "sightings": {}
+}

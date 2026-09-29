@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          background: #0a0c0f;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .hook-glow {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 1400px;
+          height: 1400px;
+          transform: translate(-50%, -50%);
+          background: radial-gradient(
+            circle,
+            rgba(76, 195, 234, 0.1) 0%,
+            rgba(76, 195, 234, 0) 62%
+          );
+          pointer-events: none;
+        }
+
+        .hook-pitch {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 1100px;
+          height: 1100px;
+          transform: translate(-50%, -50%);
+          opacity: 0.08;
+          pointer-events: none;
+        }
+
+        .hook-beat {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%) scale(0.92);
+          opacity: 0;
+          width: 1700px;
+          text-align: center;
+          font-family: "Oswald", sans-serif;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: -0.02em;
+          color: #edeff2;
+          font-size: 132px;
+          line-height: 1.08;
+        }
+
+        .hook-accent {
+          color: #4cc3ea;
+        }
+
+        .hook-rule {
+          position: absolute;
+          left: 50%;
+          bottom: -18px;
+          transform: translateX(-50%) scaleX(0);
+          transform-origin: center;
+          width: 420px;
+          height: 4px;
+          background: #4cc3ea;
+        }
+
+        .hook-beat-inner {
+          position: relative;
+          display: inline-block;
+        }
+      </style>
+
+      <div data-hf-id="hf-tse0" id="root" data-composition-id="01-hook" data-width="1920" data-height="1080" data-duration="6">
+        <div data-hf-id="hf-mh9l" class="hook-glow" data-layout-allow-overflow="true"></div>
+        <svg data-hf-id="hf-qrks" class="hook-pitch" viewBox="0 0 200 200" fill="none">
+          <circle data-hf-id="hf-9bhu" cx="100" cy="100" r="32" stroke="#8B94A0" stroke-width="1" />
+          <line data-hf-id="hf-rs9b" x1="0" y1="100" x2="200" y2="100" stroke="#8B94A0" stroke-width="1" />
+          <rect data-hf-id="hf-ww8b" x="0" y="60" width="26" height="80" stroke="#8B94A0" stroke-width="1" />
+          <rect data-hf-id="hf-lysb" x="174" y="60" width="26" height="80" stroke="#8B94A0" stroke-width="1" />
+        </svg>
+
+        <div data-hf-id="hf-ydas" class="hook-beat" id="hook-beat-a">ACTUALIZAR<br data-hf-id="hf-x5px">TU LIGA</div>
+        <div data-hf-id="hf-6n40" class="hook-beat" id="hook-beat-b">
+          NO DEBERÍA<br data-hf-id="hf-rsrt">TARDAR
+          <div data-hf-id="hf-vl69" class="hook-beat-inner">
+            <span data-hf-id="hf-1rg6" class="hook-accent">DÍAS.</span>
+            <div data-hf-id="hf-g8du" class="hook-rule" id="hook-rule"></div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Ambient pitch motif — slow breathing drift, the one shared ambient motion.
+        tl.to(
+          ".hook-pitch",
+          { rotation: 3, scale: 1.04, duration: 3, ease: "sine.inOut" },
+          0,
+        );
+        tl.to(
+          ".hook-pitch",
+          { rotation: 0, scale: 1, duration: 3, ease: "sine.inOut" },
+          3,
+        );
+        tl.to(
+          ".hook-glow",
+          { opacity: 0.6, duration: 3, ease: "sine.inOut" },
+          0,
+        );
+        tl.to(".hook-glow", { opacity: 1, duration: 3, ease: "sine.inOut" }, 3);
+
+        // Beat A — flash-in, hold, hard cut.
+        tl.fromTo(
+          "#hook-beat-a",
+          { opacity: 0, scale: 0.92 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" },
+          0,
+        );
+        tl.set("#hook-beat-a", { opacity: 0 }, 2.3);
+
+        // Beat B — spring-pop payoff, settles and holds to the end.
+        tl.fromTo(
+          "#hook-beat-b",
+          { opacity: 0, scale: 0.85 },
+          { opacity: 1, scale: 1, duration: 0.55, ease: "back.out(1.6)" },
+          2.3,
+        );
+        tl.fromTo(
+          "#hook-rule",
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.5, ease: "power2.out" },
+          2.85,
+        );
+
+        window.__timelines["01-hook"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0a0c0f;
+      }
+      #root {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      /* Sub-comp slots stretch to fill the root. */
+      [data-composition-id="root"] > div[data-composition-src] {
+        position: absolute;
+        inset: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-h6wm" id="root" data-composition-id="root" data-width="1920" data-height="1080" data-duration="71.5">
+      <!-- Frame 1 — Hook (animated) -->
+      <div data-hf-id="hf-xqyq" id="el-01" data-composition-id="01-hook" data-composition-src="compositions/frames/01-hook.html" data-start="0" data-duration="6" data-track-index="1"></div>
+
+      <!-- Frame 2 — La promesa / home (animated — clip real) -->
+      <!-- 1→2 se solapa 0.6s: blur crossfade -->
+      <div data-hf-id="hf-76ta" id="el-02" data-composition-id="02-home" data-composition-src="compositions/frames/02-home.html" data-start="5.4" data-duration="8.2" data-track-index="1"></div>
+
+      <!-- Frame 3 — Posiciones (animated — clip real) -->
+      <!-- 2→3 se solapa 0.5s: push slide -->
+      <div data-hf-id="hf-rouj" id="el-03" data-composition-id="03-posiciones" data-composition-src="compositions/frames/03-posiciones.html" data-start="13.1" data-duration="3.9" data-track-index="1"></div>
+
+      <!-- Frame 4 — Goleadores (animated — clip real) -->
+      <!-- 3→4 se solapa 0.5s: whip-pan -->
+      <div data-hf-id="hf-3a34" id="el-04" data-composition-id="04-goleadores" data-composition-src="compositions/frames/04-goleadores.html" data-start="16.5" data-duration="5" data-track-index="1"></div>
+
+      <!-- Frame 5 — Fixture (animated — clip real) -->
+      <!-- 4→5 se solapa 0.5s: focus pull -->
+      <div data-hf-id="hf-2i7i" id="el-05" data-composition-id="05-fixture" data-composition-src="compositions/frames/05-fixture.html" data-start="21.0" data-duration="5" data-track-index="1"></div>
+
+      <!-- Frame 6 — Noticias y videos (animated — clip real) -->
+      <!-- 5→6 se solapa 0.7s: elastic push -->
+      <div data-hf-id="hf-itpr" id="el-06" data-composition-id="06-noticias-videos" data-composition-src="compositions/frames/06-noticias-videos.html" data-start="25.3" data-duration="8" data-track-index="1"></div>
+
+      <!-- Frame 7 — "Gestioná la información con estos roles" (animated) -->
+      <!-- 6→7 se solapa 0.5s: squeeze -->
+      <div data-hf-id="hf-ilbl" id="el-07" data-composition-id="07-roles" data-composition-src="compositions/frames/07-roles.html" data-start="32.8" data-duration="3.5" data-track-index="1"></div>
+
+      <!-- Frame 8 — Periodista (animated — clip real) -->
+      <!-- 7→8 se solapa 0.5s: crossfade -->
+      <div data-hf-id="hf-47sf" id="el-08" data-composition-id="08-periodista" data-composition-src="compositions/frames/08-periodista.html" data-start="35.8" data-duration="7.1" data-track-index="1"></div>
+
+      <!-- Frame 9 — Administrador, panel general (animated — clip real) -->
+      <!-- 8→9 se solapa 0.5s: zoom through -->
+      <div data-hf-id="hf-ux28" id="el-09" data-composition-id="09-admin" data-composition-src="compositions/frames/09-admin.html" data-start="42.4" data-duration="4.8" data-track-index="1"></div>
+
+      <!-- Frame 10 — Fixture / sorteo (animated — clip real) -->
+      <!-- 9→10 se solapa 0.5s: circle iris -->
+      <div data-hf-id="hf-89pi" id="el-10" data-composition-id="10-fixture-sorteo" data-composition-src="compositions/frames/10-fixture-sorteo.html" data-start="46.7" data-duration="9.2" data-track-index="1"></div>
+
+      <!-- Frame 11 — Jugadores (animated — clip real) -->
+      <!-- 10→11 se solapa 0.5s: vertical push -->
+      <div data-hf-id="hf-2eds" id="el-11" data-composition-id="11-jugadores" data-composition-src="compositions/frames/11-jugadores.html" data-start="55.4" data-duration="3.8" data-track-index="1"></div>
+
+      <!-- Frame 12 — Estadísticas (animated — clip real) -->
+      <!-- 11→12 se solapa 0.5s: diamond iris -->
+      <div data-hf-id="hf-r9nh" id="el-12" data-composition-id="12-estadisticas" data-composition-src="compositions/frames/12-estadisticas.html" data-start="58.7" data-duration="5.4" data-track-index="1"></div>
+
+      <!-- Frame 13 — Cierre (animated) -->
+      <!-- 12→13 se solapa 0.6s: blur crossfade (wind-down, calmo) -->
+      <div data-hf-id="hf-052r" id="el-13" data-composition-id="13-cierre" data-composition-src="compositions/frames/13-cierre.html" data-start="63.5" data-duration="8" data-track-index="1"></div>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      // Transiciones entre paneles reales — un tipo distinto por corte,
+      // para que se note el cambio sin repetir siempre el mismo efecto.
+
+      // 1 → 2: blur crossfade (calma, de la promesa tipográfica al producto real)
+      tl.to(
+        "#el-01",
+        { filter: "blur(10px)", scale: 1.03, opacity: 0, duration: 0.5, ease: "power2.inOut" },
+        5.4,
+      );
+      tl.fromTo(
+        "#el-02",
+        { filter: "blur(10px)", scale: 0.97, opacity: 0 },
+        { filter: "blur(0px)", scale: 1, opacity: 1, duration: 0.5, ease: "power2.inOut" },
+        5.5,
+      );
+
+      // 2 → 3: push slide (se siente literalmente como cambiar de panel)
+      tl.to("#el-02", { x: -1920, duration: 0.5, ease: "power3.inOut" }, 13.1);
+      tl.fromTo(
+        "#el-03",
+        { x: 1920, opacity: 1 },
+        { x: 0, duration: 0.5, ease: "power3.inOut" },
+        13.1,
+      );
+
+      // 3 → 4: whip-pan (CSS) — pan lateral con motion blur, más rápido y nervioso
+      tl.to(
+        "#el-03",
+        { x: -500, filter: "blur(24px)", duration: 0.28, ease: "power3.in" },
+        16.5,
+      );
+      tl.fromTo(
+        "#el-04",
+        { x: 500, filter: "blur(24px)", opacity: 1 },
+        { x: 0, filter: "blur(0px)", duration: 0.32, ease: "power3.out" },
+        16.5,
+      );
+
+      // 4 → 5: focus pull — el saliente se desenfoca y se va, el entrante llega nítido
+      tl.to("#el-04", { filter: "blur(15px)", duration: 0.5, ease: "power1.in" }, 21.0);
+      tl.to("#el-04", { opacity: 0, duration: 0.3, ease: "power2.in" }, 21.25);
+      tl.fromTo(
+        "#el-05",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" },
+        21.25,
+      );
+
+      // 5 → 6: elastic push — empuje con rebote elástico en el entrante
+      tl.to("#el-05", { x: -1920, duration: 0.5, ease: "power3.in" }, 25.3);
+      tl.fromTo(
+        "#el-06",
+        { x: 1920, opacity: 1 },
+        { x: 30, duration: 0.4, ease: "power4.out" },
+        25.4,
+      );
+      tl.to("#el-06", { x: -15, duration: 0.15, ease: "sine.inOut" }, 25.8);
+      tl.to("#el-06", { x: 0, duration: 0.1, ease: "sine.out" }, 25.95);
+
+      // 6 → 7: squeeze — el tour público se comprime, el cartel de roles se expande
+      tl.to(
+        "#el-06",
+        { scaleX: 0, transformOrigin: "left center", duration: 0.4, ease: "power3.inOut" },
+        32.8,
+      );
+      tl.fromTo(
+        "#el-07",
+        { scaleX: 0, transformOrigin: "right center", opacity: 1 },
+        { scaleX: 1, duration: 0.4, ease: "power3.inOut" },
+        32.9,
+      );
+      tl.set("#el-06", { opacity: 0 }, 33.3);
+
+      // 7 → 8: crossfade simple — del cartel calmo al primer panel con rol
+      tl.to("#el-07", { opacity: 0, duration: 0.5, ease: "power2.inOut" }, 35.8);
+      tl.fromTo(
+        "#el-08",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5, ease: "power2.inOut" },
+        35.8,
+      );
+
+      // 8 → 9: zoom through — el periodista queda atrás, el admin entra de frente
+      tl.to(
+        "#el-08",
+        { scale: 2.5, opacity: 0, filter: "blur(8px)", duration: 0.4, ease: "power3.in" },
+        42.4,
+      );
+      tl.fromTo(
+        "#el-09",
+        { scale: 0.5, opacity: 0, filter: "blur(8px)" },
+        { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.4, ease: "power3.out" },
+        42.55,
+      );
+
+      // 9 → 10: circle iris — se abre un círculo sobre el panel general para entrar al detalle del fixture
+      tl.set("#el-10", { opacity: 1 }, 46.7);
+      tl.fromTo(
+        "#el-10",
+        { clipPath: "circle(0% at 50% 50%)" },
+        { clipPath: "circle(75% at 50% 50%)", duration: 0.5, ease: "power2.out" },
+        46.7,
+      );
+      tl.set("#el-09", { opacity: 0 }, 47.2);
+
+      // 10 → 11: vertical push — eje distinto al de los push horizontales ya usados
+      tl.to("#el-10", { y: -1080, duration: 0.5, ease: "power3.inOut" }, 55.4);
+      tl.fromTo(
+        "#el-11",
+        { y: 1080, opacity: 1 },
+        { y: 0, duration: 0.5, ease: "power3.inOut" },
+        55.4,
+      );
+
+      // 11 → 12: color dip — corte limpio a color de fondo y sube el nuevo, sin
+      // clip-path (el diamond iris anterior dejaba las 4 esquinas del video
+      // recortadas para toda la escena, no solo durante la transición)
+      tl.to("#el-11", { opacity: 0, duration: 0.2, ease: "power2.in" }, 58.7);
+      tl.fromTo(
+        "#el-12",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.2, ease: "power2.out" },
+        59.0,
+      );
+
+      // 12 → 13: blur crossfade — wind-down calmo hacia el cierre (mismo lenguaje que 1→2)
+      tl.to(
+        "#el-12",
+        { filter: "blur(10px)", scale: 1.03, opacity: 0, duration: 0.5, ease: "power2.inOut" },
+        63.5,
+      );
+      tl.fromTo(
+        "#el-13",
+        { filter: "blur(10px)", scale: 0.97, opacity: 0 },
+        { filter: "blur(0px)", scale: 1, opacity: 1, duration: 0.5, ease: "power2.inOut" },
+        63.6,
+      );
+
+      window.__timelines["root"] = tl;
+    </script>
+  </body>
+</html>

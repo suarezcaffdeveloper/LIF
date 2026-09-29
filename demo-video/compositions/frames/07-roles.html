@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <template>
+      <style>
+        #root {
+          position: absolute;
+          inset: 0;
+          background: #0a0c0f;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+        .roles-glow {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 1300px;
+          height: 1300px;
+          transform: translate(-50%, -50%);
+          background: radial-gradient(
+            circle,
+            rgba(76, 195, 234, 0.09) 0%,
+            rgba(76, 195, 234, 0) 62%
+          );
+          pointer-events: none;
+        }
+        .roles-title {
+          position: relative;
+          font-family: "Oswald", sans-serif;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: -0.01em;
+          font-size: 84px;
+          line-height: 1.2;
+          color: #edeff2;
+          text-align: center;
+          opacity: 0;
+          transform: scale(0.96);
+        }
+        .roles-title .accent {
+          color: #4cc3ea;
+        }
+      </style>
+      <div data-hf-id="hf-ojpk" id="root" data-composition-id="07-roles" data-width="1920" data-height="1080" data-duration="3.5">
+        <div data-hf-id="hf-gaqn" class="roles-glow" data-layout-allow-overflow="true"></div>
+        <div data-hf-id="hf-fgc2" class="roles-title" id="roles-title">
+          Gestioná la información<br data-hf-id="hf-x5px"><span data-hf-id="hf-1f6c" class="accent">con estos roles.</span>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Single restrained reveal (titlecard-reveal: calm, one move, then hold).
+        tl.fromTo(
+          "#roles-title",
+          { opacity: 0, scale: 0.96 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" },
+          0,
+        );
+        tl.to(
+          ".roles-glow",
+          { opacity: 0.6, duration: 1.75, ease: "sine.inOut" },
+          0,
+        );
+        tl.to(
+          ".roles-glow",
+          { opacity: 1, duration: 1.75, ease: "sine.inOut" },
+          1.75,
+        );
+
+        window.__timelines["07-roles"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
