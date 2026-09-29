@@ -1,0 +1,78 @@
+/* Pantallas de carga de estadísticas (Mayores e Inferiores).
+   El JavaScript arma filas y lee valores por estas clases y ids: no renombrarlas, solo cambiar su aspecto. */
+
+.est .selector-card, .est .stats-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sombra); padding: 24px; margin-bottom: 20px; }
+.est .card-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+
+/* Campos */
+.est .field-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.est .field-group label { font-size: 13.5px; font-weight: 600; }
+.est select, .est input[type="number"] {
+  width: 100%; min-height: 42px; padding: 9px 12px; font: inherit; color: var(--text);
+  background: var(--surface); border: 1px solid var(--line-fuerte); border-radius: var(--r-s);
+  transition: border-color .15s, box-shadow .15s;
+}
+.est select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23808A9C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center; background-size: 18px; }
+.est select:hover, .est input[type="number"]:hover { border-color: var(--muted); }
+.est select:focus, .est input[type="number"]:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px var(--acento-tinte); }
+.est select:disabled, .est input:disabled { opacity: .55; cursor: not-allowed; }
+.est optgroup { font-weight: 700; }
+.est .selector-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+
+/* Categoría */
+.est .cat-title { font-size: 18px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+.est .cat-title::before { content: ""; width: 4px; height: 20px; border-radius: 2px; background: var(--acento); }
+.est .cat-divider { height: 1px; background: var(--line); margin: 34px 0; }
+.est .teams-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-bottom: 20px; }
+.est .team-box { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; }
+.est .team-name { flex: none; text-align: left; font-size: 16px; font-weight: 700; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.est .team-box .field-group { margin-bottom: 16px; }
+
+/* Filas de goleadores y tarjetas (las crea el script) */
+.est .list-rows-container { display: flex; flex-direction: column; gap: 8px; }
+.est .list-rows-container:not(:empty) { margin-bottom: 4px; }
+.est .list-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--acento); border-radius: var(--r-s); padding: 8px; }
+.est .list-row select, .est .list-row input[type="number"] { min-height: 38px; padding: 6px 10px; font-size: 14px; }
+.est .list-row input[type="number"] { max-width: 80px; text-align: center; }
+.est .remove-row { min-width: 38px; min-height: 38px; border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); background: var(--danger-bg); color: var(--danger); border-radius: var(--r-s); cursor: pointer; font-size: 14px; }
+.est .remove-row:hover { background: color-mix(in srgb, var(--danger) 22%, transparent); }
+.est .btn-add { width: 100%; min-height: 40px; margin-top: 8px; padding: 8px; background: transparent; border: 1px dashed var(--line-fuerte); border-radius: var(--r-s); color: var(--text); font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; }
+.est .btn-add:hover { background: var(--acento-tinte); border-color: var(--acento-sombra); }
+
+/* Penales */
+.est .penales-box { background: var(--warn-bg); border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent); border-radius: var(--r); padding: 16px 20px; margin: 8px auto 0; max-width: 600px; }
+.est .penales-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.est .penales-title { font-weight: 700; font-size: 15px; }
+.est .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex: none; }
+.est .switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 1; }
+.est .slider { position: absolute; inset: 0; background: var(--surface-3); border: 1px solid var(--line-fuerte); border-radius: 999px; transition: background .2s; }
+.est .slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0, 0, 0, .35); transition: transform .2s; }
+.est .switch input:checked + .slider { background: var(--acento); border-color: var(--acento-sombra); }
+.est .switch input:checked + .slider::before { transform: translateX(20px); background: #fff; }
+.est .switch input:focus-visible + .slider { outline: 2px solid var(--focus); outline-offset: 2px; }
+.est .penales-slide { max-height: 0; overflow: hidden; opacity: 0; transition: max-height .35s ease, opacity .35s ease, margin-top .35s ease; }
+.est .penales-slide.active { max-height: 220px; opacity: 1; margin-top: 16px; }
+.est .penales-inputs-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.est .penales-inputs-grid .field-group label { text-align: center; }
+.est .penales-inputs-grid input[type="number"] { text-align: center; }
+
+/* Guardar */
+.est .btn-save { width: 100%; min-height: 46px; margin-top: 24px; padding: 10px; background: var(--acento); border: 1px solid var(--acento-sombra); border-radius: var(--r-s); color: var(--acento-ink); font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 2px 0 var(--acento-sombra); transition: transform .08s, box-shadow .08s, background .15s; }
+.est .btn-save:hover { background: #FFD24D; }
+.est .btn-save:active { transform: translateY(2px); box-shadow: none; }
+.est .btn-save:disabled { background: var(--surface-3); border-color: var(--line-fuerte); color: var(--muted); box-shadow: none; cursor: not-allowed; transform: none; }
+.est .btn-save.saved { background: var(--ok-bg); border-color: color-mix(in srgb, var(--ok) 45%, transparent); color: var(--ok); box-shadow: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .est .selector-card, .est .stats-card { animation: ad-entra .4s ease-out both; }
+}
+@media (max-width: 720px) {
+  .est .selector-card, .est .stats-card { padding: 18px; }
+  .est .selector-grid, .est .teams-grid, .est .penales-inputs-grid { grid-template-columns: minmax(0, 1fr); }
+  .est .list-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .est .list-row select:first-child { grid-column: 1 / -1 !important; }
+  .est .list-row input[type="number"], .est .list-row select:nth-child(2) { grid-column: 1 !important; max-width: none; }
+  .est .remove-row { grid-column: 2 !important; }
+}
