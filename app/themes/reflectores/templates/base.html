@@ -44,7 +44,7 @@
         <div class="menu">{% for c in liga.categorias %}<a href="{{ url_for('views.tabla_posiciones', categoria=c.parametro_url) }}">{{ c.etiqueta }}</a>{% endfor %}</div></div>
 
       <div class="nav-item"><button type="button" aria-haspopup="true" class="{{ 'active' if ep == 'views.mostrar_estadisticas' }}">Goleadores</button>
-        <div class="menu">{% for c in liga.categorias %}<a href="/goleadores/{{ c.slug }}">{{ c.etiqueta }}</a>{% endfor %}</div></div>
+        <div class="menu">{% for c in liga.categorias %}<a href="{{ url_for('views.mostrar_estadisticas', categoria=c.slug) }}">{{ c.etiqueta }}</a>{% endfor %}</div></div>
 
       <div class="nav-item"><a href="{{ url_for('views.todas_noticias') }}" class="{{ 'active' if ep in ('views.todas_noticias', 'views.noticia_detalle') }}">Noticias</a></div>
       <div class="nav-item"><a href="{{ url_for('views.todos_videos') }}" class="{{ 'active' if ep == 'views.todos_videos' }}">Videos</a></div>
@@ -67,7 +67,7 @@
   <a href="{{ url_for('views.index') }}">Inicio</a>
   <a href="{{ url_for('views.fixture', bloque=primera.bloque, categoria=primera.parametro_url) }}">Fixture</a>
   <a href="{{ url_for('views.tabla_posiciones', categoria=primera.parametro_url) }}">Posiciones</a>
-  <a href="/goleadores/{{ primera.slug }}">Goleadores</a>
+  <a href="{{ url_for('views.mostrar_estadisticas', categoria=primera.slug) }}">Goleadores</a>
   <a href="{{ url_for('views.todas_noticias') }}">Noticias</a>
   <a href="{{ url_for('views.todos_videos') }}">Videos</a>
   {% if current_user.is_authenticated %}<a href="{{ url_for('views.logout') }}">Salir</a>{% else %}<a href="{{ url_for('views.login') }}">Ingresar</a>{% endif %}
@@ -84,5 +84,6 @@
 
 <script src="{{ url_for('tema.static', filename='js/reflectores.js') }}" defer></script>
 {% block scripts %}{% endblock %}
+{% include "_selector_tema.html" ignore missing %}
 </body>
 </html>

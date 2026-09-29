@@ -141,7 +141,8 @@ img{max-width:100%}
 .band span::after{content:"";width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.55)}
 
 /* ───────── SECCIONES ───────── */
-section.s{padding:clamp(64px,9vw,120px) 0}
+section.s{padding:clamp(64px,9vw,120px) 0;scroll-margin-top:24px}
+#resultados,#tabla,#goleadores,#noticias{scroll-margin-top:60px}
 .s-title{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:22px;margin-bottom:34px}
 .s-title h1,.s-title h2{font-weight:900;font-stretch:112%;font-size:clamp(38px,6.4vw,92px);line-height:.9;letter-spacing:-.05em}
 .s-title em{font-style:normal;color:var(--pitch-500)}

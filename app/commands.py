@@ -1,11 +1,12 @@
 from flask.cli import with_appcontext
 import click
-from datetime import datetime, date, time
+import random
+from datetime import datetime, date, time, timedelta
 from werkzeug.security import generate_password_hash
 
 from app.database.db import db, DEMO_BIND_KEY, set_demo_mode
 from app.models.models import Usuario
-from app.ligas import LIGA
+from app.ligas import LIGA, FORMATO
 
 
 @click.command("create-admin")
@@ -78,11 +79,59 @@ def reset_demo_db(seed):
         db.session.remove()
 
 
+@click.command("seed-liga-demo")
+@click.option("--yes", is_flag=True, help="No pedir confirmación.")
+@with_appcontext
+def seed_liga_demo(yes):
+    """Borra y vuelve a crear la base PRINCIPAL con datos ficticios.
+
+    Solo corre en una liga de demostración (LIGA=demo): con cualquier liga real
+    se niega, para no borrar nunca datos verdaderos.
+    """
+    if not LIGA.demo:
+        raise click.ClickException(
+            f"Este comando solo corre en una liga de demostración (LIGA=demo); la liga activa es {LIGA.slug!r}."
+        )
+    destino = db.engine.url.render_as_string(hide_password=True)
+    if not yes:
+        click.confirm(f"Se BORRARÁN todas las tablas de {destino}. ¿Continuar?", abort=True)
+
+    db.metadata.drop_all(bind=db.engine)
+    db.metadata.create_all(bind=db.engine)
+    resumen = _seed_demo_data()
+    db.session.commit()
+    click.echo(f"✅ Base {destino} poblada: {resumen}")
+
+
+# Nombres para los jugadores ficticios.
+_NOMBRES = ["Matías", "Lucas", "Tomás", "Franco", "Joaquín", "Nicolás", "Diego", "Martín", "Agustín", "Bruno"]
+_APELLIDOS = ["Ferreyra", "Benítez", "Aguirre", "Ibarra", "Medina", "Rojas", "Sosa", "Paz", "Ledesma", "Acosta", "Vega", "Molina"]
+
+
+def _rondas(n):
+    """Todos contra todos (método del círculo): lista de fechas, cada una con pares (local, visitante)."""
+    equipos = list(range(n))
+    for _ in range(n - 1):
+        yield [(equipos[i], equipos[n - 1 - i]) for i in range(n // 2)]
+        equipos = [equipos[0]] + [equipos[-1]] + equipos[1:-1]
+
+
 def _seed_demo_data():
+    """Datos ficticios completos: 12 clubes en todas las categorías de la liga, cuatro
+    fechas jugadas con goles y tarjetas, una fecha próxima con días relativos a hoy
+    (la cuenta regresiva siempre tiene un partido por delante), noticias y videos.
+
+    Escribe en la base activa de la sesión (la real o la del modo demo) y devuelve
+    un resumen de lo creado. Es determinista: siempre genera lo mismo salvo las fechas.
+    """
+    from app.ligas.demo.clubes import CLUBES, url_escudo
     from app.models.models import (
         Temporada, Torneo, Fase, Club, Equipo, Jugador, JugadorEquipo,
         Partido, EstadoJugadorPartido, Noticia, Video,
     )
+
+    azar = random.Random(2026)
+    hoy = date.today()
 
     # Cuenta demo=administrador: rol 'administrador' (pasa los chequeos de
     # permisos de las rutas de admin, ej. adminview) y es_demo=True (queda
@@ -108,112 +157,135 @@ def _seed_demo_data():
     db.session.add(periodista_demo)
     db.session.flush()
 
-    temporada = Temporada(nombre="2026-demo", activa=True)
+    # Temporada con los torneos y fases que define el formato de la liga.
+    temporada = Temporada(nombre=str(hoy.year), activa=True)
     db.session.add(temporada)
     db.session.flush()
-
-    torneo = Torneo(nombre="Apertura Demo", temporada=temporada, activo=True)
-    db.session.add(torneo)
+    torneo_activo, fase_regular = None, None
+    for nombre_torneo in FORMATO.TORNEOS:
+        torneo = Torneo(nombre=nombre_torneo, temporada=temporada, activo=(nombre_torneo == FORMATO.TORNEO_INICIAL))
+        db.session.add(torneo)
+        db.session.flush()
+        for orden, (nombre_fase, ida_vuelta) in enumerate(FORMATO.FASES, start=1):
+            fase = Fase(nombre=nombre_fase, orden=orden, torneo=torneo, ida_vuelta=ida_vuelta)
+            db.session.add(fase)
+            if torneo.activo and orden == 1:
+                torneo_activo, fase_regular = torneo, fase
     db.session.flush()
 
-    fase = Fase(nombre="Regular", orden=1, torneo=torneo, ida_vuelta=False)
-    db.session.add(fase)
-    db.session.flush()
-
-    clubes_info = [
-        ("Atlético Demo", "Ciudad Norte"),
-        ("Deportivo Muestra", "Ciudad Sur"),
-        ("Club Prototipo", "Ciudad Este"),
-        ("Unión Ejemplo", "Ciudad Oeste"),
-    ]
-    clubes = []
-    for nombre, localidad in clubes_info:
-        club = Club(nombre=nombre, localidad=localidad)
+    # Clubes y jugadores (los mismos jugadores sirven en todas las categorías del club).
+    clubes, jugadores = [], []
+    carnet = 1
+    for nombre, localidad, _color in CLUBES:
+        club = Club(nombre=nombre, localidad=localidad, escudo_url=url_escudo(nombre))
         db.session.add(club)
         clubes.append(club)
     db.session.flush()
-
-    equipos = []
     for club in clubes:
-        equipo = Equipo(club=club, categoria="Primera")
-        db.session.add(equipo)
-        equipos.append(equipo)
-    db.session.flush()
-
-    nombres = ["Juan", "Carlos", "Diego", "Martín", "Lucas", "Nicolás"]
-    apellidos = ["Gómez", "Pérez", "Fernández", "López", "Díaz", "Romero"]
-
-    carnet = 1
-    jugadores_por_equipo = {}
-    for i, equipo in enumerate(equipos):
-        jugadores_equipo = []
-        for j in range(6):
+        plantel = []
+        for k in range(9):
             jugador = Jugador(
                 numero_carnet=carnet,
-                nombre=nombres[(i + j) % len(nombres)],
-                apellido=apellidos[(i * 3 + j) % len(apellidos)],
-                club=equipo.club,
+                nombre=_NOMBRES[(carnet + k) % len(_NOMBRES)],
+                apellido=_APELLIDOS[(carnet * 3 + k) % len(_APELLIDOS)],
+                club=club,
             )
             db.session.add(jugador)
-            db.session.flush()
-            db.session.add(JugadorEquipo(numero_carnet=jugador.numero_carnet, equipo_id=equipo.id))
-            jugadores_equipo.append(jugador)
+            plantel.append(jugador)
             carnet += 1
-        jugadores_por_equipo[equipo.id] = jugadores_equipo
+        jugadores.append(plantel)
     db.session.flush()
 
-    resultados = [
-        (0, 1, 2, 1),
-        (2, 3, 0, 0),
-        (1, 3, 1, 1),
-        (0, 2, 3, 2),
-        (1, 2, 2, 2),
-        (0, 3, 1, 0),
-    ]
-    for jornada, (local_i, visitante_i, gl, gv) in enumerate(resultados, start=1):
-        partido = Partido(
-            fecha_partido=date(2026, 3, jornada),
-            hora_partido=time(16, 0),
-            jornada=jornada,
-            categoria="Primera",
-            torneo=torneo,
-            fase=fase,
-            equipo_local=equipos[local_i],
-            equipo_visitante=equipos[visitante_i],
-            goles_local=gl,
-            goles_visitante=gv,
-            jugado=True,
-        )
-        db.session.add(partido)
+    # Equipos por categoría, con su plantel.
+    partidos_creados = 0
+    for categoria in LIGA.categorias:
+        equipos = []
+        for club, plantel in zip(clubes, jugadores):
+            equipo = Equipo(club=club, categoria=categoria.parametro_url)
+            db.session.add(equipo)
+            equipos.append(equipo)
+        db.session.flush()
+        for equipo, plantel in zip(equipos, jugadores):
+            for jugador in plantel[:8]:
+                db.session.add(JugadorEquipo(numero_carnet=jugador.numero_carnet, equipo_id=equipo.id))
         db.session.flush()
 
-        if gl:
-            goleador = jugadores_por_equipo[equipos[local_i].id][0]
-            db.session.add(EstadoJugadorPartido(
-                id_jugador=goleador.numero_carnet, id_partido=partido.id, cant_goles=gl
-            ))
-        if gv:
-            goleador = jugadores_por_equipo[equipos[visitante_i].id][0]
-            db.session.add(EstadoJugadorPartido(
-                id_jugador=goleador.numero_carnet, id_partido=partido.id, cant_goles=gv
-            ))
+        # Cuatro fechas jugadas (una por semana hacia atrás) y una próxima.
+        for nro, cruces in enumerate(_rondas(len(clubes)), start=1):
+            if nro > 5:
+                break
+            jugada = nro <= 4
+            for pos, (local, visitante) in enumerate(cruces):
+                if jugada:
+                    fecha = hoy - timedelta(days=7 * (5 - nro) + 1)
+                    goles_l = azar.choice([0, 0, 1, 1, 1, 2, 2, 3])
+                    goles_v = azar.choice([0, 0, 1, 1, 2, 2, 3])
+                else:
+                    fecha = hoy + timedelta(days=2 + pos // 3)
+                    goles_l = goles_v = 0
+                partido = Partido(
+                    fecha_partido=fecha,
+                    hora_partido=time(11 + (pos % 4) * 2, 30 if pos % 2 else 0),
+                    jornada=nro,
+                    categoria=categoria.parametro_url,
+                    torneo=torneo_activo,
+                    fase=fase_regular,
+                    equipo_local=equipos[local],
+                    equipo_visitante=equipos[visitante],
+                    goles_local=goles_l,
+                    goles_visitante=goles_v,
+                    jugado=jugada,
+                )
+                db.session.add(partido)
+                db.session.flush()
+                partidos_creados += 1
+
+                if not jugada:
+                    continue
+                # Goles y tarjetas: se acumulan por jugador para respetar la clave (jugador, partido).
+                estadisticas = {}
+                for indice_club, goles in ((local, goles_l), (visitante, goles_v)):
+                    for _ in range(goles):
+                        autor = jugadores[indice_club][azar.choice([0, 0, 0, 1, 1, 2, 3])]
+                        estadisticas.setdefault(autor.numero_carnet, [0, 0, 0])[0] += 1
+                    if azar.random() < .35:
+                        estadisticas.setdefault(jugadores[indice_club][azar.randrange(4, 9)].numero_carnet, [0, 0, 0])[1] += 1
+                    if azar.random() < .05:
+                        estadisticas.setdefault(jugadores[indice_club][azar.randrange(4, 9)].numero_carnet, [0, 0, 0])[2] += 1
+                for id_jugador, (g, a, r) in estadisticas.items():
+                    db.session.add(EstadoJugadorPartido(
+                        id_jugador=id_jugador, id_partido=partido.id,
+                        cant_goles=g, tarjetas_amarillas=a, tarjetas_rojas=r,
+                    ))
+        db.session.flush()
+
+    # Noticias y videos de ejemplo (los videos son películas abiertas de Blender, de uso libre).
+    noticias = [
+        ("El puntero ganó el clásico y sigue arriba", "Primera", "puntero-gano-el-clasico",
+         "<p>Con un gol sobre el final, el líder venció 2 a 1 y estiró a tres puntos su ventaja en la cima de la tabla.</p>"
+         "<p>El próximo fin de semana visita a uno de los cuatro equipos que lo siguen.</p>"),
+        ("La Sexta ya tiene a sus cuatro semifinalistas", "Inferiores", "sexta-ya-tiene-semifinalistas",
+         "Se definieron los cuatro clasificados y los cruces arrancan el fin de semana."),
+        ("Nuevo horario para la Reserva desde la próxima fecha", "Institucional", "nuevo-horario-reserva",
+         "Desde la próxima fecha, los partidos de Reserva se juegan una hora antes que los de Primera."),
+    ]
+    for pos, (titulo, categoria, slug_noticia, contenido) in enumerate(noticias):
+        db.session.add(Noticia(
+            titulo=titulo, contenido=contenido, categoria=categoria, slug=slug_noticia,
+            id_autor=periodista_demo.id_usuario,
+            fecha_publicacion=datetime.utcnow() - timedelta(days=pos * 2 + 1),
+        ))
+    videos = [
+        ("Resumen de la fecha 4", "https://www.youtube.com/watch?v=aqz-KE-bpKQ"),
+        ("Los mejores goles del mes", "https://www.youtube.com/watch?v=eRsGyueVLvQ"),
+        ("Entrevista al capitán del puntero", "https://www.youtube.com/watch?v=R6MlUcmOul8"),
+    ]
+    for pos, (titulo, url) in enumerate(videos):
+        db.session.add(Video(
+            titulo_video=titulo, url=url, descripcion="Video de muestra para el entorno demo.",
+            id_autor=periodista_demo.id_usuario, jornada_jugada=4,
+            fecha_subida=datetime.utcnow() - timedelta(days=pos * 3 + 1),
+        ))
     db.session.flush()
 
-    db.session.add(Noticia(
-        titulo="Bienvenido al modo demo",
-        contenido=(
-            "Este contenido fue generado por 'flask reset-demo-db' para mostrar "
-            "el panel de noticias con datos de prueba, sin tocar la base real."
-        ),
-        id_autor=periodista_demo.id_usuario,
-        categoria="General",
-        slug="bienvenido-al-modo-demo",
-    ))
-
-    db.session.add(Video(
-        titulo_video="Resumen de ejemplo",
-        url="https://www.youtube.com/watch?v=demo00001",
-        descripcion="Video de muestra para el entorno demo.",
-        id_autor=periodista_demo.id_usuario,
-        jornada_jugada=1,
-    ))
+    return f"{len(clubes)} clubes, {len(LIGA.categorias)} categorías, {partidos_creados} partidos"

@@ -11,6 +11,7 @@ from sqlalchemy.orm import joinedload
 from app.utils.email_utils import enviar_mail_bienvenida, enviar_mail_jornada, jornada_completa
 from app.utils.capturas_redes import generar_capturas_jornada, BLOQUES_CATEGORIAS
 from app.ligas import LIGA, FORMATO
+from app.temas import tema_actual
 from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -29,13 +30,23 @@ views = Blueprint('views', __name__)
 
 
 def admin_required(f):
-    """Exige sesión iniciada y rol administrador (mismo criterio que adminview)."""
+    """Exige sesión iniciada y rol administrador (mismo criterio que adminview).
+
+    Las rutas de /api/ responden JSON (401 sin sesión, 403 sin permiso) en vez
+    de redirigir, porque las consume JavaScript y no una persona.
+    """
     from functools import wraps
 
     @wraps(f)
-    @login_required
     def wrapper(*args, **kwargs):
+        es_api = request.path.startswith('/api/')
+        if not current_user.is_authenticated:
+            if es_api:
+                return jsonify({"error": "Iniciá sesión para continuar."}), 401
+            return current_app.login_manager.unauthorized()
         if current_user.rol != 'administrador':
+            if es_api:
+                return jsonify({"error": "Solo los administradores pueden hacer esto."}), 403
             flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
             return redirect(url_for('views.index'))
         return f(*args, **kwargs)
@@ -53,7 +64,7 @@ def index():
 
     # Resumen de fixture, tabla y goleadores: solo lo piden los temas que lo
     # muestran en el inicio (theme.json -> "portada": true).
-    portada = _datos_portada() if current_app.config.get("TEMA", {}).get("portada") else None
+    portada = _datos_portada() if tema_actual(current_app).get("portada") else None
 
     return render_template(
         'index.html',
@@ -184,6 +195,7 @@ def todos_videos():
 # VISTA PANEL CARGA TORNEOS, FASES Y TEMPORADAS
 # ============================
 @views.route('/cargar_parametros', methods=['GET'])
+@admin_required
 def cargar_parametros_view():
     torneos = Torneo.query.order_by(Torneo.nombre).all()
     fases = Fase.query.order_by(Fase.nombre).all()
@@ -737,6 +749,7 @@ def calcular_rachas(tabla, categoria):
 # RUTA DE RECALCULO MANUAL (DEBUG)
 # ===========================================
 @views.route('/recalcular_tabla/<categoria>')
+@admin_required
 def recalcular_tabla_manual(categoria):
     categoria = categoria.lower()
     categorias_validas = LIGA.slugs_categorias
@@ -1082,6 +1095,8 @@ def generar_capturas_manual():
     generadas = generar_capturas_jornada(bloque=bloque, jornada=jornada)
     if generadas:
         flash(f'Se generaron {len(generadas)} capturas para {bloque.capitalize()} - Jornada {jornada}.', 'success')
+    elif LIGA.demo:
+        flash('En la demo no se generan capturas: en una liga real se crean solas al completarse la jornada.', 'info')
     else:
         flash('No se generó ninguna captura. Revisá que existan partidos cargados para esa jornada.', 'danger')
 
@@ -1090,6 +1105,7 @@ def generar_capturas_manual():
 
 
 @views.route("/cargar_clubes", methods=["GET", "POST"])
+@admin_required
 def cargar_clubes():
     if request.method == "POST":
         nombre = request.form.get("nombre")
@@ -1105,11 +1121,14 @@ def cargar_clubes():
 
         # Si se subió un archivo
         if archivo and archivo.filename != "":
-            resultado = cloudinary.uploader.upload(
-                archivo,
-                folder="escudosclubes"  # opcional pero recomendado
-            )
-            escudo_url = resultado.get("secure_url")
+            if LIGA.demo:
+                flash("En la demo no se guardan imágenes: el club se creó sin escudo.", "info")
+            else:
+                resultado = cloudinary.uploader.upload(
+                    archivo,
+                    folder="escudosclubes"  # opcional pero recomendado
+                )
+                escudo_url = resultado.get("secure_url")
 
         nuevo_club = Club(
             nombre=nombre,
@@ -1128,6 +1147,7 @@ def cargar_clubes():
 
 #-------------------------CARGAR EQUIPOS-----------------------#    
 @views.route("/cargar_equipos", methods=["GET", "POST"])
+@admin_required
 def cargar_equipos():
 
     clubes = Club.query.order_by(Club.nombre.asc()).all()
@@ -1182,6 +1202,7 @@ def cargar_equipos():
 
 
 @views.route("/categorias_cargadas/<int:club_id>")
+@admin_required
 def categorias_cargadas(club_id):
     equipos = Equipo.query.filter_by(club_id=club_id).all()
     categorias = [e.categoria for e in equipos]
@@ -1190,6 +1211,7 @@ def categorias_cargadas(club_id):
 
 #-------------------------CARGAR JUGADORES-----------------------#
 @views.route('/cargar_jugadores', methods=['GET', 'POST'])
+@admin_required
 def cargar_jugadores():
 
     clubes = Club.query.order_by(Club.nombre).all()
@@ -1276,7 +1298,7 @@ def cargar_jugadores():
 #   IMPORTAR JUGADORES DESDE EXCEL / GOOGLE SHEETS
 # ============================================================
 @views.route('/importar_jugadores_excel', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def importar_jugadores_excel():
 
     if request.method == 'POST':
@@ -1439,6 +1461,7 @@ def importar_jugadores_excel():
 
 
 @views.route('/obtener_datos_club/<int:club_id>')
+@admin_required
 def obtener_datos_club(club_id):
 
     jugadores = Jugador.query.filter_by(club_id=club_id).order_by(Jugador.apellido).all()
@@ -1466,6 +1489,7 @@ def obtener_datos_club(club_id):
 #   ASIGNAR JUGADOR A CATEGORÍA
 # ============================================================
 @views.route('/asignar_jugador_categoria', methods=['GET', 'POST'])
+@admin_required
 def asignar_jugador_categoria():
     clubes = Club.query.order_by(Club.nombre).all()
 
@@ -1520,6 +1544,7 @@ def asignar_jugador_categoria():
 
 #-------------------------JUGADORES POR EQUIPO-----------------------#
 @views.route("/api/jugadores_por_equipo/<int:equipo_id>")
+@admin_required
 def jugadores_por_equipo(equipo_id):
     try:
         jug_eq = (
@@ -1546,6 +1571,7 @@ def jugadores_por_equipo(equipo_id):
         return jsonify({"error": str(e)}), 500
 
 @views.route('/info_jugador/<int:carnet>')
+@admin_required
 def info_jugador(carnet):
 
     j = Jugador.query.get(carnet)
@@ -1567,7 +1593,7 @@ def info_jugador(carnet):
 # PANEL DE CARGA DE PARTIDOS
 # ============================
 @views.route('/cargar_fixture_mayores', methods=['GET'])
-@login_required
+@admin_required
 def cargar_fixture_mayores_view():
     temporada_activa = Temporada.query.filter_by(activa=True).first()
     if not temporada_activa:
@@ -1633,7 +1659,7 @@ def cargar_fixture_mayores_view():
 # GUARDAR PARTIDO MAYORES
 # =========================
 @views.route('/guardar_partido_mayores', methods=['POST'])
-@login_required
+@admin_required
 def guardar_partido_mayores():
     data = request.form
     if not data:
@@ -1757,6 +1783,7 @@ def guardar_partido_mayores():
 # FIXTURE OCUPADOS MAYORES
 # =========================
 @views.route('/fixture/ocupados/<int:jornada>', methods=['GET'])
+@admin_required
 def fixture_ocupados(jornada):
 
     # 🔹 Obtener torneo activo de la temporada activa
@@ -2003,7 +2030,7 @@ def generar_fixture_automatico_mayores():
 
 
 @views.route('/vista_fixture_generado_mayores')
-@login_required
+@admin_required
 def vista_fixture_generado_mayores():
     temporada_activa = Temporada.query.filter_by(activa=True).first()
     torneo_activo = (
@@ -2058,7 +2085,7 @@ def vista_fixture_generado_mayores():
 # CARGAR FIXTURE INFERIORES
 # ====================================================
 @views.route('/cargar_fixture_inferiores', methods=['GET'])
-@login_required
+@admin_required
 def cargar_fixture_inferiores():
     clubes = Club.query.order_by(Club.nombre).all()
     total_jornadas = len(clubes) - 1
@@ -2075,7 +2102,7 @@ def cargar_fixture_inferiores():
 # =========================
 CATEGORIAS_INFERIORES = ["quinta", "sexta", "septima"]
 @views.route("/fixture_ocupados_inferiores/<int:jornada>")
-@login_required
+@admin_required
 def fixture_ocupados_inferiores(jornada):
     """
     Retorna clubes ocupados y partidos cargados de la jornada
@@ -2152,7 +2179,7 @@ def fixture_ocupados_inferiores(jornada):
 # GUARDAR PARTIDO INFERIORES
 # ====================================================
 @views.route('/guardar_partido_inferiores', methods=['POST'])
-@login_required
+@admin_required
 def guardar_partido_inferiores():
 
     data = request.form or request.get_json()
@@ -2410,7 +2437,7 @@ def generar_fixture_automatico_inferiores():
 
 
 @views.route('/vista_fixture_generado_inferiores')
-@login_required
+@admin_required
 def vista_fixture_generado_inferiores():
     temporada_activa = Temporada.query.filter_by(activa=True).first()
     torneo_activo = (
@@ -2500,6 +2527,7 @@ def vista_fixture_generado_inferiores():
 # 1) CARGAR ESTADÍSTICAS MAYORES
 # ====================================================
 @views.route('/cargar_estadisticas_mayores')
+@admin_required
 def cargar_estadisticas_mayores():
     # Obtener jornadas regulares
     jornadas = (
@@ -2538,6 +2566,7 @@ def cargar_estadisticas_mayores():
 # ====================================================
 
 @views.route("/api/info_cruce_playoff_inferiores/<int:cruce_id>/<categoria>/<ida_vuelta>")
+@admin_required
 def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
     """
     Devuelve información detallada de un cruce de playoff de inferiores (por partido, categoría e ida/vuelta)
@@ -2599,6 +2628,7 @@ def info_cruce_playoff_inferiores(cruce_id, categoria, ida_vuelta):
         return jsonify({"error": "Error interno"})
     
 @views.route("/api/cruces_playoff_inferiores/<int:fase_id>/<categoria>/<ida_vuelta>")
+@admin_required
 def cruces_playoff_inferiores(fase_id, categoria, ida_vuelta):
     """
     Devuelve los cruces de playoff para una fase, categoría e ida/vuelta específica (inferiores)
@@ -2724,6 +2754,7 @@ def chequeo_resultados_playoff_inferiores():
         return f"Error: {str(e)}", 500
 
 @views.route('/playoff/partidos_inferiores', methods=['GET'])
+@admin_required
 def vista_partidos_playoff_inferiores():
     from app.models.models import Torneo
     torneos = Torneo.query.order_by(Torneo.id.desc()).all()
@@ -2754,6 +2785,7 @@ def vista_partidos_playoff_inferiores():
 # 2) CRUCES PLAYOFF MAYORES (NUEVO)
 # ====================================================
 @views.route("/api/cruces_playoff_mayores/<int:fase_id>/<categoria>/<ida_vuelta>")
+@admin_required
 def cruces_playoff_mayores(fase_id, categoria, ida_vuelta):
     """
     Retorna los cruces de playoff para una fase, categoría e ida/vuelta específica
@@ -2835,6 +2867,7 @@ def cruces_playoff_mayores(fase_id, categoria, ida_vuelta):
 # 2.4) INFO CRUCE PLAYOFF (NUEVO)
 # ====================================================
 @views.route("/api/info_cruce_playoff/<int:cruce_id>/<categoria>/<ida_vuelta>")
+@admin_required
 def info_cruce_playoff(cruce_id, categoria, ida_vuelta):
     """
     Retorna información de un cruce playoff específico con ambas categorías
@@ -2934,6 +2967,7 @@ def info_cruce_playoff(cruce_id, categoria, ida_vuelta):
 # 1) CRUCES PENDIENTES MAYORES
 # ====================================================
 @views.route("/api/cruces_pendientes_mayores/<int:jornada>")
+@admin_required
 def cruces_pendientes_mayores(jornada):
     # Obtener torneo activo directamente
     torneo_activo = Torneo.query.filter_by(activo=True).first()
@@ -2985,6 +3019,7 @@ def cruces_pendientes_mayores(jornada):
 # 2) INFO CRUCE MAYORES
 # ====================================================
 @views.route("/api/info_cruce/<int:cruce_id>")
+@admin_required
 def info_cruce(cruce_id):
     try:
         partido_base = Partido.query.get_or_404(cruce_id)
@@ -3348,12 +3383,14 @@ def validar_y_guardar_estadisticas(data, categoria):
 # 5) ENDPOINTS ESPECÍFICOS
 # ====================================================
 @views.route("/api/guardar_primera", methods=["POST"])
+@admin_required
 def guardar_primera():
     data = request.get_json() or {}
     resp, code = validar_y_guardar_estadisticas(data, "primera")
     return jsonify(resp), code
 
 @views.route("/api/guardar_reserva", methods=["POST"])
+@admin_required
 def guardar_reserva():
     data = request.get_json() or {}
     resp, code = validar_y_guardar_estadisticas(data, "reserva")
@@ -3364,6 +3401,7 @@ def guardar_reserva():
 # CARGAR ESTADÍSTICAS INFERIORES
 # ====================================================
 @views.route('/cargar_estadisticas_inferiores')
+@admin_required
 def cargar_estadisticas_inferiores():
     categorias_inferiores = ["quinta", "sexta", "septima"]
 
@@ -3400,6 +3438,7 @@ def cargar_estadisticas_inferiores():
 # CRUCES POR JORNADA
 # ====================================================
 @views.route("/api/cruces_por_jornada_inferiores/<int:jornada>")
+@admin_required
 def cruces_por_jornada_inferiores(jornada):
 
 
@@ -3503,6 +3542,7 @@ def cruces_por_jornada_inferiores(jornada):
 # INFO CRUCE
 # ====================================================
 @views.route("/api/info_cruce_inferiores/<int:id_representativo>")
+@admin_required
 def info_cruce_inferiores(id_representativo):
     p = Partido.query.get_or_404(id_representativo)
     # Buscar todos los partidos de esa jornada y esos clubes para las 3 categorías
@@ -3535,6 +3575,7 @@ def info_cruce_inferiores(id_representativo):
 # PARTIDOS DEL CRUCE
 # ====================================================
 @views.route('/get_partidos_cruce_inferiores', methods=['POST'])
+@admin_required
 def get_partidos_cruce_inferiores():
     data = request.get_json()
     jornada = data.get("jornada")
@@ -3592,6 +3633,7 @@ def get_partidos_cruce_inferiores():
 # CRUCES PENDIENTES
 # ====================================================
 @views.route("/api/cruces_pendientes/<int:jornada>")
+@admin_required
 def cruces_pendientes(jornada):
     torneo_nombre = request.args.get("torneo", "Apertura")
     categorias = ["quinta", "sexta", "septima"]
@@ -3634,6 +3676,7 @@ def fase_requiere_ganador(partido):
     return partido.fase.nombre in fases_decisivas
 
 @views.route("/api/global_cruce/<int:cruce_id>/<categoria>")
+@admin_required
 def global_cruce(cruce_id, categoria):
 
     try:
@@ -3679,6 +3722,7 @@ def global_cruce(cruce_id, categoria):
 # GUARDAR ESTADÍSTICAS INFERIORES
 # ====================================================
 @views.route('/api/guardar_inferiores', methods=['POST'])
+@admin_required
 def guardar_inferiores():
 
     data = request.get_json(force=True)
@@ -4175,6 +4219,7 @@ def obtener_ganadores_cuartos(torneo_id, categoria):
 
 
 @views.route("/api/playoff/clubes_clasificados", methods=["GET"])
+@admin_required
 def clubes_clasificados():
     
     from app.utils.playoff_utils import obtener_ganador_partido
@@ -4357,6 +4402,7 @@ def clubes_clasificados():
 # CARGAR PARTIDOS PLAYOFF
 #-----------------------------------------
 @views.route("/api/playoff/jornadas_disponibles", methods=["GET"])
+@admin_required
 def jornadas_disponibles():
     torneo_id = request.args.get("torneo_id", type=int)
     fase_id = request.args.get("fase_id", type=int)
@@ -4393,6 +4439,7 @@ def jornadas_disponibles():
 
 
 @views.route("/api/playoff/crear_partido", methods=["POST"])
+@admin_required
 def crear_partido_playoff():
     try:
         data = request.get_json()
@@ -4595,6 +4642,7 @@ def crear_partido_playoff():
 # VISTA HTML: CARGA DE PARTIDOS PLAYOFF
 # ===========================================
 @views.route("/crear_partido_playoff", methods=["GET"])
+@admin_required
 def vista_crear_partido_playoff():
 
     # =========================
@@ -4648,6 +4696,7 @@ def vista_crear_partido_playoff():
 
 
 @views.route("/playoff/partidos", methods=["GET"])
+@admin_required
 def vista_partidos_playoff():
     torneos = Torneo.query.order_by(Torneo.id.desc()).all()
     
@@ -4745,7 +4794,9 @@ def cargar_noticia():
         # ---------------------------
         # SUBIDA DE IMAGEN A CLOUDINARY
         # ---------------------------
-        if file and file.filename != "" and allowed_file(file.filename):
+        if LIGA.demo and file and file.filename != "":
+            flash("En la demo no se guardan imágenes: la noticia se publicó sin foto.", "info")
+        elif file and file.filename != "" and allowed_file(file.filename):
             try:
                 # Verificar que Cloudinary esté configurado
                 cloud_name = current_app.config.get('CLOUDINARY_CLOUD_NAME')
@@ -4820,14 +4871,6 @@ def cargar_noticia():
 def noticia_detalle(noticia_id):
     noticia = Noticia.query.get_or_404(noticia_id)
     return render_template('noticia_detalle.html', noticia=noticia)
-
-@views.route('/cargar_resultados_admin')
-@login_required
-def cargar_resultados_admin():
-    if current_user.rol != 'administrador':
-        flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
-        return redirect(url_for('views.index'))
-    return render_template('plantillasAdmin/cargar_resultados.html', usuario=current_user)
 
 # CHEQUEO DE RESULTADOS PLAYOFF
 @views.route('/playoff/chequeo_resultados')

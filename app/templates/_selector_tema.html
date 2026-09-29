@@ -1,0 +1,63 @@
+{#- Selector de diseño y color de marca de la demo pública. Solo se dibuja con DEMO_TEMAS=1
+    (variable `escaparate`) y no aparece si la página se incrusta con ?embed=1.
+    Es independiente del tema: lleva su propio CSS y JS (prefijo esc-). -#}
+{% if escaparate and not escaparate.embed %}
+<style>
+.esc{position:fixed;left:16px;bottom:16px;z-index:9999;font:500 14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:#0b1220}
+.esc *{box-sizing:border-box}
+.esc-btn{display:flex;align-items:center;gap:10px;height:46px;padding:0 18px 0 14px;border-radius:999px;border:0;background:#0b1220;color:#fff;font:inherit;font-weight:600;cursor:pointer;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.esc-btn i{width:14px;height:14px;border-radius:50%;background:conic-gradient(#12805a,#3d6bff,#e2731f,#d42e5b,#12805a)}
+.esc-panel{position:absolute;left:0;bottom:56px;width:min(340px,calc(100vw - 32px));padding:18px;border-radius:20px;background:#fff;box-shadow:0 24px 60px rgba(0,0,0,.35);display:none}
+.esc.abierto .esc-panel{display:block}
+.esc h4{margin:0 0 10px;font:700 13px/1 system-ui,sans-serif;color:#5b6577}
+.esc-temas{display:grid;gap:6px;margin-bottom:16px}
+.esc-tema{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:12px;border:1.5px solid #e2e6ee;background:#fff;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.esc-tema b{font-weight:700}
+.esc-tema small{color:#5b6577;font-size:12px}
+.esc-tema[aria-pressed=true]{border-color:#0b1220;background:#f3f5f9}
+.esc-colores{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.esc-color{width:30px;height:30px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px #cfd5e1;cursor:pointer;padding:0}
+.esc-color[aria-pressed=true]{box-shadow:0 0 0 2.5px #0b1220}
+.esc-color.auto{background:conic-gradient(#12805a,#3d6bff,#e2731f,#d42e5b,#12805a)}
+.esc input[type=color]{width:34px;height:34px;border:0;padding:0;background:none;cursor:pointer}
+.esc-nota{margin:14px 0 0;font-size:12px;color:#5b6577}
+@media(max-width:860px){.esc{bottom:calc(92px + env(safe-area-inset-bottom));left:12px}}
+</style>
+<div class="esc" id="esc">
+  <div class="esc-panel" role="dialog" aria-label="Cambiar el diseño de la demo">
+    <h4>Diseño</h4>
+    <div class="esc-temas">
+      {% for t in escaparate.temas %}
+      <button type="button" class="esc-tema" data-tema="{{ t.slug }}" aria-pressed="{{ 'true' if t.slug == escaparate.actual else 'false' }}"><b>{{ t.nombre }}</b><small>{{ t.descripcion|truncate(70) }}</small></button>
+      {% endfor %}
+    </div>
+    <h4>Color de marca</h4>
+    <div class="esc-colores">
+      <button type="button" class="esc-color auto" data-marca="auto" aria-label="Colores originales del diseño" title="Colores originales" aria-pressed="{{ 'true' if not escaparate.marca else 'false' }}"></button>
+      {% for c in ['#12805a', '#3d6bff', '#e2731f', '#d42e5b', '#6b54d6', '#0e8f8f', '#b8a400'] %}
+      <button type="button" class="esc-color" data-marca="{{ c }}" style="background:{{ c }}" aria-label="Color {{ c }}" aria-pressed="{{ 'true' if escaparate.marca == c else 'false' }}"></button>
+      {% endfor %}
+      <input type="color" id="esc-libre" value="{{ escaparate.marca or '#3d6bff' }}" aria-label="Elegir otro color">
+    </div>
+    <p class="esc-nota">Es una demo: los datos y los clubes son ficticios. Así se vería tu liga con su propio diseño y colores.</p>
+  </div>
+  <button type="button" class="esc-btn" id="esc-abrir" aria-expanded="false"><i></i>Cambiar diseño</button>
+</div>
+<script>
+(function () {
+  var raiz = document.getElementById('esc'), boton = document.getElementById('esc-abrir');
+  function ir(clave, valor) {
+    var p = new URLSearchParams(location.search);
+    p.set(clave, valor);
+    location.search = p.toString();
+  }
+  boton.addEventListener('click', function () {
+    var abierto = raiz.classList.toggle('abierto');
+    boton.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+  });
+  raiz.querySelectorAll('[data-tema]').forEach(function (b) { b.addEventListener('click', function () { ir('tema', b.dataset.tema); }); });
+  raiz.querySelectorAll('[data-marca]').forEach(function (b) { b.addEventListener('click', function () { ir('marca', b.dataset.marca); }); });
+  document.getElementById('esc-libre').addEventListener('change', function (e) { ir('marca', e.target.value); });
+})();
+</script>
+{% endif %}

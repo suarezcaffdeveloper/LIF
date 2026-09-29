@@ -133,6 +133,7 @@ img{max-width:100%}
 
 /* ───────── SECCIONES ───────── */
 section.s{padding:clamp(70px,10vw,130px) 0}
+#fixture,#tabla,#goleadores,#noticias{scroll-margin-top:40px}
 .s-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:38px}
 .s-head h1,.s-head h2{font:900 clamp(42px,6vw,88px)/.92 var(--f-display);text-transform:uppercase}
 .s-head small{display:block;font:500 15px var(--f-body);text-transform:none;letter-spacing:0;color:var(--text-dim);margin-top:14px;max-width:46ch;line-height:1.5}

@@ -73,9 +73,14 @@ def _cargar_escudo(escudo_url, size):
     try:
         if not escudo_url:
             raise ValueError("sin escudo_url")
-        resp = requests.get(escudo_url, timeout=6)
-        resp.raise_for_status()
-        imagen = Image.open(io.BytesIO(resp.content)).convert("RGBA")
+        if escudo_url.startswith("/static/"):
+            # Escudo guardado en la propia app (por ejemplo, los de la liga demo).
+            ruta = os.path.join(_UTILS_DIR, "..", "static", *escudo_url[len("/static/"):].split("/"))
+            imagen = Image.open(ruta).convert("RGBA")
+        else:
+            resp = requests.get(escudo_url, timeout=6)
+            resp.raise_for_status()
+            imagen = Image.open(io.BytesIO(resp.content)).convert("RGBA")
     except Exception:
         imagen = Image.open(_ESCUDO_DEFAULT_PATH).convert("RGBA")
 
@@ -357,6 +362,11 @@ def generar_capturas_jornada(bloque, jornada):
     fecha) de todas las categorías de un bloque ('mayores'/'inferiores') para
     la jornada indicada. Nunca lanza excepción: un fallo puntual (ej. un
     escudo caído) se loguea y se sigue con el resto."""
+    if LIGA.demo:
+        # Las capturas se suben a Cloudinary: en la demo no se generan.
+        current_app.logger.info("generar_capturas_jornada: omitido en liga de demostración")
+        return []
+
     bloque = bloque.lower().strip()
     categorias = BLOQUES_CATEGORIAS.get(bloque)
     if not categorias:

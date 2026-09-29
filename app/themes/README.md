@@ -72,6 +72,19 @@ Los temas que no lo piden reciben `portada = None` y no pagan las consultas extr
 
 `cancha` deriva su paleta de dos colores opcionales de la liga: `color_marca` (verde por defecto) y `color_marca_2` (naranja por defecto). Se definen en `app/ligas/<liga>/__init__.py`.
 
+## Modo escaparate (demo pública)
+
+Con `DEMO_TEMAS=1` cada visita elige el diseño y el color de marca, y la elección queda en la sesión y en los enlaces:
+
+- `?tema=cancha` (o `reflectores`, `clasico`) cambia el diseño.
+- `?marca=%23e2731f` reemplaza el color de marca (`color_marca` y `acento` de la liga) solo para esa visita; `?marca=auto` la quita.
+- `?embed=1` oculta el selector flotante, para incrustar la demo en un iframe.
+- El selector flotante (`app/templates/_selector_tema.html`) lo incluye cada `base.html` con `{% include "_selector_tema.html" ignore missing %}`. Un tema nuevo tiene que sumar esa línea para aparecer con la misma barra.
+
+Detalles de implementación (`app/temas.py`): cada tema tiene su propio entorno Jinja (así no se mezclan las plantillas compiladas), `/tema/...` sirve el estático del tema de la visita, y el nombre de los archivos estáticos de cada tema no debe repetirse (`cancha.css`, `reflectores.css`). Sin `DEMO_TEMAS` nada de esto está activo.
+
+Los enlaces de un tema deben armarse con `url_for(...)`, no con rutas escritas a mano, para que lleven la elección de la visita.
+
 ## Reglas para un tema nuevo
 
 - Empezar con `base.html` e `index.html`. El resto puede heredar de `clasico`.

@@ -201,7 +201,7 @@
     <div class="pane" data-group="goles" data-key="{{ c.categoria.slug }}"><div class="vacio">Todavía no hay goles cargados en {{ c.categoria.etiqueta_larga }}.</div></div>
     {% endif %}
     {% endfor %}
-    {% if cats %}<p><a href="/goleadores/{{ liga.categorias[0].slug }}" class="btn btn-ink btn-sm">Ver estadísticas completas</a></p>{% endif %}
+    {% if cats %}<p><a href="{{ url_for('views.mostrar_estadisticas', categoria=liga.categorias[0].slug) }}" class="btn btn-ink btn-sm">Ver estadísticas completas</a></p>{% endif %}
   </div>
 </section>
 

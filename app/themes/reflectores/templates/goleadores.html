@@ -22,7 +22,7 @@
     <div class="s-head">
       <h1>Goleadores<small>{{ cat.etiqueta_larga if cat else categoria|capitalize }} · Temporada {{ anio }}</small></h1>
       <nav class="tabs" aria-label="Categoría">
-        {% for c in liga.categorias %}<a href="/goleadores/{{ c.slug }}" {% if c.slug == categoria|lower %}aria-current="page"{% endif %}>{{ c.etiqueta }}</a>{% endfor %}
+        {% for c in liga.categorias %}<a href="{{ url_for('views.mostrar_estadisticas', categoria=c.slug) }}" {% if c.slug == categoria|lower %}aria-current="page"{% endif %}>{{ c.etiqueta }}</a>{% endfor %}
       </nav>
     </div>
 

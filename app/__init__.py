@@ -1,4 +1,4 @@
-from flask import Flask, request, session
+from flask import Flask, g, has_request_context, request, session
 import re
 import os
 from datetime import datetime
@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 from flask_login import LoginManager, user_logged_in, user_logged_out
 from flask_mail import Mail
-from app.commands import create_admin, reset_demo_db, _seed_demo_data
+from app.commands import create_admin, reset_demo_db, seed_liga_demo, _seed_demo_data
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
@@ -15,7 +15,8 @@ import cloudinary.api
 from .database.db import db, DEMO_BIND_KEY, DEMO_ROLE, is_demo_mode, set_demo_mode
 from .models.models import Usuario
 from .ligas import LIGA, FORMATO, PRODUCTO
-from .temas import cargar_tema
+from dataclasses import replace
+from .temas import AppConTemas, cargar_tema, tema_actual, contexto_escaparate
 
 mail = Mail()
 
@@ -73,16 +74,19 @@ def _normalizar_db_url(nombre_var, valor):
 
 
 def create_app():
-    app = Flask(__name__)
+    app = AppConTemas(__name__)
     app.cli.add_command(create_admin)
     app.cli.add_command(reset_demo_db)
+    app.cli.add_command(seed_liga_demo)
     # -----------------------
     # CONFIG GENERAL
     # -----------------------
     app.jinja_env.filters["youtube_id"] = youtube_id
 
     # Tema visual: `TEMA` (variable de entorno) o el tema configurado en la liga.
-    tema = cargar_tema(app, os.environ.get("TEMA") or LIGA.tema)
+    # Con DEMO_TEMAS=1 cada visita puede elegir tema y color (modo escaparate de la demo pública).
+    escaparate = os.environ.get("DEMO_TEMAS", "").strip().lower() in ("1", "true", "si", "sí")
+    tema = cargar_tema(app, os.environ.get("TEMA") or LIGA.tema, escaparate=escaparate)
     app.config["TEMA"] = tema
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
@@ -223,9 +227,15 @@ def create_app():
     def _inject_liga():
         # `liga` es la marca y configuración de la liga de esta instancia;
         # `producto` es el nombre de la plataforma (ElTablón).
+        liga = LIGA
+        marca = getattr(g, "marca", None) if has_request_context() else None
+        if marca:
+            # Modo escaparate: el color elegido en la visita reemplaza los colores de la liga.
+            liga = replace(LIGA, color_marca=marca, acento=marca, acento_dim=marca)
         return {
-            "liga": LIGA, "producto": PRODUCTO, "anio": datetime.now().year, "tema": tema,
+            "liga": liga, "producto": PRODUCTO, "anio": datetime.now().year, "tema": tema_actual(app),
             "clasificados": getattr(FORMATO, "CLASIFICADOS", 0),
+            "escaparate": contexto_escaparate(app),
         }
 
     @user_logged_in.connect_via(app)
@@ -260,8 +270,11 @@ def create_app():
         "MAIL_DEFAULT_SENDER", LIGA.email_remitente
     )
 
+    # En una liga de demostración nunca sale un mail real.
+    app.config["MAIL_SUPPRESS_SEND"] = bool(LIGA.demo)
+
     mail.init_app(app)
-    
+
     # -----------------------
     # CLOUDINARY CONFIG
     # -----------------------

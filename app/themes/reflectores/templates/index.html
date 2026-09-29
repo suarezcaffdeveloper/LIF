@@ -180,7 +180,7 @@
           {% endfor %}
         </div>
         {% endfor %}
-        {% if cats %}<p style="margin-top:16px"><a href="/goleadores/{{ liga.categorias[0].slug }}" class="btn btn-line btn-sm">Ver estadísticas completas</a></p>{% endif %}
+        {% if cats %}<p style="margin-top:16px"><a href="{{ url_for('views.mostrar_estadisticas', categoria=liga.categorias[0].slug) }}" class="btn btn-line btn-sm">Ver estadísticas completas</a></p>{% endif %}
       </div>
     </div>
   </div>

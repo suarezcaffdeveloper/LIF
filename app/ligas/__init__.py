@@ -42,6 +42,8 @@ class Liga:
     categorias: tuple = field(default_factory=tuple)
     tema: str = "clasico"
     resaltar_letra: int = -1         # índice de la letra de la sigla que va en color de acento (-1: ninguna)
+    # Liga de demostración: no envía mails ni sube archivos a servicios externos.
+    demo: bool = False
     # Colores de marca opcionales para temas claros (el tema deriva el resto de la
     # paleta). Sin valor, cada tema usa su paleta propia.
     color_marca: str = ""            # ej. '#0B4A34'
