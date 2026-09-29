@@ -1,0 +1,23 @@
+{#- Macros compartidas del tema Reflectores. Importar con:
+    {% from "_macros.html" import escudo, fecha_corta, hora with context %} -#}
+
+{% macro escudo(club, clase='') -%}
+{%- set por_defecto = url_for('static', filename='escudos/predeterminada.png') -%}
+<img class="crest {{ clase }}" src="{{ (club.escudo_url if club and club.escudo_url) or por_defecto }}" alt="{{ 'Escudo de ' ~ club.nombre if club else '' }}" loading="lazy" onerror="this.onerror=null;this.src='{{ por_defecto }}'">
+{%- endmacro %}
+
+{% macro fecha_corta(f) -%}
+{%- if f -%}
+{{ ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'][f.weekday()] }} {{ f.day }} {{ ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][f.month - 1] }}
+{%- else -%}
+Fecha a confirmar
+{%- endif -%}
+{%- endmacro %}
+
+{% macro hora(h) -%}
+{{ h.strftime('%H:%M') if h else 'A confirmar' }}
+{%- endmacro %}
+
+{% macro flecha() -%}
+<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6h8M6.5 2.5L10 6l-3.5 3.5"/></svg>
+{%- endmacro %}

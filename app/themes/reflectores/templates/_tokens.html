@@ -1,0 +1,17 @@
+{#- Paleta del tema Reflectores. Si la liga define color_marca se deriva el acento a partir de él;
+    si no, se usa el azul propio del tema. -#}
+{% set marca = liga.color_marca %}
+<style>
+:root{
+  --ink-950:#050914; --ink-900:#0A1020; --ink-800:#111A30; --ink-700:#1A2542;
+  --chalk:#ECF1FF; --mist:#8F9BB8; --live:#FF5468;
+  {% if marca %}
+  --volt-500:{{ marca }};
+  --volt-400:color-mix(in srgb,{{ marca }} 78%,#fff);
+  --volt-300:color-mix(in srgb,{{ marca }} 55%,#fff);
+  {% else %}
+  --volt-500:#3D6BFF; --volt-400:#6C8DFF; --volt-300:#9DB4FF;
+  {% endif %}
+  --max-len:{{ liga.hero_lineas | map('length') | max }};
+}
+</style>

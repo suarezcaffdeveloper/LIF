@@ -66,6 +66,10 @@ Los temas que no lo piden reciben `portada = None` y no pagan las consultas extr
 | `clasico` | oscuro | Diseño original. Es el tema base: lo que otro tema no define se toma de acá. |
 | `cancha` | claro | Editorial y pensado para celular. Sigla gigante con césped en movimiento, nav flotante que se oscurece al scrollear, barra de navegación inferior en el celular. |
 
+| `reflectores` | oscuro | Estadio nocturno. Reflectores que oscilan, cancha que se dibuja al cargar, nav de vidrio que se esconde al bajar, sliders que se arrastran y contadores animados. |
+
+`reflectores` toma su acento de `color_marca` (azul por defecto). Además de lo que usa `cancha`, el inicio le pide a `portada` los `totales` (`partidos` jugados y `goles`) para los contadores.
+
 `cancha` deriva su paleta de dos colores opcionales de la liga: `color_marca` (verde por defecto) y `color_marca_2` (naranja por defecto). Se definen en `app/ligas/<liga>/__init__.py`.
 
 ## Reglas para un tema nuevo

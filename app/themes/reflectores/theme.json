@@ -1,0 +1,6 @@
+{
+  "nombre": "Reflectores",
+  "descripcion": "Oscuro y de estadio nocturno: reflectores que oscilan, cancha que se dibuja al cargar, nav de vidrio que se esconde al bajar y sliders que se arrastran.",
+  "modo": "oscuro",
+  "portada": true
+}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_macros.html" import escudo with context %}
+{% block title %}{{ titulo }} - {{ liga.nombre_corto }}{% endblock %}
+
+{# Un partido: local, marcador (o "vs") y visitante, con sus goleadores. #}
+{% macro partido_fila(partido) %}
+<div class="mrow">
+  <div class="side">{{ escudo(partido.equipo_local.club) }}<div class="who"><span>{{ partido.equipo_local.club.nombre }}</span>
+    {% if partido.goleadores_local %}<small>{% for g in partido.goleadores_local %}{{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}{% endfor %}</small>{% endif %}</div></div>
+  <div class="mid">
+    {% if mostrar_resultados and partido.jugado %}
+      <div class="res">{{ partido.goles_local }} – {{ partido.goles_visitante }}</div>
+      {% if partido.definido_por_penales %}<small>({{ partido.penales_local }}-{{ partido.penales_visitante }}) pen.</small>{% endif %}
+    {% else %}
+      <div class="res next">vs</div>
+      {% if partido.fecha_partido %}<small>{{ partido.fecha_partido.strftime('%d/%m') }}{% if partido.hora_partido %} · {{ partido.hora_partido.strftime('%H:%M') }}{% endif %}</small>{% endif %}
+    {% endif %}
+  </div>
+  <div class="side r">{{ escudo(partido.equipo_visitante.club) }}<div class="who"><span>{{ partido.equipo_visitante.club.nombre }}</span>
+    {% if partido.goleadores_visitante %}<small>{% for g in partido.goleadores_visitante %}{{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}{% endfor %}</small>{% endif %}</div></div>
+</div>
+{% endmacro %}
+
+{% block content %}
+{# Se abre por defecto la última jornada con resultados. #}
+{% set ns = namespace(ultima=0) %}
+{% for nombre, ps in fechas_partidos.items() %}{% if ps | selectattr('jugado') | list %}{% set ns.ultima = loop.index0 %}{% endif %}{% endfor %}
+<section class="page">
+  <div class="wrap">
+    <div class="s-head">
+      <h1>{{ titulo }}</h1>
+      <nav class="tabs" aria-label="Categoría">
+        {% for c in liga.categorias %}<a href="{{ url_for('views.fixture', bloque=c.bloque, categoria=c.parametro_url) }}">{{ c.etiqueta }}</a>{% endfor %}
+      </nav>
+    </div>
+
+    {% if fechas_partidos %}
+    <div class="tabs jornadas" data-group="jornada" role="tablist">
+      {% for nombre, ps in fechas_partidos.items() %}
+      <button type="button" role="tab" data-key="j{{ loop.index0 }}" aria-selected="{{ 'true' if loop.index0 == ns.ultima else 'false' }}">{{ nombre }}</button>
+      {% endfor %}
+    </div>
+
+    {% for nombre, ps in fechas_partidos.items() %}
+    <div class="pane mrow-wrap" data-group="jornada" data-key="j{{ loop.index0 }}">
+      {% if ps and ps[0].es_ida_vuelta %}
+        {% set ida = ps | selectattr('jornada', 'equalto', 1) | list %}
+        {% set vuelta = ps | selectattr('jornada', 'equalto', 2) | list %}
+        {% if ida %}<p class="ronda">Ida</p>{% for p in ida %}{{ partido_fila(p) }}{% endfor %}{% endif %}
+        {% if vuelta %}<p class="ronda">Vuelta</p>{% for p in vuelta %}{{ partido_fila(p) }}{% endfor %}{% endif %}
+      {% else %}
+        {% for p in ps %}{{ partido_fila(p) }}{% endfor %}
+      {% endif %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="vacio">Todavía no hay partidos cargados para {{ titulo }}.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

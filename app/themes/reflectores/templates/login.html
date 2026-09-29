@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ingresar - {{ liga.nombre_corto }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% include "_tokens.html" %}
+<link rel="stylesheet" href="{{ url_for('tema.static', filename='css/reflectores.css') }}">
+</head>
+<body>
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% if mensajes %}<div class="flashes" role="status" style="top:20px">{% for categoria, mensaje in mensajes %}<div class="flash flash-{{ categoria }}">{{ mensaje }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+
+<main class="auth">
+  <div class="auth-card">
+    <a href="{{ url_for('views.index') }}" class="logo" aria-label="Volver al inicio">
+      <span class="logo-mark"><img src="{{ url_for('static', filename=liga.logo) }}" alt=""></span>
+      <div><b>{{ liga.nombre_corto }}</b><small>{{ liga.nombre }}</small></div>
+    </a>
+    <h1>Ingresar</h1>
+
+    <form method="POST" action="{{ url_for('views.login') }}">
+      <div class="field"><input type="email" name="email" placeholder="Email" autocomplete="email" required></div>
+      <div class="field">
+        <input type="password" id="password" name="password" placeholder="Contraseña" autocomplete="current-password" required>
+        <button type="button" class="eye" data-target="password" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <button type="submit" class="btn btn-solid">Ingresar</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('views.login') }}">
+      <input type="hidden" name="email" value="{{ liga.email_demo }}">
+      <input type="hidden" name="password" value="demo123">
+      <button type="submit" class="btn-demo">Probar la demo con el panel de administrador</button>
+    </form>
+
+    <div class="auth-links">
+      <p>¿No tenés cuenta? <a href="{{ url_for('views.register') }}">Creá una</a></p>
+      <a href="{{ url_for('views.index') }}">Seguir sin iniciar sesión</a>
+    </div>
+  </div>
+</main>
+<script src="{{ url_for('tema.static', filename='js/reflectores.js') }}" defer></script>
+</body>
+</html>

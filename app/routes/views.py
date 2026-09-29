@@ -67,7 +67,8 @@ def index():
 def _datos_portada():
     """Resumen para el inicio de los temas que lo muestran.
 
-    Devuelve {"categorias": [...], "proximo": Partido | None}. Cada categoría
+    Devuelve {"categorias": [...], "proximo": Partido | None, "totales": {"partidos", "goles"}}.
+    Cada categoría
     trae la fecha en juego (la última con resultados o, si no hay, la primera),
     sus partidos de fase regular, la tabla y los máximos goleadores.
     `proximo` es el partido pendiente más cercano de toda la liga.
@@ -122,7 +123,19 @@ def _datos_portada():
             "goleadores": goleadores,
         })
 
-    return {"categorias": categorias, "proximo": proximo}
+    totales = {"partidos": 0, "goles": 0}
+    if torneo:
+        partidos_jugados, goles = (
+            db.session.query(
+                func.count(Partido.id),
+                func.coalesce(func.sum(Partido.goles_local + Partido.goles_visitante), 0),
+            )
+            .filter(Partido.torneo_id == torneo.id, Partido.jugado == True)
+            .one()
+        )
+        totales = {"partidos": partidos_jugados, "goles": int(goles)}
+
+    return {"categorias": categorias, "proximo": proximo, "totales": totales}
   
 @views.route('/club/<int:club_id>')
 def club_plantel(club_id):
