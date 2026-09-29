@@ -1,6 +1,6 @@
 ﻿{% extends "base.html" %}
 
-{% block title %}Inicio - LIF{% endblock %}
+{% block title %}Inicio - {{ liga.nombre_corto }}{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -467,9 +467,9 @@
 
 <!-- ─── HERO ─── --> 
 <section class="lif-hero">
-    <p class="hero-eyebrow">Temporada 2026</p>
-    <h1 class="hero-title">Liga<br><em>Interprovincial</em><br>de Fútbol</h1>
-    <p class="hero-sub">Seguí toda la acción, los resultados, goleadores y posiciones de la liga en tiempo real.</p>
+    <p class="hero-eyebrow">Temporada {{ anio }}</p>
+    <h1 class="hero-title">{{ liga.hero_lineas[0] }}<br><em>{{ liga.hero_lineas[1] }}</em><br>{{ liga.hero_lineas[2] }}</h1>
+    <p class="hero-sub">{{ liga.descripcion }}</p>
 </section>
 
 <!-- ─── STAT BAR ─── -->
@@ -480,11 +480,11 @@
         <span class="label">Clubes</span>
     </div>
     <div class="stat-item">
-        <span class="num">5</span>
+        <span class="num">{{ liga.categorias | length }}</span>
         <span class="label">Categorías</span>
     </div>
     <div class="stat-item">
-        <span class="num">2026</span>
+        <span class="num">{{ anio }}</span>
         <span class="label">Temporada</span>
     </div>
 </div>

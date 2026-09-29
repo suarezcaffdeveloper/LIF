@@ -5,12 +5,13 @@ from werkzeug.security import generate_password_hash
 
 from app.database.db import db, DEMO_BIND_KEY, set_demo_mode
 from app.models.models import Usuario
+from app.ligas import LIGA
 
 
 @click.command("create-admin")
 @with_appcontext
 def create_admin():
-    email = "admin@liga.com"
+    email = LIGA.email_admin_inicial
     password = "admin123"  # luego la cambiás
     nombre = "Administrador"
 
@@ -66,8 +67,8 @@ def reset_demo_db(seed):
         _seed_demo_data()
         db.session.commit()
         click.echo("✅ Datos de ejemplo cargados en la base demo")
-        click.echo("   Login demo (panel admin) -> demo@liga.com / demo123")
-        click.echo("   Login demo (periodista)  -> periodista.demo@liga.com / demo123")
+        click.echo(f"   Login demo (panel admin) -> {LIGA.email_demo} / demo123")
+        click.echo(f"   Login demo (periodista)  -> {LIGA.email_periodista_demo} / demo123")
     except Exception as e:
         db.session.rollback()
         click.echo(f"❌ Error al poblar la base demo: {e}")
@@ -88,7 +89,7 @@ def _seed_demo_data():
     # aislada en la base demo, ver _es_cuenta_demo en app/__init__.py).
     demo_user = Usuario(
         nombre_completo="Administrador Demo",
-        email="demo@liga.com",
+        email=LIGA.email_demo,
         rol="administrador",
         es_demo=True,
         fecha_registro=datetime.utcnow(),
@@ -98,7 +99,7 @@ def _seed_demo_data():
 
     periodista_demo = Usuario(
         nombre_completo="Periodista Demo",
-        email="periodista.demo@liga.com",
+        email=LIGA.email_periodista_demo,
         rol="periodista",
         es_demo=True,
         fecha_registro=datetime.utcnow(),

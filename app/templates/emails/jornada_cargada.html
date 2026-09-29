@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jornada {{ jornada }} cargada — LIF</title>
+  <title>Jornada {{ jornada }} cargada — {{ liga.nombre_corto }}</title>
 </head>
 <body style="margin:0; padding:0; background-color:#0a0e14; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;">
 
@@ -24,7 +24,7 @@
                 <tr>
                   <td style="background-color:#111720; border-radius:10px; padding:14px 28px; text-align:center;">
                     <span style="font-size:22px; font-weight:900; letter-spacing:6px; color:#ffffff; text-transform:uppercase;">L<span style="color:#00e5ff;">I</span>F</span>
-                    <div style="font-size:10px; letter-spacing:3px; color:#7a8a9e; text-transform:uppercase; margin-top:3px;">Liga Interprovincial de Fútbol</div>
+                    <div style="font-size:10px; letter-spacing:3px; color:#7a8a9e; text-transform:uppercase; margin-top:3px;">{{ liga.nombre }}</div>
                   </td>
                 </tr>
               </table>
@@ -77,7 +77,7 @@
                     <table cellpadding="0" cellspacing="0" border="0">
                       <tr>
                         <td style="border-radius:8px; background-color:#00e5ff;">
-                          <a href="https://lif-1.onrender.com" style="display:inline-block; padding:13px 30px; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#0a0e14; text-decoration:none;">
+                          <a href="{{ liga.url_publica }}"style="display:inline-block; padding:13px 30px; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#0a0e14; text-decoration:none;">
                             Ver resultados →
                           </a>
                         </td>
@@ -95,10 +95,10 @@
           <tr>
             <td style="padding:28px 8px 0; text-align:center;">
               <p style="margin:0; font-size:11px; color:#3a4455; letter-spacing:1px; text-transform:uppercase;">
-                Liga Interprovincial de Fútbol · Temporada 2026
+                {{ liga.nombre }} · Temporada {{ anio }}
               </p>
               <p style="margin:6px 0 0; font-size:11px; color:#3a4455;">
-                Recibís este correo porque estás registrad@ en la plataforma LIF.
+                Recibís este correo porque estás registrad@ en la plataforma {{ liga.nombre_corto }}.
               </p>
             </td>
           </tr>

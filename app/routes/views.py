@@ -10,6 +10,7 @@ from sqlalchemy import func, or_, and_, literal
 from sqlalchemy.orm import joinedload
 from app.utils.email_utils import enviar_mail_bienvenida, enviar_mail_jornada, jornada_completa
 from app.utils.capturas_redes import generar_capturas_jornada, BLOQUES_CATEGORIAS
+from app.ligas import LIGA, FORMATO
 from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -25,6 +26,20 @@ import pandas as pd
 from slugify import slugify
 
 views = Blueprint('views', __name__)
+
+
+def admin_required(f):
+    """Exige sesión iniciada y rol administrador (mismo criterio que adminview)."""
+    from functools import wraps
+
+    @wraps(f)
+    @login_required
+    def wrapper(*args, **kwargs):
+        if current_user.rol != 'administrador':
+            flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
+            return redirect(url_for('views.index'))
+        return f(*args, **kwargs)
+    return wrapper
 
 @views.route('/')
 def index():
@@ -47,14 +62,8 @@ def index():
 def club_plantel(club_id):
     club = Club.query.get_or_404(club_id)
 
-    CATEGORIAS = ['primera', 'reserva', 'quinta', 'sexta', 'septima']
-    LABELS = {
-        'primera': 'Primera División',
-        'reserva': 'Reserva',
-        'quinta': 'Quinta División',
-        'sexta': 'Sexta División',
-        'septima': 'Séptima División',
-    }
+    CATEGORIAS = LIGA.slugs_categorias
+    LABELS = {c.slug: c.etiqueta_larga for c in LIGA.categorias}
 
     planteles = {}
     for cat in CATEGORIAS:
@@ -109,6 +118,7 @@ def cargar_parametros_view():
     )
 
 @views.route('/admin/temporadas', methods=['GET'])
+@admin_required
 def administrar_temporadas_view():
 
     temporadas = Temporada.query.order_by(Temporada.nombre.desc()).all()
@@ -128,6 +138,7 @@ def administrar_temporadas_view():
     )
 
 @views.route('/admin/temporadas', methods=['POST'])
+@admin_required
 def crear_temporada():
     nombre = request.form.get("nombre")
 
@@ -153,11 +164,11 @@ def crear_temporada():
 
     # Crear torneos automáticamente
     torneos = []
-    for torneo_nombre in ["Apertura", "Clausura"]:
+    for torneo_nombre in FORMATO.TORNEOS:
         torneo = Torneo(
             nombre=torneo_nombre,
             temporada_id=nueva_temporada.id,
-            activo=(torneo_nombre == "Apertura")  # 👈 Apertura activo
+            activo=(torneo_nombre == FORMATO.TORNEO_INICIAL)  # 👈 el torneo inicial queda activo
         )
         db.session.add(torneo)
         torneos.append(torneo)
@@ -165,15 +176,13 @@ def crear_temporada():
     db.session.commit()  # Commit para obtener IDs de torneos
 
     # Crear fases automáticamente para cada torneo
-    fases_predeterminadas = ["Regular", "Cuartos", "Semifinal", "Final", "Finalísima"]
-
     for torneo in torneos:
-        for orden, fase_nombre in enumerate(fases_predeterminadas, start=1):
+        for orden, (fase_nombre, ida_vuelta) in enumerate(FORMATO.FASES, start=1):
             fase = Fase(
                 nombre=fase_nombre,
                 torneo_id=torneo.id,
                 orden=orden,
-                ida_vuelta=(fase_nombre in ["Cuartos", "Semifinal", "Final", "Finalísima"])
+                ida_vuelta=ida_vuelta
             )
             db.session.add(fase)
 
@@ -183,6 +192,7 @@ def crear_temporada():
     return redirect(url_for("views.administrar_temporadas_view"))
 
 @views.route("/admin/activar_temporada/<int:temporada_id>", methods=["POST"])
+@admin_required
 def activar_temporada(temporada_id):
 
     temporada = Temporada.query.get_or_404(temporada_id)
@@ -198,6 +208,7 @@ def activar_temporada(temporada_id):
     return redirect(url_for("views.administrar_temporadas_view"))
 
 @views.route("/admin/activar_torneo/<int:torneo_id>", methods=["POST"])
+@admin_required
 def activar_torneo(torneo_id):
 
     torneo = Torneo.query.get_or_404(torneo_id)
@@ -235,10 +246,7 @@ def fixture(bloque, categoria=None):
         flash("No existe el torneo Apertura en la temporada activa", "danger")
         return redirect(url_for("views.index"))
 
-    bloques = {
-        "mayores": ["primera", "reserva"],
-        "inferiores": ["quinta", "sexta", "septima"]
-    }
+    bloques = LIGA.bloques
 
     if bloque not in bloques:
         flash("Bloque inválido", "danger")
@@ -259,7 +267,7 @@ def fixture(bloque, categoria=None):
 
     fechas_partidos = {}
 
-    fases_playoff = ["Cuartos", "Semifinal", "Final", "Finalísima"]
+    fases_playoff = list(FORMATO.FASES_PLAYOFF)
 
     # ====================================================
     # 1️⃣ FASE REGULAR
@@ -652,7 +660,7 @@ def calcular_rachas(tabla, categoria):
 @views.route('/recalcular_tabla/<categoria>')
 def recalcular_tabla_manual(categoria):
     categoria = categoria.lower()
-    categorias_validas = ['primera', 'reserva', 'quinta', 'sexta', 'septima']
+    categorias_validas = LIGA.slugs_categorias
 
     if categoria not in categorias_validas:
         return f"Categoría inválida: {categoria}", 400
@@ -667,7 +675,7 @@ def recalcular_tabla_manual(categoria):
 @views.route('/tabla_posiciones/<categoria>')
 def tabla_posiciones(categoria):
     categoria = categoria.lower()
-    categorias_validas = ['primera', 'reserva', 'quinta', 'sexta', 'septima']
+    categorias_validas = LIGA.slugs_categorias
 
     if categoria not in categorias_validas:
         flash("La categoría solicitada no existe.", "danger")
@@ -697,14 +705,7 @@ def tabla_posiciones(categoria):
     rachas = calcular_rachas(tabla, categoria)
 
     # Cruces
-    cruces = []
-    if len(tabla) >= 8:
-        cruces = [
-            (tabla[0], tabla[7]),
-            (tabla[1], tabla[6]),
-            (tabla[2], tabla[5]),
-            (tabla[3], tabla[4]),
-        ]
+    cruces = FORMATO.cruces_clasificados(tabla)
 
     return render_template(
         'tabla_posiciones.html',
@@ -1853,7 +1854,7 @@ def generar_fixture_automatico_mayores():
         fecha_clasico = fecha_base + _td(days=dias_a_sabado)
 
         # ── Torneo invertido (Apertura ↔ Clausura) ─────────────────────────
-        nombre_invertido = "Apertura" if torneo_activo.nombre == "Clausura" else "Clausura"
+        nombre_invertido = FORMATO.torneo_opuesto(torneo_activo.nombre)
         torneo_invertido = Torneo.query.filter_by(
             temporada_id=temporada_activa.id, nombre=nombre_invertido
         ).first()
@@ -2273,7 +2274,7 @@ def generar_fixture_automatico_inferiores():
             }), 400
 
         # ── Torneo invertido (Apertura ↔ Clausura) ─────────────────────────
-        nombre_invertido = "Apertura" if torneo_activo.nombre == "Clausura" else "Clausura"
+        nombre_invertido = FORMATO.torneo_opuesto(torneo_activo.nombre)
         torneo_invertido = Torneo.query.filter_by(
             temporada_id=temporada_activa.id, nombre=nombre_invertido
         ).first()
@@ -2441,7 +2442,7 @@ def cargar_estadisticas_mayores():
         .filter(
             Temporada.activa == True,
             Torneo.activo == True,
-            Fase.nombre.in_(["Cuartos", "Semifinal", "Final", "Finalísima"])
+            Fase.nombre.in_(FORMATO.FASES_PLAYOFF)
         )
         .order_by(Fase.orden)
         .all()
@@ -2647,9 +2648,7 @@ def chequeo_resultados_playoff_inferiores():
 def vista_partidos_playoff_inferiores():
     from app.models.models import Torneo
     torneos = Torneo.query.order_by(Torneo.id.desc()).all()
-    fases_list = Fase.query.filter(Fase.nombre.in_([
-        "Cuartos", "Semifinal", "Final", "Finalísima"
-    ])).order_by(Fase.orden).all()
+    fases_list = Fase.query.filter(Fase.nombre.in_(FORMATO.FASES_PLAYOFF)).order_by(Fase.orden).all()
     fases_dict = {}
     for fase in fases_list:
         if fase.nombre not in fases_dict:
@@ -2659,9 +2658,7 @@ def vista_partidos_playoff_inferiores():
         Partido.query
         .join(Fase)
         .join(Torneo, Partido.torneo_id == Torneo.id)
-        .filter(Fase.nombre.in_([
-            "Cuartos", "Semifinal", "Final", "Finalísima"
-        ]))
+        .filter(Fase.nombre.in_(FORMATO.FASES_PLAYOFF))
         .filter(Partido.categoria.in_(['quinta', 'sexta', 'septima']))
         .order_by(Torneo.id.desc(), Fase.orden, Partido.jornada)
         .all()
@@ -3308,7 +3305,7 @@ def cargar_estadisticas_inferiores():
         .filter(
             Temporada.activa == True,
             Torneo.activo == True,
-            Fase.nombre.in_(["Cuartos", "Semifinal", "Final", "Finalísima"])
+            Fase.nombre.in_(FORMATO.FASES_PLAYOFF)
         )
         .order_by(Fase.orden)
         .all()
@@ -4149,7 +4146,7 @@ def clubes_clasificados():
         print(f"✅ Torneo: {torneo.nombre} ({torneo.temporada.nombre})")
         print(f"✅ Fase: {fase.nombre} (ID={fase.id}) ← BÚSQUEDA AUTOMÁTICA")
         
-        fases_ordenadas = ["Cuartos", "Semifinal", "Final", "Finalísima"]
+        fases_ordenadas = list(FORMATO.FASES_PLAYOFF)
         
         # ============== OBTENER CLUBES DISPONIBLES ==============
         if fase.nombre == "Cuartos":
@@ -4400,7 +4397,7 @@ def crear_partido_playoff():
         # ============== VALIDAR SECUENCIA DE FASES ==============
         # Cuartos NO necesita validación previa (puede cargarse sin jornadas regulares)
         # Semifinal, Final, Finalísima SÍ necesitan que la fase anterior esté cargada y completada
-        fases_ordenadas = ["Cuartos", "Semifinal", "Final", "Finalísima"]
+        fases_ordenadas = list(FORMATO.FASES_PLAYOFF)
         if fase.nombre in fases_ordenadas:
             idx = fases_ordenadas.index(fase.nombre)
             # Solo validar para fases posteriores a Cuartos
@@ -4549,7 +4546,7 @@ def vista_crear_partido_playoff():
     # Traer fases únicas
     fases_list = (
         Fase.query
-        .filter(Fase.nombre.in_(["Cuartos", "Semifinal", "Final", "Finalísima"]))
+        .filter(Fase.nombre.in_(FORMATO.FASES_PLAYOFF))
         .order_by(Fase.orden)
         .all()
     )
@@ -4575,9 +4572,7 @@ def vista_crear_partido_playoff():
 def vista_partidos_playoff():
     torneos = Torneo.query.order_by(Torneo.id.desc()).all()
     
-    fases_list = Fase.query.filter(Fase.nombre.in_([
-        "Cuartos", "Semifinal", "Final", "Finalísima"
-    ])).order_by(Fase.orden).all()
+    fases_list = Fase.query.filter(Fase.nombre.in_(FORMATO.FASES_PLAYOFF)).order_by(Fase.orden).all()
     
     # Eliminar duplicados manteniendo el orden por nombre
     fases_dict = {}
@@ -4591,9 +4586,7 @@ def vista_partidos_playoff():
         Partido.query
         .join(Fase)
         .join(Torneo, Partido.torneo_id == Torneo.id)
-        .filter(Fase.nombre.in_([
-            "Cuartos", "Semifinal", "Final", "Finalísima"
-        ]))
+        .filter(Fase.nombre.in_(FORMATO.FASES_PLAYOFF))
         .order_by(Torneo.id.desc(), Fase.orden, Partido.jornada)
         .all()
     )

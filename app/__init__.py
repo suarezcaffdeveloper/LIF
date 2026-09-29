@@ -1,6 +1,7 @@
 from flask import Flask, request, session
 import re
 import os
+from datetime import datetime
 import sqlalchemy as sa
 from dotenv import load_dotenv
 from flask_migrate import Migrate
@@ -13,6 +14,7 @@ import cloudinary.api
 
 from .database.db import db, DEMO_BIND_KEY, DEMO_ROLE, is_demo_mode, set_demo_mode
 from .models.models import Usuario
+from .ligas import LIGA, PRODUCTO
 
 mail = Mail()
 
@@ -132,7 +134,7 @@ def create_app():
             set_demo_mode(True)
             try:
                 ya_poblada = db.session.query(Usuario.id_usuario).filter_by(
-                    email="demo@liga.com"
+                    email=LIGA.email_demo
                 ).first()
                 if not ya_poblada:
                     _seed_demo_data()
@@ -212,6 +214,12 @@ def create_app():
     def _inject_demo_mode():
         return {"demo_mode": is_demo_mode()}
 
+    @app.context_processor
+    def _inject_liga():
+        # `liga` es la marca y configuración de la liga de esta instancia;
+        # `producto` es el nombre de la plataforma (ElTablón).
+        return {"liga": LIGA, "producto": PRODUCTO, "anio": datetime.now().year}
+
     @user_logged_in.connect_via(app)
     def _marcar_sesion_demo(sender, user):
         session["_demo_mode"] = _es_cuenta_demo(user)
@@ -241,8 +249,7 @@ def create_app():
     app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
     app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
     app.config["MAIL_DEFAULT_SENDER"] = os.environ.get(
-        "MAIL_DEFAULT_SENDER",
-        "Liga Interprovincial <infoligainterprovincial@gmail.com>"
+        "MAIL_DEFAULT_SENDER", LIGA.email_remitente
     )
 
     mail.init_app(app)

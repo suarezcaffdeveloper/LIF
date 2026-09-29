@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Login — LIF</title>
+  <title>Login — {{ liga.nombre_corto }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
@@ -260,7 +260,7 @@
 
     <div class="auth-logo">
       <span>L<em>I</em>F</span>
-      <p>Liga Interprovincial de Fútbol</p>
+      <p>{{ liga.nombre }}</p>
     </div>
 
     <h2 class="auth-title">Iniciar sesión</h2>
@@ -279,7 +279,7 @@
     </form>
 
     <form method="POST" action="{{ url_for('views.login') }}">
-      <input type="hidden" name="email" value="demo@liga.com">
+      <input type="hidden" name="email" value="{{ liga.email_demo }}">
       <input type="hidden" name="password" value="demo123">
       <button type="submit" class="btn-demo">🧪 Probar demo (vista de administrador)</button>
     </form>

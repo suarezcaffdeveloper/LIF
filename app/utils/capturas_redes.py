@@ -18,32 +18,31 @@ import cloudinary
 import cloudinary.uploader
 
 from ..database.db import db
+from ..ligas import LIGA, FORMATO
 from ..models.models import CapturaJornada, Fase, Partido, Temporada, Torneo
 
 # ---------------------------------------------------------------------------
-# Constantes visuales (misma paleta que app/templates/base.html)
+# Constantes visuales (misma paleta que app/templates/base.html, tomada de la
+# configuración de la liga para que cada liga tenga sus propios colores)
 # ---------------------------------------------------------------------------
 SIZE = 1080
-BG = (10, 14, 20)          # --oscuro
-PANEL = (17, 23, 32)       # --panel
-PANEL_2 = (22, 29, 40)     # --panel-2
-VERDE = (0, 229, 255)      # --verde
-VERDE_DIM = (0, 184, 212)  # --verde-dim
-TEXTO = (232, 237, 245)    # --texto
-TEXTO_DIM = (122, 138, 158)  # --texto-dim
+BG = LIGA.rgb("fondo")            # --oscuro
+PANEL = LIGA.rgb("panel")         # --panel
+PANEL_2 = LIGA.rgb("panel_2")     # --panel-2
+VERDE = LIGA.rgb("acento")        # --verde (acento de la liga)
+VERDE_DIM = LIGA.rgb("acento_dim")  # --verde-dim
+TEXTO = LIGA.rgb("texto")         # --texto
+TEXTO_DIM = LIGA.rgb("texto_dim")  # --texto-dim
 
 MARGEN_X = 85
 ANCHO_CONTENIDO = SIZE - 2 * MARGEN_X
 
-FASES_PLAYOFF = ["Cuartos", "Semifinal", "Final", "Finalísima"]
-BLOQUES_CATEGORIAS = {
-    "mayores": ["primera", "reserva"],
-    "inferiores": ["quinta", "sexta", "septima"],
-}
+FASES_PLAYOFF = list(FORMATO.FASES_PLAYOFF)
+BLOQUES_CATEGORIAS = LIGA.bloques
 
 _UTILS_DIR = os.path.dirname(__file__)
 _FONTS_DIR = os.path.join(_UTILS_DIR, "..", "static", "fonts")
-_LOGO_PATH = os.path.join(_UTILS_DIR, "..", "static", "escudos", "logolif_transparente.png")
+_LOGO_PATH = os.path.join(_UTILS_DIR, "..", "static", *LIGA.logo.split("/"))
 _ESCUDO_DEFAULT_PATH = os.path.join(_UTILS_DIR, "..", "static", "escudos", "predeterminada.png")
 
 
@@ -115,7 +114,7 @@ def _dibujar_header(img, draw, categoria, jornada, kicker, titulo):
 def _dibujar_pie(draw):
     draw.text(
         (SIZE // 2, SIZE - 34),
-        "LIGA INTERPROVINCIAL",
+        LIGA.nombre.upper(),
         font=_font("BarlowCondensed-SemiBold", 22),
         fill=TEXTO_DIM,
         anchor="mm",
@@ -138,7 +137,7 @@ def generar_imagen_tabla_posiciones(categoria, jornada, temporada_nombre):
     draw = ImageDraw.Draw(img)
     y = _dibujar_header(
         img, draw, categoria, jornada,
-        kicker=f"LIF · TEMPORADA {temporada_nombre}",
+        kicker=f"{LIGA.nombre_corto} · TEMPORADA {temporada_nombre}",
         titulo="TABLA DE POSICIONES",
     )
 
@@ -239,7 +238,7 @@ def _dibujar_partidos(categoria, jornada_mostrada, temporada_nombre, partidos, k
     draw = ImageDraw.Draw(img)
     y = _dibujar_header(
         img, draw, categoria, jornada_mostrada,
-        kicker=f"LIF · TEMPORADA {temporada_nombre}",
+        kicker=f"{LIGA.nombre_corto} · TEMPORADA {temporada_nombre}",
         titulo=kicker,
     )
 

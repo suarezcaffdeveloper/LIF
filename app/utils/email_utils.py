@@ -6,26 +6,33 @@ from email.mime.text import MIMEText
 from ..models.models import Partido
 from flask import render_template
 from sqlalchemy import func
+from datetime import datetime
+from ..ligas import LIGA, FORMATO
+
+
+def _pie():
+    return f"{LIGA.nombre} — Temporada {datetime.now().year}"
+
 
 def enviar_mail_bienvenida(destinatario, nombre):
     """
     Envía un mail de bienvenida a un nuevo usuario registrado.
     """
-    asunto = "Bienvenid@ a la Liga Interprovincial de Fútbol"
- 
+    asunto = f"Bienvenid@ a {LIGA.nombre}"
+
     msg = Message(asunto, recipients=[destinatario])
- 
+
     # Fallback texto plano
     msg.body = (
         f"Hola {nombre}, ¡bienvenid@!\n\n"
-        f"Tu registro en la Liga Interprovincial de Fútbol fue exitoso.\n"
+        f"Tu registro en {LIGA.nombre} fue exitoso.\n"
         f"Ya podés acceder a la plataforma y seguir toda la acción de la liga:\n\n"
         f"  · Fixture y resultados\n"
         f"  · Tabla de posiciones\n"
         f"  · Goleadores y estadísticas\n"
         f"  · Noticias y videos\n\n"
-        f"https://lif-1.onrender.com\n\n"
-        f"Liga Interprovincial de Fútbol — Temporada 2026"
+        f"{LIGA.url_publica}\n\n"
+        f"{_pie()}"
     )
  
     msg.html = render_template(
@@ -50,21 +57,21 @@ def enviar_mail_periodista(destinatario, nombre, password):
     """
     Envía las credenciales de acceso a un nuevo usuario periodista.
     """
-    asunto = "Credenciales de acceso — Panel Periodista LIF"
- 
+    asunto = f"Credenciales de acceso — Panel Periodista {LIGA.nombre_corto}"
+
     msg = Message(asunto, recipients=[destinatario])
- 
+
     # Fallback texto plano
     msg.body = (
         f"Hola {nombre},\n\n"
-        f"Tu cuenta de periodista en la Liga Interprovincial de Fútbol "
+        f"Tu cuenta de periodista en {LIGA.nombre} "
         f"fue creada exitosamente.\n\n"
         f"USUARIO: {destinatario}\n"
         f"CONTRASEÑA: {password}\n\n"
         f"Podés iniciar sesión desde:\n"
-        f"https://lif-1.onrender.com/login\n\n"
+        f"{LIGA.url_publica}/login\n\n"
         f"Importante: no compartas estas credenciales con nadie.\n\n"
-        f"Liga Interprovincial de Fútbol — Temporada 2026"
+        f"{_pie()}"
     )
  
     msg.html = render_template(
@@ -94,11 +101,8 @@ def jornada_completa(jornada, categoria):
 
     categoria = categoria.lower().strip()
 
-    if categoria == "mayores":
-        categorias_validas = ["primera", "reserva"]
-    elif categoria == "inferiores":
-        categorias_validas = ["quinta", "sexta", "septima"]
-    else:
+    categorias_validas = LIGA.bloques.get(categoria)
+    if not categorias_validas:
         return False
 
     try:
@@ -109,7 +113,7 @@ def jornada_completa(jornada, categoria):
             return False
 
         torneo_activo = Torneo.query.filter_by(
-            nombre="Apertura",
+            nombre=FORMATO.TORNEO_INICIAL,
             temporada_id=temporada_activa.id
         ).first()
 
@@ -170,8 +174,8 @@ def enviar_mail_jornada(usuarios, jornada, categoria):
             f"ya están disponibles en la plataforma.\n\n"
             f"Podés ver el fixture completo, la tabla de posiciones actualizada "
             f"y los goleadores desde:\n"
-            f"https://lif-1.onrender.com\n\n"
-            f"Liga Interprovincial de Fútbol — Temporada 2026"
+            f"{LIGA.url_publica}\n\n"
+            f"{_pie()}"
         )
  
         msg.html = render_template(
