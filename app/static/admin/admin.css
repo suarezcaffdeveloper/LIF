@@ -394,3 +394,12 @@ body.ad-body {
 .ad-card-form { max-width: 720px; }
 @media (max-width: 720px) { .url-preview iframe { height: 200px; } }
 .ad-form > * + .ad-field { margin-top: 18px; }
+
+/* SweetAlert2 (estadísticas y playoff) con los colores del panel, sea claro u oscuro */
+.swal2-popup { background: var(--surface) !important; color: var(--text) !important; border: 1px solid var(--line-fuerte); border-radius: 14px !important; font-family: var(--f-ui) !important; }
+.swal2-title, .swal2-html-container { color: var(--text) !important; }
+.swal2-html-container { color: var(--muted) !important; }
+.swal2-styled.swal2-confirm { background: var(--acento) !important; color: var(--acento-ink) !important; border-radius: var(--r-s) !important; font-weight: 600 !important; box-shadow: 0 2px 0 var(--acento-sombra) !important; }
+.swal2-styled.swal2-cancel, .swal2-styled.swal2-deny { border-radius: var(--r-s) !important; font-weight: 600 !important; }
+.swal2-styled:focus { box-shadow: 0 0 0 3px var(--acento-tinte) !important; }
+.swal2-timer-progress-bar { background: var(--acento) !important; }
