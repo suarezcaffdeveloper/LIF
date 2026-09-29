@@ -42,6 +42,10 @@ class Liga:
     categorias: tuple = field(default_factory=tuple)
     tema: str = "clasico"
     resaltar_letra: int = -1         # índice de la letra de la sigla que va en color de acento (-1: ninguna)
+    # Colores de marca opcionales para temas claros (el tema deriva el resto de la
+    # paleta). Sin valor, cada tema usa su paleta propia.
+    color_marca: str = ""            # ej. '#0B4A34'
+    color_marca_2: str = ""          # color de contraste, ej. '#FF5A36'
     # cuentas iniciales / demo
     email_admin_inicial: str = "admin@liga.com"
     email_demo: str = "demo@liga.com"

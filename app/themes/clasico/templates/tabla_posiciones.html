@@ -58,21 +58,21 @@
     }
 
     /* ─── CARD BASE ─── */
-    .lif-card {
+    .tb-card {
         background: var(--panel);
         border: 1px solid var(--borde);
         border-radius: 16px;
         overflow: hidden;
     }
 
-    .lif-card-header {
+    .tb-card-header {
         padding: 18px 22px;
         border-bottom: 1px solid var(--borde);
         display: flex;
         align-items: center;
         gap: 10px;
     }
-    .lif-card-header h3 {
+    .tb-card-header h3 {
         font-family: 'Barlow Condensed', sans-serif;
         font-size: 1.1rem;
         font-weight: 800;
@@ -81,7 +81,7 @@
         color: #fff;
         margin: 0;
     }
-    .lif-card-header .dot {
+    .tb-card-header .dot {
         width: 8px; height: 8px;
         border-radius: 50%;
         background: var(--verde);
@@ -306,15 +306,15 @@
 
     <!-- HEADER -->
     <div class="pos-header">
-        <p class="pos-eyebrow">Temporada 2026</p>
+        <p class="pos-eyebrow">Temporada {{ anio }}</p>
         <h1 class="pos-title">Tabla de <span>Posiciones</span><br>{{ categoria|capitalize }}</h1>
     </div>
 
     <div class="pos-layout">
 
         <!-- TABLA PRINCIPAL -->
-        <div class="lif-card">
-            <div class="lif-card-header">
+        <div class="tb-card">
+            <div class="tb-card-header">
                 <div class="dot"></div>
                 <h3>Clasificación — {{ categoria|capitalize }}</h3>
             </div>
@@ -378,8 +378,8 @@
         <div class="side-col">
 
             <!-- Estadísticas -->
-            <div class="lif-card">
-                <div class="lif-card-header">
+            <div class="tb-card">
+                <div class="tb-card-header">
                     <div class="dot"></div>
                     <h3>Estadísticas</h3>
                 </div>
@@ -405,10 +405,10 @@
             </div>
 
             <!-- Cruces -->
-            <div class="lif-card">
-                <div class="lif-card-header">
+            <div class="tb-card">
+                <div class="tb-card-header">
                     <div class="dot"></div>
-                    <h3>Cuartos de final</h3>
+                    <h3>Cruces de la fase final</h3>
                 </div>
                 {% if cruces %}
                     {% for a, b in cruces %}

@@ -1,0 +1,25 @@
+{#- Paleta del tema Cancha. Si la liga define color_marca / color_marca_2 se derivan los tonos
+    a partir de ellos; si no, se usa la paleta propia del tema (verde césped + naranja). -#}
+{% set marca = liga.color_marca %}
+{% set contraste = liga.color_marca_2 %}
+<style>
+:root{
+  --paper:#EEF1EC; --white:#FFFFFF; --mist:#DCE3DC;
+  --ink:#0B1712; --ink-dim:#5C6B63;
+  {% if marca %}
+  --pitch-700:{{ marca }};
+  --pitch-900:color-mix(in srgb,{{ marca }} 40%,#000);
+  --pitch-500:color-mix(in srgb,{{ marca }} 82%,#fff);
+  --pitch-400:color-mix(in srgb,{{ marca }} 62%,#fff);
+  {% else %}
+  --pitch-900:#06231A; --pitch-700:#0B4A34; --pitch-500:#12805A; --pitch-400:#1FA274;
+  {% endif %}
+  {% if contraste %}
+  --flare:{{ contraste }};
+  --flare-dark:color-mix(in srgb,{{ contraste }} 82%,#000);
+  {% else %}
+  --flare:#FF5A36; --flare-dark:#E23F1C;
+  {% endif %}
+  --n-letras:{{ liga.nombre_corto|length }};
+}
+</style>

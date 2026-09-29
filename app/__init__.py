@@ -14,7 +14,8 @@ import cloudinary.api
 
 from .database.db import db, DEMO_BIND_KEY, DEMO_ROLE, is_demo_mode, set_demo_mode
 from .models.models import Usuario
-from .ligas import LIGA, PRODUCTO
+from .ligas import LIGA, FORMATO, PRODUCTO
+from .temas import cargar_tema
 
 mail = Mail()
 
@@ -79,6 +80,10 @@ def create_app():
     # CONFIG GENERAL
     # -----------------------
     app.jinja_env.filters["youtube_id"] = youtube_id
+
+    # Tema visual: `TEMA` (variable de entorno) o el tema configurado en la liga.
+    tema = cargar_tema(app, os.environ.get("TEMA") or LIGA.tema)
+    app.config["TEMA"] = tema
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
 
@@ -218,7 +223,10 @@ def create_app():
     def _inject_liga():
         # `liga` es la marca y configuración de la liga de esta instancia;
         # `producto` es el nombre de la plataforma (ElTablón).
-        return {"liga": LIGA, "producto": PRODUCTO, "anio": datetime.now().year}
+        return {
+            "liga": LIGA, "producto": PRODUCTO, "anio": datetime.now().year, "tema": tema,
+            "clasificados": getattr(FORMATO, "CLASIFICADOS", 0),
+        }
 
     @user_logged_in.connect_via(app)
     def _marcar_sesion_demo(sender, user):

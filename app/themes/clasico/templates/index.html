@@ -5,7 +5,7 @@
 {% block extra_styles %}
 <style>
     /* ─── HERO ─── */
-    .lif-hero {
+    .tb-hero {
         position: relative;
         padding: 40px 2rem 36px;
         text-align: center;
@@ -13,7 +13,7 @@
     }
 
     /* Glowing circle backdrop */
-    .lif-hero::before {
+    .tb-hero::before {
         content: '';
         position: absolute;
         top: -120px; left: 50%;
@@ -25,7 +25,7 @@
     }
 
     /* Diagonal stripe texture */
-    .lif-hero::after {
+    .tb-hero::after {
         content: '';
         position: absolute;
         inset: 0;
@@ -96,7 +96,7 @@
         z-index: 1;
     }
 
-    .btn-primary-lif {
+    .tb-btn-primary {
         font-family: 'Barlow Condensed', sans-serif;
         font-weight: 800;
         font-size: 1rem;
@@ -111,13 +111,13 @@
         transition: transform .2s, box-shadow .2s;
         box-shadow: 0 0 24px rgba(0,229,255,.3);
     }
-    .btn-primary-lif:hover {
+    .tb-btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 0 36px rgba(0,229,255,.45);
         color: #0a0e14;
     }
 
-    .btn-ghost-lif {
+    .tb-btn-ghost {
         font-family: 'Barlow Condensed', sans-serif;
         font-weight: 700;
         font-size: 1rem;
@@ -131,21 +131,21 @@
         text-decoration: none;
         transition: border-color .2s, background .2s;
     }
-    .btn-ghost-lif:hover {
+    .tb-btn-ghost:hover {
         border-color: rgba(255,255,255,.25);
         background: rgba(255,255,255,.05);
         color: #fff;
     }
 
     /* ─── SECTION WRAPPER ─── */
-    .lif-section {
+    .tb-section {
         max-width: 1280px;
         margin: 0 auto;
         padding: 60px 2rem;
     }
 
     /* ─── SECTION HEADER ─── */
-    .lif-section-header {
+    .tb-section-header {
         display: flex;
         align-items: flex-end;
         justify-content: space-between;
@@ -154,7 +154,7 @@
         padding-bottom: 16px;
     }
 
-    .lif-section-header h2 {
+    .tb-section-header h2 {
         font-family: 'Barlow Condensed', sans-serif;
         font-size: clamp(1.8rem, 4vw, 2.6rem);
         font-weight: 900;
@@ -164,7 +164,7 @@
         margin: 0;
         line-height: 1;
     }
-    .lif-section-header h2 span {
+    .tb-section-header h2 span {
         color: var(--verde);
     }
 
@@ -247,7 +247,7 @@
     }
 
     /* ─── VIDEO CARDS ─── */
-    .card-lif {
+    .tb-card {
         background: var(--panel);
         border: 1px solid var(--borde);
         border-radius: 14px;
@@ -257,7 +257,7 @@
         flex-direction: column;
         transition: transform .25s, border-color .25s;
     }
-    .card-lif:hover {
+    .tb-card:hover {
         transform: translateY(-4px);
         border-color: rgba(255,255,255,.15);
     }
@@ -276,7 +276,7 @@
         border: 0;
     }
 
-    .card-lif .card-body {
+    .tb-card .card-body {
         padding: 18px;
         flex-grow: 1;
         display: flex;
@@ -284,7 +284,7 @@
         gap: 8px;
     }
 
-    .card-lif h5 {
+    .tb-card h5 {
         font-family: 'Barlow Condensed', sans-serif;
         font-size: 1.1rem;
         font-weight: 800;
@@ -295,7 +295,7 @@
         line-height: 1.2;
     }
 
-    .card-lif p.texto {
+    .tb-card p.texto {
         font-size: .88rem;
         color: var(--texto-dim);
         flex-grow: 1;
@@ -307,7 +307,7 @@
         margin: 0;
     }
 
-    .card-lif .card-date {
+    .tb-card .card-date {
         font-family: 'Barlow Condensed', sans-serif;
         font-size: .8rem;
         letter-spacing: .06em;
@@ -412,7 +412,7 @@
     }
 
     /* ─── DIVIDER ─── */
-    .lif-divider {
+    .tb-divider {
         height: 1px;
         background: var(--borde);
         margin: 0 2rem;
@@ -455,8 +455,8 @@
     }
 
     @media (max-width: 600px) {
-        .lif-hero { padding: 32px 1rem 28px; }
-        .lif-section { padding: 40px 1rem; }
+        .tb-hero { padding: 32px 1rem 28px; }
+        .tb-section { padding: 40px 1rem; }
         .stat-bar { gap: 0; }
         .stat-item .num { font-size: 1.8rem; }
     }
@@ -466,14 +466,14 @@
 {% block content %}
 
 <!-- ─── HERO ─── --> 
-<section class="lif-hero">
+<section class="tb-hero">
     <p class="hero-eyebrow">Temporada {{ anio }}</p>
     <h1 class="hero-title">{{ liga.hero_lineas[0] }}<br><em>{{ liga.hero_lineas[1] }}</em><br>{{ liga.hero_lineas[2] }}</h1>
     <p class="hero-sub">{{ liga.descripcion }}</p>
 </section>
 
 <!-- ─── STAT BAR ─── -->
-<div class="lif-divider"></div>
+<div class="tb-divider"></div>
 <div class="stat-bar">
     <div class="stat-item">
         <span class="num">{{ clubes | length }}</span>
@@ -488,11 +488,11 @@
         <span class="label">Temporada</span>
     </div>
 </div>
-<div class="lif-divider"></div>
+<div class="tb-divider"></div>
 
 <!-- ─── CLUBES ─── -->
-<section class="lif-section">
-    <div class="lif-section-header">
+<section class="tb-section">
+    <div class="tb-section-header">
         <h2>Clubes <span>participantes</span></h2>
     </div>
     <div class="equipos-grid">
@@ -505,18 +505,18 @@
     </div>
 </section>
 
-<div class="lif-divider"></div>
+<div class="tb-divider"></div>
 
 <!-- ─── VIDEOS ─── -->
-<section class="lif-section">
-    <div class="lif-section-header">
+<section class="tb-section">
+    <div class="tb-section-header">
         <h2>Últimos <span>Videos</span></h2>
         <a href="{{ url_for('views.todos_videos') }}" class="btn-ver-todas">Ver todos</a>
     </div>
     <div class="row g-4">
         {% for video in videos %}
         <div class="col-md-4">
-            <div class="card-lif">
+            <div class="tb-card">
                 <div class="video-wrap">
                     <iframe src="{{ video.url | replace('watch?v=', 'embed/') }}" allowfullscreen></iframe>
                 </div>
@@ -531,11 +531,11 @@
     </div>
 </section>
 
-<div class="lif-divider"></div>
+<div class="tb-divider"></div>
 
 <!-- ─── NOTICIAS ─── -->
-<section class="lif-section">
-    <div class="lif-section-header">
+<section class="tb-section">
+    <div class="tb-section-header">
         <h2>Últimas <span>Noticias</span></h2>
         <a href="{{ url_for('views.todas_noticias') }}" class="btn-ver-todas">Ver todas</a>
     </div>

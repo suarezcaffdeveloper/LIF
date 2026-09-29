@@ -51,12 +51,78 @@ def index():
     # Últimos 6 videos
     videos = Video.query.order_by(Video.fecha_subida.desc()).limit(3).all()
 
+    # Resumen de fixture, tabla y goleadores: solo lo piden los temas que lo
+    # muestran en el inicio (theme.json -> "portada": true).
+    portada = _datos_portada() if current_app.config.get("TEMA", {}).get("portada") else None
+
     return render_template(
         'index.html',
         clubes=clubes,
         noticias=noticias,
-        videos=videos
+        videos=videos,
+        portada=portada
     )
+
+
+def _datos_portada():
+    """Resumen para el inicio de los temas que lo muestran.
+
+    Devuelve {"categorias": [...], "proximo": Partido | None}. Cada categoría
+    trae la fecha en juego (la última con resultados o, si no hay, la primera),
+    sus partidos de fase regular, la tabla y los máximos goleadores.
+    `proximo` es el partido pendiente más cercano de toda la liga.
+    """
+    torneo = Torneo.query.filter_by(activo=True).first()
+    hoy = dt.date.today()
+    categorias = []
+    proximo = None
+
+    for cat in LIGA.categorias:
+        jornada, partidos = None, []
+        if torneo:
+            regular = (
+                Partido.query
+                .outerjoin(Partido.fase)
+                .filter(
+                    Partido.torneo_id == torneo.id,
+                    func.lower(Partido.categoria) == cat.slug,
+                    or_(Partido.fase_id == None, ~Fase.nombre.in_(FORMATO.FASES_PLAYOFF)),
+                )
+            )
+            jornada = regular.filter(Partido.jugado == True).with_entities(func.max(Partido.jornada)).scalar()
+            if jornada is None:
+                jornada = regular.with_entities(func.min(Partido.jornada)).scalar()
+            if jornada is not None:
+                partidos = (
+                    regular.filter(Partido.jornada == jornada)
+                    .order_by(Partido.fecha_partido, Partido.hora_partido, Partido.id)
+                    .all()
+                )
+
+            pendiente = (
+                regular.filter(Partido.jugado == False, Partido.fecha_partido >= hoy)
+                .order_by(Partido.fecha_partido, Partido.hora_partido)
+                .first()
+            )
+            if pendiente:
+                def _cuando(p):
+                    return (p.fecha_partido, p.hora_partido or dt.time(0))
+                if proximo is None or _cuando(pendiente) < _cuando(proximo):
+                    proximo = pendiente
+
+        goleadores = [
+            g for g in consulta_estadistica(EstadoJugadorPartido.cant_goles, cat.slug, limite=6)
+            if g.total
+        ]
+        categorias.append({
+            "categoria": cat,
+            "jornada": jornada,
+            "partidos": partidos,
+            "tabla": recalcular_tabla_posiciones(cat.slug),
+            "goleadores": goleadores,
+        })
+
+    return {"categorias": categorias, "proximo": proximo}
   
 @views.route('/club/<int:club_id>')
 def club_plantel(club_id):

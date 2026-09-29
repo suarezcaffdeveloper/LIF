@@ -20,6 +20,10 @@ FASES = (
 FASES_PLAYOFF = ("Cuartos", "Semifinal", "Final", "Finalísima")
 
 
+# Cuántos equipos de la tabla clasifican a la primera fase de playoff.
+CLASIFICADOS = 8
+
+
 def torneo_opuesto(nombre):
     """Apertura <-> Clausura (se usa al generar el fixture del otro torneo)."""
     return TORNEOS[0] if nombre == TORNEOS[1] else TORNEOS[1]
