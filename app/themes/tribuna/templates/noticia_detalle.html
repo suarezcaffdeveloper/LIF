@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ noticia.titulo }} - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <a href="{{ url_for('views.todas_noticias') }}" class="back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Volver a noticias</a>
+    <article class="article rv">
+      {% if noticia.imagen_url %}<div class="ph"><img src="{{ noticia.imagen_url }}" alt="{{ noticia.titulo }}"></div>{% endif %}
+      <span class="tag">{{ noticia.categoria or 'Noticias' }}</span>
+      <h1>{{ noticia.titulo }}</h1>
+      <div class="meta">
+        <span>{{ noticia.fecha_publicacion.strftime('%d/%m/%Y') }}</span>
+        {% if noticia.autor and noticia.autor.nombre_completo %}<span>·</span><span>por {{ noticia.autor.nombre_completo }}</span>{% endif %}
+      </div>
+      <div class="body-text">{{ noticia.contenido | safe }}</div>
+    </article>
+  </div>
+</section>
+{% endblock %}

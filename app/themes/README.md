@@ -69,6 +69,9 @@ Los temas que no lo piden reciben `portada = None` y no pagan las consultas extr
 | `marcador` | oscuro | Tablero de estadio. Inicio con el marcador electrónico (cuenta regresiva en dígitos LED de matriz de puntos), barra lateral de íconos en escritorio y pestañas fijas en celular, goleadores como gráfico de barras y puntos como barra LED. |
 | `cuaderno` | claro | Cuaderno del técnico. Papel cuadriculado y tinta con tiza roja, pizarra táctica en el inicio con fichas de escudos que se arrastran y una flecha que las sigue, listas con renglones y margen, goleadores en columnas rayadas, tipografía serif y anotaciones a mano. |
 | `nocturno` | oscuro | Neón nocturno premium. Tipografía enorme con mucho aire, acento neón que respira en elementos clave, nav y dock de cristal esmerilado, secciones que aparecen con fade-up al scrollear y estados de goles con brillo. |
+| `tribuna` | claro | Estadio de día. Héroe con los hinchas haciendo la ola y banderines, partidos como entradas con código de barras, cinta de resultados, tipografía de camiseta y acento ultramar. |
+
+`tribuna` toma su ultramar de `color_marca` y el amarillo de la ola de `color_marca_2` (defaults: ultramar y amarillo).
 
 `nocturno` toma su neón de `color_marca` (lima por defecto).
 

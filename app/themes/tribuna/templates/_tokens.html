@@ -1,0 +1,28 @@
+{#- Paleta del tema Tribuna. Si la liga define color_marca / color_marca_2 se derivan el acento
+    ultramar y el amarillo de la ola; si no, se usa la paleta propia del tema. -#}
+{% set marca = liga.color_marca %}
+{% set contraste = liga.color_marca_2 %}
+<style>
+:root{
+  --fondo:#EFF1F5; --fondo-2:#E6E9EF; --blanco:#FFFFFF; --panel:#F7F8FA;
+  --tinta:#0D1219; --tinta-dim:#59616E; --tinta-faint:#9AA1AC;
+  --linea:rgba(13,18,25,.10); --linea-2:rgba(13,18,25,.2);
+  {% if marca %}
+  --azul:{{ marca }};
+  --azul-osc:color-mix(in srgb,{{ marca }} 68%,#000);
+  --azul-claro:color-mix(in srgb,{{ marca }} 10%,#fff);
+  --azul-borde:color-mix(in srgb,{{ marca }} 30%,transparent);
+  {% else %}
+  --azul:#2B4BF2; --azul-osc:#1B31B8; --azul-claro:#E7EBFF; --azul-borde:rgba(43,75,242,.28);
+  {% endif %}
+  {% if contraste %}
+  --amarillo:{{ contraste }};
+  {% else %}
+  --amarillo:#FFD23F;
+  {% endif %}
+  --amarillo-osc:color-mix(in srgb,{{ contraste or '#FFD23F' }} 62%,#000);
+  --verde:#12A05C; --rojo:#E5484D; --violeta:#7C5CFF;
+  --grada:repeating-linear-gradient(-45deg,rgba(13,18,25,.045) 0 10px,transparent 10px 20px);
+  --n-letras:{{ liga.nombre_corto|length }};
+}
+</style>

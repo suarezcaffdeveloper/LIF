@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Noticias - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <header class="s-head rv">
+      <div>
+        <span class="kicker">Actualidad</span>
+        <h1>Noti<em>cias</em></h1>
+      </div>
+    </header>
+    {% if noticias %}
+    <div class="cards-grid">
+      {% for n in noticias %}
+      <a href="{{ url_for('views.noticia_detalle', noticia_id=n.id_noticia) }}" class="ncard rv" style="--d:{{ loop.index0 % 6 }}">
+        <div class="ph">{% if n.imagen_url %}<img src="{{ n.imagen_url }}" alt="" loading="lazy">{% endif %}</div>
+        <div class="bd">
+          <span class="tag">{{ n.categoria or 'Noticias' }} · {{ n.fecha_publicacion.strftime('%d/%m/%Y') }}</span>
+          <h3>{{ n.titulo }}</h3>
+          <p>{{ n.contenido | striptags | truncate(150) }}</p>
+          <span class="read">Leer la nota<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">Todavía no hay noticias publicadas.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

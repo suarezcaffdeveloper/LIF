@@ -87,7 +87,8 @@ def create_app():
     # Con DEMO_TEMAS=1 cada visita puede elegir tema y color (modo escaparate de la demo pública).
     escaparate = os.environ.get("DEMO_TEMAS", "").strip().lower() in ("1", "true", "si", "sí")
     tema = cargar_tema(app, os.environ.get("TEMA") or LIGA.tema, escaparate=escaparate)
-    app.config["TEMA"] = tema
+    if not escaparate:  # en modo escaparate, cargar_tema ya dejó el tema por defecto (siempre uno visible)
+        app.config["TEMA"] = tema
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
 
@@ -237,6 +238,13 @@ def create_app():
             "clasificados": getattr(FORMATO, "CLASIFICADOS", 0),
             "escaparate": contexto_escaparate(app),
         }
+
+    @app.context_processor
+    def _inject_tema_admin():
+        # Modo del panel de administración (claro / oscuro / auto), guardado en una cookie del
+        # navegador. Se escribe en <html data-tema> desde el servidor para que no haya parpadeo.
+        elegido = request.cookies.get("admin_tema") if has_request_context() else None
+        return {"tema_admin": elegido if elegido in ("claro", "oscuro") else "auto"}
 
     @user_logged_in.connect_via(app)
     def _marcar_sesion_demo(sender, user):

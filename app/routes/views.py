@@ -918,6 +918,18 @@ def logout():
     flash("Sesión cerrada correctamente.", "success")
     return redirect(url_for('views.login'))
 
+def _estado_liga():
+    """Resumen para el inicio del panel: temporada y torneo activos, partidos y clubes."""
+    temporada = Temporada.query.filter_by(activa=True).first()
+    torneo = Torneo.query.filter_by(activo=True).first()
+    estado = {"temporada": temporada, "torneo": torneo, "clubes": Club.query.count(),
+              "jugados": 0, "pendientes": 0}
+    if torneo:
+        estado["jugados"] = Partido.query.filter_by(torneo_id=torneo.id, jugado=True).count()
+        estado["pendientes"] = Partido.query.filter_by(torneo_id=torneo.id, jugado=False).count()
+    return estado
+
+
 # ---------------- DASHBOARD ----------------
 @views.route('/dashboard')
 @login_required
@@ -925,7 +937,7 @@ def dashboard():
     role = current_user.rol
 
     if role == 'administrador':
-        return render_template('adminview.html', usuario=current_user)
+        return render_template('adminview.html', usuario=current_user, estado=_estado_liga())
 
     if role == 'periodista':
         return render_template('panelperiodista.html', usuario=current_user)
@@ -1028,7 +1040,7 @@ def adminview():
     if current_user.rol != 'administrador':
         flash('Acceso denegado. Solo administradores pueden acceder a esta sección.', 'danger')
         return redirect(url_for('views.index'))
-    return render_template('adminview.html', usuario=current_user)
+    return render_template('adminview.html', usuario=current_user, estado=_estado_liga())
 
 
 # ---------------- CAPTURAS PARA REDES SOCIALES ----------------

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Videos - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <header class="s-head rv">
+      <div>
+        <span class="kicker">Multimedios</span>
+        <h1>Vi<em>deos</em></h1>
+      </div>
+    </header>
+    {% if videos %}
+    <div class="cards-grid">
+      {% for video in videos %}
+      <article class="ncard rv" style="--d:{{ loop.index0 % 6 }}">
+        <div class="vframe"><iframe src="{{ video.url | replace('watch?v=', 'embed/') }}" title="{{ video.titulo_video }}" loading="lazy" allowfullscreen></iframe></div>
+        <div class="bd">
+          <span class="tag">{{ video.fecha_subida.strftime('%d/%m/%Y') }}</span>
+          <h3>{{ video.titulo_video }}</h3>
+          {% if video.descripcion %}<p>{{ video.descripcion }}</p>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">Todavía no hay videos publicados.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

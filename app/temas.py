@@ -110,9 +110,15 @@ def tema_actual(app):
 
 
 def _habilitar_escaparate(app, slug_defecto):
+    # Solo los temas visibles se pueden elegir (`"visible": false` en theme.json los oculta:
+    # siguen instalados como respaldo, pero no se ofrecen en el selector ni por ?tema=).
     metas = {s: _leer_meta(app, s) for s in temas_disponibles(app)}
+    metas = {s: m for s, m in metas.items() if m.get("visible", True)}
+    if slug_defecto not in metas:
+        slug_defecto = next(iter(metas))
     app.config["ESCAPARATE"] = True
     app.config["TEMAS_META"] = metas
+    app.config["TEMA"] = metas[slug_defecto]
 
     # Las cookies de sesión tienen que viajar dentro de un iframe (la landing incrusta la demo).
     app.config["SESSION_COOKIE_SAMESITE"] = "None"

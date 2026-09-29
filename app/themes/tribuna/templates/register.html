@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crear cuenta - {{ liga.nombre_corto }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% include "_tokens.html" %}
+<link rel="stylesheet" href="{{ url_for('tema.static', filename='css/tribuna.css') }}">
+</head>
+<body>
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% if mensajes %}<div class="flashes" role="status" style="top:20px">{% for categoria, mensaje in mensajes %}<div class="flash flash-{{ categoria }}">{{ mensaje }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+
+<main class="auth">
+  <div class="auth-side" aria-hidden="true">
+    <div class="banderines"><div class="band-track">{% for _ in range(20) %}<i class="band {{ ['b1','b2','b3'][loop.index0 % 3] }}"></i>{% endfor %}</div></div>
+    <div class="auth-grada">{% for fila in range(3) %}<div class="fila f{{ fila }}">{% for i in range(22) %}<span class="hincha" style="--i:{{ i }};--f:{{ fila }}"><b></b></span>{% endfor %}</div>{% endfor %}</div>
+    <strong class="auth-sigla">{{ liga.nombre_corto }}</strong>
+  </div>
+  <div class="auth-card">
+    <a href="{{ url_for('views.index') }}" class="auth-brand" aria-label="Volver al inicio">
+      <img src="{{ url_for('static', filename=liga.logo) }}" alt="">
+      <div><b>{{ liga.nombre_corto }}</b><small>{{ liga.nombre }}</small></div>
+    </a>
+    <h1>Crear cuenta</h1>
+
+    <form method="POST" class="auth-form">
+      <div class="field"><input type="text" name="nombre" placeholder="Nombre completo" value="{{ nombre }}" autocomplete="name" required></div>
+      <div class="field"><input type="email" name="email" placeholder="Email" value="{{ email }}" autocomplete="email" required></div>
+      <div class="field">
+        <input type="password" id="password" name="password" placeholder="Contraseña" autocomplete="new-password" required>
+        <button type="button" class="eye" data-target="password" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <div class="field">
+        <input type="password" id="verifypassword" name="verifypassword" placeholder="Repetir contraseña" autocomplete="new-password" required>
+        <button type="button" class="eye" data-target="verifypassword" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <p id="password-hint" class="hint" aria-live="polite"></p>
+
+      <button type="submit" class="btn btn-solid btn-full">Crear cuenta</button>
+
+      <div class="auth-links">
+        <p>¿Ya tenés cuenta? <a href="{{ url_for('views.login') }}">Ingresá</a></p>
+      </div>
+    </form>
+  </div>
+</main>
+<script src="{{ url_for('tema.static', filename='js/tribuna.js') }}" defer></script>
+</body>
+</html>

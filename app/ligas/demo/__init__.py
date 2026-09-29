@@ -21,6 +21,7 @@ LIGA = Liga(
     email_admin_inicial="admin@demo.eltablon.com",
     email_demo="demo@eltablon.com",
     email_periodista_demo="periodista@eltablon.com",
+    tema="cancha",
     acento="#2dd4bf",
     acento_dim="#14b8a6",
     demo=True,

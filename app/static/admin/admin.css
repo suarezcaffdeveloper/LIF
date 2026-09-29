@@ -341,9 +341,13 @@ body.ad-body {
 
 .ad-seccion { margin-top: 30px; }
 .ad-seccion > h2 { font-size: 14px; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
-.ad-accesos { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.ad-accesos { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
 .ad-acceso { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); text-decoration: none; transition: border-color .15s, transform .15s, box-shadow .15s; }
 .ad-acceso:hover { border-color: var(--acento-sombra); transform: translateY(-2px); box-shadow: var(--sombra); }
+@media (prefers-reduced-motion: no-preference) {
+  .ad-acceso { animation: ad-entra .4s ease-out both; animation-delay: calc(var(--i, 0) * 45ms); }
+}
+@keyframes ad-entra { from { opacity: 0; transform: translateY(8px); } }
 .ad-acceso .ico { width: 42px; height: 42px; border-radius: 10px; background: var(--acento-tinte); color: var(--text); display: grid; place-items: center; flex: none; }
 .ad-acceso strong { display: block; font-size: 15px; font-weight: 600; }
 .ad-acceso small { display: block; color: var(--muted); font-size: 13px; line-height: 1.35; margin-top: 1px; }

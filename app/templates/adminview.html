@@ -1,576 +1,85 @@
-<!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <title>Panel de Administración</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+{% extends "admin/base_admin.html" %}
+{% block title %}Inicio{% endblock %}
+{% block page_title %}Panel de administración{% endblock %}
+{% block page_sub %}Todo lo que se carga y se publica en {{ liga.nombre }}, en un solo lugar.{% endblock %}
+{% block page_actions %}<a class="ad-btn" href="{{ url_for('views.index') }}" target="_blank" rel="noopener">Ver el sitio <svg class="ad-i"><use href="#i-externo"/></svg></a>{% endblock %}
 
-  <style>
-    :root {
-      --bg:        #0a0a0f;
-      --surface:   #111118;
-      --border:    rgba(255,255,255,0.07);
-      --accent:    #00e5ff;
-      --accent2:   #7c3aed;
-      --text:      #e8e8f0;
-      --muted:     #6b6b80;
-      --card-bg:   #13131c;
-      --card-hover:#181825;
-    }
+{% macro acceso(url, icono, titulo, detalle, n) -%}
+  <a class="ad-acceso" href="{{ url }}" style="--i:{{ n }}">
+    <span class="ico"><svg class="ad-i"><use href="#i-{{ icono }}"/></svg></span>
+    <span><strong>{{ titulo }}</strong><small>{{ detalle }}</small></span>
+    <svg class="ad-i ad-flecha"><use href="#i-flecha"/></svg>
+  </a>
+{%- endmacro %}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ── NOISE TEXTURE OVERLAY ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: .5;
-    }
-
-    /* ── AMBIENT GLOW ── */
-    body::after {
-      content: '';
-      position: fixed;
-      width: 700px; height: 700px;
-      top: -200px; left: 50%;
-      transform: translateX(-50%);
-      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .wrapper {
-      position: relative;
-      z-index: 1;
-      max-width: 1360px;
-      margin: 0 auto;
-      padding: 0 32px 80px;
-    }
-
-    /* ── TOPBAR ── */
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 28px 0;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 64px;
-    }
-
-    .logo-mark {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: 1rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent);
-      opacity: .6;
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-nav {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 9px 20px;
-      border-radius: 100px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all .25s ease;
-      letter-spacing: .3px;
-    }
-
-    .btn-nav:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(0,229,255,.06);
-    }
-
-    .btn-nav .icon { font-style: normal; font-size: 1rem; }
-
-    /* ── HERO HEADER ── */
-    .hero {
-      margin-bottom: 72px;
-    }
-
-    .hero-eyebrow {
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--accent);
-      opacity: .7;
-      margin-bottom: 16px;
-    }
-
-    .hero h1 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: clamp(2.4rem, 5vw, 4rem);
-      color: var(--text);
-      line-height: 1.05;
-      letter-spacing: -1.5px;
-    }
-
-    .hero h1 span {
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* ── SECTION ── */
-    .section { margin-bottom: 56px; }
-
-    .section-label {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .section-label .label-icon {
-      font-size: 1rem;
-      width: 34px; height: 34px;
-      display: grid;
-      place-items: center;
-      background: rgba(255,255,255,.04);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-
-    .section-label h2 {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .section-label .divider {
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* ── GRID ── */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    /* ── CARD ── */
-    .card-link {
-      text-decoration: none;
-      display: block;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
-      position: relative;
-      overflow: hidden;
-      transition: transform .3s cubic-bezier(.22,.68,0,1.2),
-                  background .25s ease,
-                  border-color .25s ease,
-                  box-shadow .3s ease;
-      cursor: pointer;
-      min-height: 130px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-
-    /* Glow pill top-right */
-    .card::before {
-      content: '';
-      position: absolute;
-      top: -40px; right: -40px;
-      width: 100px; height: 100px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,229,255,.18) 0%, transparent 70%);
-      opacity: 0;
-      transition: opacity .35s ease;
-    }
-
-    .card-link:hover .card::before { opacity: 1; }
-
-    .card-link:hover .card {
-      transform: translateY(-5px) scale(1.01);
-      background: var(--card-hover);
-      border-color: rgba(0,229,255,.25);
-      box-shadow: 0 20px 50px rgba(0,0,0,.4), 0 0 0 1px rgba(0,229,255,.1);
-    }
-
-    .card-number {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: rgba(0,229,255,.3);
-      margin-bottom: 14px;
-      transition: color .25s;
-    }
-
-    .card-link:hover .card-number { color: rgba(0,229,255,.65); }
-
-    .card h3 {
-      font-family: 'Syne', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.35;
-      letter-spacing: -.2px;
-      transition: color .25s;
-    }
-
-    .card-link:hover .card h3 { color: #fff; }
-
-    .card-arrow {
-      position: absolute;
-      top: 24px; right: 24px;
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      display: grid;
-      place-items: center;
-      font-size: 0.75rem;
-      color: var(--muted);
-      transition: all .3s ease;
-    }
-
-    .card-link:hover .card-arrow {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(0,229,255,.08);
-      transform: rotate(45deg);
-    }
-
-    /* ── STAGGER ANIMATION ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .card-link {
-      animation: fadeUp .5s ease both;
-    }
-
-    /* ── RESPONSIVE ── */
-    @media (max-width: 640px) {
-      .wrapper { padding: 0 18px 60px; }
-      .hero h1 { letter-spacing: -1px; }
-      .card-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
-      .topbar { flex-direction: column; gap: 16px; align-items: flex-start; }
-    }
-
-    /* ── DEMO MODE FLOATING BANNER ── */
-    .demo-float-banner {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 2000;
-      max-width: 340px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 16px 18px;
-      border-radius: 16px;
-      background: var(--card-bg);
-      border: 1px solid rgba(0,229,255,.25);
-      box-shadow: 0 20px 50px rgba(0,0,0,.5), 0 0 0 1px rgba(0,229,255,.08);
-      animation: fadeUp .5s ease both;
-    }
-
-    .demo-float-banner__icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
-
-    .demo-float-banner__body { flex: 1; }
-
-    .demo-float-banner__title {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: .75rem;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 5px;
-    }
-
-    .demo-float-banner__text {
-      font-size: .8rem;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-
-    .demo-float-banner__close {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-size: 1rem;
-      cursor: pointer;
-      line-height: 1;
-      padding: 2px;
-      flex-shrink: 0;
-      transition: color .2s;
-    }
-
-    .demo-float-banner__close:hover { color: var(--text); }
-
-    @media (max-width: 640px) {
-      .demo-float-banner { left: 18px; right: 18px; bottom: 18px; max-width: none; }
-    }
-  </style>
-</head>
-
-<body>
-
-  {% if demo_mode %}
-  <div class="demo-float-banner" id="demoBanner">
-    <span class="demo-float-banner__icon">🧪</span>
-    <div class="demo-float-banner__body">
-      <div class="demo-float-banner__title">Modo Demo</div>
-      <p class="demo-float-banner__text">
-        Estás en una base de datos aislada de prueba. Probá lo que quieras:
-        nada de esto afecta los datos reales de la liga.
-      </p>
-    </div>
-    <button type="button" class="demo-float-banner__close" onclick="document.getElementById('demoBanner').remove()" aria-label="Cerrar aviso">✕</button>
+{% block content %}
+<section class="ad-estado" aria-label="Estado de la liga">
+  <div class="ad-dato ad-dato-acento">
+    <small>Temporada activa</small>
+    <strong>{{ estado.temporada.nombre if estado.temporada else 'Sin activar' }}</strong>
   </div>
-  {% endif %}
-
-<div class="wrapper">
-
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <span class="logo-mark">Admin</span>
-    <div class="top-actions">
-      <a href="{{ url_for('views.index') }}" class="btn-nav">
-        <i class="icon">⌂</i> Inicio
-      </a>
-      <a href="{{ url_for('views.logout') }}" class="btn-nav">
-        <i class="icon">→</i> Cerrar Sesión
-      </a>
-    </div>
-  </header>
-
-  <!-- HERO -->
-  <div class="hero">
-    <p class="hero-eyebrow">Sistema de gestión</p>
-    <h1>Panel de<br><span>Administración</span></h1>
+  <div class="ad-dato">
+    <small>Torneo activo</small>
+    <strong>{{ estado.torneo.nombre if estado.torneo else 'Sin activar' }}</strong>
   </div>
+  <div class="ad-dato">
+    <small>Partidos del torneo</small>
+    <strong>{{ estado.jugados }} jugados · {{ estado.pendientes }} por jugar</strong>
+  </div>
+  <div class="ad-dato">
+    <small>Clubes cargados</small>
+    <strong>{{ estado.clubes }}</strong>
+  </div>
+</section>
+{% if not estado.temporada or not estado.torneo %}
+  <div class="ad-demo" role="note" style="margin-top:0;margin-bottom:8px;background:var(--warn-bg);border-color:color-mix(in srgb,var(--warn) 40%,transparent)">
+    <svg class="ad-i" style="color:var(--warn)"><use href="#i-alerta"/></svg>
+    <p>Falta activar una temporada y un torneo: el sitio público no muestra fixture ni tablas hasta entonces. <a href="{{ url_for('views.administrar_temporadas_view') }}"><strong>Ir a temporadas</strong></a></p>
+  </div>
+{% endif %}
 
-  <!-- ── SECCIÓN 1: Estadísticas ── -->
-  <section class="section">
-    <div class="section-label">
-      <span class="label-icon">📊</span>
-      <h2>Estadísticas</h2>
-      <div class="divider"></div>
-    </div>
-    <div class="card-grid">
+<section class="ad-seccion">
+  <h2>Estadísticas</h2>
+  <div class="ad-accesos">
+    {{ acceso(url_for('views.cargar_estadisticas_mayores'), 'estadisticas', 'Estadísticas Mayores', 'Resultados, goleadores y tarjetas', 1) }}
+    {{ acceso(url_for('views.cargar_estadisticas_inferiores'), 'estadisticas', 'Estadísticas Inferiores', 'Resultados, goleadores y tarjetas', 2) }}
+  </div>
+</section>
 
-      <a href="/cargar_estadisticas_mayores" class="card-link" style="animation-delay:.05s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">01</div>
-          <h3>Cargar Estadísticas Mayores</h3>
-        </div>
-      </a>
+<section class="ad-seccion">
+  <h2>Fixture</h2>
+  <div class="ad-accesos">
+    {{ acceso(url_for('views.cargar_fixture_mayores_view'), 'fixture', 'Fixture Mayores', 'Armar y sortear las fechas', 1) }}
+    {{ acceso(url_for('views.cargar_fixture_inferiores'), 'fixture', 'Fixture Inferiores', 'Armar y sortear las fechas', 2) }}
+    {{ acceso(url_for('views.vista_crear_partido_playoff'), 'playoff', 'Partidos de playoff', 'Cruces de la fase final', 3) }}
+  </div>
+</section>
 
-      <a href="/cargar_estadisticas_inferiores" class="card-link" style="animation-delay:.10s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">02</div>
-          <h3>Cargar Estadísticas Inferiores</h3>
-        </div>
-      </a>
+<section class="ad-seccion">
+  <h2>Jugadores y equipos</h2>
+  <div class="ad-accesos">
+    {{ acceso(url_for('views.cargar_jugadores'), 'jugadores', 'Cargar jugadores', 'Alta de un jugador nuevo', 1) }}
+    {{ acceso(url_for('views.asignar_jugador_categoria'), 'asignar', 'Asignar a equipo', 'Pasar un jugador a su categoría', 2) }}
+    {{ acceso(url_for('views.cargar_clubes'), 'clubes', 'Clubes', 'Nombre y escudo', 3) }}
+    {{ acceso(url_for('views.cargar_equipos'), 'equipos', 'Equipos', 'Un equipo por categoría de cada club', 4) }}
+    {{ acceso(url_for('views.importar_jugadores_excel'), 'excel', 'Importar desde Excel', 'Carga masiva de jugadores', 5) }}
+  </div>
+</section>
 
-    </div>
-  </section>
+<section class="ad-seccion">
+  <h2>Contenido y redes</h2>
+  <div class="ad-accesos">
+    {{ acceso(url_for('views.cargar_noticia'), 'noticia', 'Noticias', 'Publicar una nota', 1) }}
+    {{ acceso(url_for('views.cargar_video'), 'video', 'Videos', 'Sumar un video de YouTube', 2) }}
+    {{ acceso(url_for('views.crear_periodista'), 'periodista', 'Periodistas', 'Dar de alta una cuenta', 3) }}
+    {{ acceso(url_for('views.admin_capturas'), 'capturas', 'Capturas para redes', 'Imágenes listas para publicar', 4) }}
+  </div>
+</section>
 
-  <!-- ── SECCIÓN 2: Jugadores y Equipos ── -->
-  <section class="section">
-    <div class="section-label">
-      <span class="label-icon">👥</span>
-      <h2>Jugadores y Equipos</h2>
-      <div class="divider"></div>
-    </div>
-    <div class="card-grid">
-
-      <a href="/cargar_jugadores" class="card-link" style="animation-delay:.05s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">01</div>
-          <h3>Cargar Jugadores</h3>
-        </div>
-      </a>
-
-      <a href="/asignar_jugador_categoria" class="card-link" style="animation-delay:.10s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">02</div>
-          <h3>Asignar Jugador a Equipo</h3>
-        </div>
-      </a>
-
-      <a href="/cargar_clubes" class="card-link" style="animation-delay:.15s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">03</div>
-          <h3>Cargar Clubes</h3>
-        </div>
-      </a>
-
-      <a href="/cargar_equipos" class="card-link" style="animation-delay:.20s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">04</div>
-          <h3>Cargar Equipos</h3>
-        </div>
-      </a>
-
-      <a href="{{ url_for('views.vista_crear_partido_playoff') }}" class="card-link" style="animation-delay:.25s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">05</div>
-          <h3>Cargar Partidos Playoffs</h3>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ── SECCIÓN 3: Fixture y Contenido ── -->
-  <section class="section">
-    <div class="section-label">
-      <span class="label-icon">🎯</span>
-      <h2>Fixture y Contenido</h2>
-      <div class="divider"></div>
-    </div>
-    <div class="card-grid">
-
-      <a href="/cargar_fixture_mayores" class="card-link" style="animation-delay:.05s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">01</div>
-          <h3>Cargar Fixture Mayores</h3>
-        </div>
-      </a>
-
-      <a href="/cargar_fixture_inferiores" class="card-link" style="animation-delay:.10s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">02</div>
-          <h3>Cargar Fixture Inferiores</h3>
-        </div>
-      </a>
-
-      <a href="/cargar_noticia" class="card-link" style="animation-delay:.15s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">03</div>
-          <h3>Cargar Noticia</h3>
-        </div>
-      </a>
-
-      <a href="/cargar_video" class="card-link" style="animation-delay:.20s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">04</div>
-          <h3>Cargar Video</h3>
-        </div>
-      </a>
-
-      <a href="/crear_periodista" class="card-link" style="animation-delay:.25s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">05</div>
-          <h3>Registrar Periodista</h3>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ── SECCIÓN 4: Parámetros ── -->
-  <section class="section">
-    <div class="section-label">
-      <span class="label-icon">⚙️</span>
-      <h2>Parámetros</h2>
-      <div class="divider"></div>
-    </div>
-    <div class="card-grid">
-
-      <a href="/admin/temporadas" class="card-link" style="animation-delay:.05s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">01</div>
-          <h3>Cargar Parámetros</h3>
-        </div>
-      </a>
-
-      <a href="/importar_jugadores_excel" class="card-link" style="animation-delay:.25s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">02</div>
-          <h3>Importar Jugadores Excel</h3>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- ── SECCIÓN 5: Redes Sociales ── -->
-  <section class="section">
-    <div class="section-label">
-      <span class="label-icon">📸</span>
-      <h2>Redes Sociales</h2>
-      <div class="divider"></div>
-    </div>
-    <div class="card-grid">
-
-      <a href="{{ url_for('views.admin_capturas') }}" class="card-link" style="animation-delay:.05s">
-        <div class="card">
-          <div class="card-arrow">↗</div>
-          <div class="card-number">01</div>
-          <h3>Capturas para Redes</h3>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-</div>
-</body>
-</html>
+<section class="ad-seccion">
+  <h2>Parámetros</h2>
+  <div class="ad-accesos">
+    {{ acceso(url_for('views.administrar_temporadas_view'), 'temporadas', 'Temporadas y torneos', 'Elegir cuál está activo en el sitio', 1) }}
+  </div>
+</section>
+{% endblock %}
