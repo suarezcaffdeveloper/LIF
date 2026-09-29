@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}{{ liga.nombre_corto }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..700&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@500..700&display=swap" rel="stylesheet">
+{% include "_tokens.html" %}
+<link rel="stylesheet" href="{{ url_for('tema.static', filename='css/cuaderno.css') }}">
+{% block extra_styles %}{% endblock %}
+</head>
+{%- set ep = request.endpoint or '' -%}
+{%- set primera = liga.categorias[0] -%}
+<body class="{% block body_class %}{% endblock %}">
+
+{% if demo_mode %}<div class="demo-banner">Modo demo: estás viendo datos de prueba, aislados de la base de datos real</div>{% endif %}
+
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% if mensajes %}
+<div class="flashes" role="status">
+  {% for categoria, mensaje in mensajes %}<div class="flash flash-{{ categoria }}">{{ mensaje }}</div>{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{# ───────── Encabezado ───────── #}
+<header class="cab" id="cab">
+  <div class="wrap cab-in">
+    <a href="{{ url_for('views.index') }}" class="logo" aria-label="{{ liga.nombre }}: inicio"><img src="{{ url_for('static', filename=liga.logo) }}" alt=""><span>{{ liga.nombre_corto }}</span></a>
+
+    <nav class="nav" aria-label="Principal">
+      <div class="m {{ 'on' if ep == 'views.index' }}"><a href="{{ url_for('views.index') }}">Inicio</a></div>
+      <div class="m {{ 'on' if ep == 'views.fixture' }}"><a href="{{ url_for('views.fixture', bloque=primera.bloque, categoria=primera.parametro_url) }}">Fixture</a>
+        <div class="desp">{% for c in liga.categorias %}<a href="{{ url_for('views.fixture', bloque=c.bloque, categoria=c.parametro_url) }}">{{ c.etiqueta }}</a>{% endfor %}</div></div>
+      <div class="m {{ 'on' if ep == 'views.tabla_posiciones' }}"><a href="{{ url_for('views.tabla_posiciones', categoria=primera.parametro_url) }}">Posiciones</a>
+        <div class="desp">{% for c in liga.categorias %}<a href="{{ url_for('views.tabla_posiciones', categoria=c.parametro_url) }}">{{ c.etiqueta }}</a>{% endfor %}</div></div>
+      <div class="m {{ 'on' if ep == 'views.mostrar_estadisticas' }}"><a href="{{ url_for('views.mostrar_estadisticas', categoria=primera.slug) }}">Goleadores</a>
+        <div class="desp">{% for c in liga.categorias %}<a href="{{ url_for('views.mostrar_estadisticas', categoria=c.slug) }}">{{ c.etiqueta }}</a>{% endfor %}</div></div>
+      <div class="m {{ 'on' if ep in ('views.todas_noticias', 'views.noticia_detalle') }}"><a href="{{ url_for('views.todas_noticias') }}">Noticias</a></div>
+      <div class="m {{ 'on' if ep == 'views.todos_videos' }}"><a href="{{ url_for('views.todos_videos') }}">Videos</a></div>
+    </nav>
+
+    <div class="cab-der">
+      {% if current_user.is_authenticated %}
+        {% if current_user.rol == 'administrador' %}<a href="{{ url_for('views.adminview') }}" class="btn btn-mini">Panel admin</a>{% endif %}
+        {% if current_user.rol == 'periodista' %}<a href="{{ url_for('views.panel_periodista') }}" class="btn btn-mini">Panel periodista</a>{% endif %}
+        <a href="{{ url_for('views.logout') }}" class="btn btn-mini btn-tiza">Salir</a>
+      {% else %}
+        <a href="{{ url_for('views.login') }}" class="btn btn-mini btn-tiza">Ingresar</a>
+      {% endif %}
+      <button type="button" class="burger" id="burger" aria-expanded="false" aria-controls="cajon" aria-label="Abrir el menú"><i></i><i></i><i></i></button>
+    </div>
+  </div>
+</header>
+
+{# Cajón del menú (celular) #}
+<div class="velo" id="velo"></div>
+<aside class="cajon" id="cajon" aria-label="Menú">
+  <a href="{{ url_for('views.index') }}">Inicio</a>
+  <a href="{{ url_for('views.fixture', bloque=primera.bloque, categoria=primera.parametro_url) }}">Fixture</a>
+  <a href="{{ url_for('views.tabla_posiciones', categoria=primera.parametro_url) }}">Posiciones</a>
+  <a href="{{ url_for('views.mostrar_estadisticas', categoria=primera.slug) }}">Goleadores</a>
+  <a href="{{ url_for('views.todas_noticias') }}">Noticias</a>
+  <a href="{{ url_for('views.todos_videos') }}">Videos</a>
+  {% if current_user.is_authenticated %}<a href="{{ url_for('views.logout') }}">Salir</a>{% else %}<a href="{{ url_for('views.login') }}">Ingresar</a>{% endif %}
+</aside>
+
+<main>{% block content %}{% endblock %}</main>
+
+<footer class="pie">
+  <div class="wrap pie-in">
+    <b>{{ liga.nombre }}</b>
+    <p>© {{ anio }} · Hecho con {{ producto }}</p>
+  </div>
+</footer>
+
+<script src="{{ url_for('tema.static', filename='js/cuaderno.js') }}" defer></script>
+{% block scripts %}{% endblock %}
+{% include "_selector_tema.html" ignore missing %}
+</body>
+</html>

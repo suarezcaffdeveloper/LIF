@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "_macros.html" import escudo with context %}
+{% set cat = liga.categoria(categoria) %}
+{% block title %}Posiciones {{ cat.etiqueta if cat else categoria|capitalize }} - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <header class="s-head rv">
+      <div>
+        <h1>Posi<em>ciones</em></h1>
+        <p class="s-sub">{{ cat.etiqueta_larga if cat else categoria|capitalize }} · Temporada {{ anio }}</p>
+      </div>
+      <nav class="tabs tabs-links" aria-label="Categoría">
+        {% for c in liga.categorias %}<a href="{{ url_for('views.tabla_posiciones', categoria=c.parametro_url) }}" {% if c.slug == categoria %}aria-current="page"{% endif %}>{{ c.etiqueta }}</a>{% endfor %}
+      </nav>
+    </header>
+
+    <div class="cols">
+      <div class="rv">
+        {% if tabla %}
+        <div class="standings standings-full">
+          <div class="st-row st-head">
+            <span>#</span><span>Club</span><span>PJ</span><span class="hm">G</span><span class="hm">E</span><span class="hm">P</span><span class="hm">GF</span><span class="hm">GC</span><span>DG</span><span>Pts</span><span class="hm">Racha</span>
+          </div>
+          {% for fila in tabla %}
+          <div class="st-row {{ 'q' if loop.index <= clasificados }}">
+            <span class="pos">{{ loop.index }}</span>
+            <span class="cl">{{ escudo({'escudo_url': fila.escudo_url, 'nombre': fila.nombre_equipo}) }}{{ fila.nombre_equipo }}</span>
+            <span class="dim">{{ fila.partidos_jugados }}</span>
+            <span class="dim hm">{{ fila.partidos_ganados }}</span>
+            <span class="dim hm">{{ fila.partidos_empatados }}</span>
+            <span class="dim hm">{{ fila.partidos_perdidos }}</span>
+            <span class="dim hm">{{ fila.goles_a_favor }}</span>
+            <span class="dim hm">{{ fila.goles_en_contra }}</span>
+            <span class="dim">{{ '+' if fila.diferencia_gol > 0 }}{{ fila.diferencia_gol }}</span>
+            <span class="pts">{{ fila.cantidad_puntos }}</span>
+            <span class="hm"><span class="form">{% for r in rachas.get(fila.nombre_equipo, []) %}<i class="{{ r }}" title="{{ {'G': 'Ganó', 'E': 'Empató', 'P': 'Perdió'}.get(r, r) }}"></i>{% else %}—{% endfor %}</span></span>
+          </div>
+          {% endfor %}
+          {% if clasificados %}<p class="st-foot"><i></i>Clasifican a la fase final</p>{% endif %}
+        </div>
+        {% else %}
+        <div class="empty">Todavía no hay datos de posiciones en esta categoría.</div>
+        {% endif %}
+      </div>
+
+      <div class="stack">
+        <div class="panel rv d1">
+          <h3>Estadísticas</h3>
+          {% if stats %}
+          <div class="stat-line"><small>Más goleador</small><b>{{ stats.mas_goleador.nombre_equipo }}</b><span>{{ stats.mas_goleador.goles_a_favor }} goles a favor</span></div>
+          <div class="stat-line"><small>Menos goleado</small><b>{{ stats.menos_goleado.nombre_equipo }}</b><span>{{ stats.menos_goleado.goles_en_contra }} goles en contra</span></div>
+          <div class="stat-line"><small>Mejor diferencia</small><b>{{ stats.mejor_diferencia.nombre_equipo }}</b><span>{{ '+' if stats.mejor_diferencia.diferencia_gol > 0 }}{{ stats.mejor_diferencia.diferencia_gol }} de diferencia</span></div>
+          {% else %}
+          <p class="s-sub" style="margin:0">Todavía no hay estadísticas disponibles.</p>
+          {% endif %}
+        </div>
+        <div class="panel rv d2">
+          <h3>Cruces de la fase final</h3>
+          {% if cruces %}
+            {% for a, b in cruces %}<div class="cruce"><span>{{ a.nombre_equipo }}</span><em>vs</em><span>{{ b.nombre_equipo }}</span></div>{% endfor %}
+          {% else %}
+          <p class="s-sub" style="margin:0">No hay suficientes equipos para definir los cruces.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

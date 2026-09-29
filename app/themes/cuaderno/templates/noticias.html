@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Noticias - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <div class="sec-cab"><h1>Noticias</h1></div>
+    {% if noticias %}
+    <div class="cards">
+      {% for n in noticias %}
+      <a href="{{ url_for('views.noticia_detalle', noticia_id=n.id_noticia) }}" class="ncard">
+        <div class="ph">{% if n.imagen_url %}<img src="{{ n.imagen_url }}" alt="" loading="lazy">{% endif %}</div>
+        <div class="bd">
+          <span class="etiq">{{ n.categoria or 'Noticias' }} · {{ n.fecha_publicacion.strftime('%d/%m/%Y') }}</span>
+          <h3>{{ n.titulo }}</h3>
+          <p>{{ n.contenido | striptags | truncate(170) }}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="vacio">Todavía no hay noticias publicadas.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

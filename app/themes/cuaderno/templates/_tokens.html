@@ -1,0 +1,16 @@
+{#- Paleta del tema Cuaderno. Si la liga define color_marca, la tiza roja se reemplaza por ese color;
+    si no, se usa el rojo propio del tema. -#}
+{% set marca = liga.color_marca %}
+<style>
+:root{
+  --papel:#F5F7FB; --papel-2:#E9EEF7; --blanco:#FFFFFF;
+  --tinta:#17233E; --grafito:#56637C; --azul:#2F5DA8; --resalte:#FFE27A;
+  --grilla:rgba(47,93,168,.11); --regla:rgba(47,93,168,.24);
+  {% if marca %}
+  --tiza:{{ marca }};
+  --tiza-osc:color-mix(in srgb,{{ marca }} 80%,#000);
+  {% else %}
+  --tiza:#D9432F; --tiza-osc:#B5301F;
+  {% endif %}
+}
+</style>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crear cuenta - {{ liga.nombre_corto }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..700&family=Doto:wght@400..900&display=swap" rel="stylesheet">
+{% include "_tokens.html" %}
+<link rel="stylesheet" href="{{ url_for('tema.static', filename='css/marcador.css') }}">
+<style>.main{margin-left:0}.rail{display:none}</style>
+</head>
+<body>
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% if mensajes %}<div class="flashes" role="status">{% for categoria, mensaje in mensajes %}<div class="flash flash-{{ categoria }}">{{ mensaje }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+
+<main class="acceso">
+  <form method="POST" class="acceso-caja">
+    <a href="{{ url_for('views.index') }}" class="marca" aria-label="Volver al inicio">
+      <img src="{{ url_for('static', filename=liga.logo) }}" alt="">
+      <div><b>{{ liga.nombre_corto }}</b><small>{{ liga.nombre }}</small></div>
+    </a>
+    <h1>Crear cuenta</h1>
+
+    <div class="campo"><input type="text" name="nombre" placeholder="Nombre completo" value="{{ nombre }}" autocomplete="name" required></div>
+    <div class="campo"><input type="email" name="email" placeholder="Email" value="{{ email }}" autocomplete="email" required></div>
+    <div class="campo">
+      <input type="password" id="password" name="password" placeholder="Contraseña" autocomplete="new-password" required>
+      <button type="button" class="ojo" data-target="password" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+    <div class="campo">
+      <input type="password" id="verifypassword" name="verifypassword" placeholder="Repetir contraseña" autocomplete="new-password" required>
+      <button type="button" class="ojo" data-target="verifypassword" aria-label="Mostrar contraseña"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+    <p id="pista-clave" class="pista-clave" aria-live="polite"></p>
+
+    <button type="submit" class="btn btn-led">Crear cuenta</button>
+
+    <div class="acceso-links">
+      <p>¿Ya tenés cuenta? <a href="{{ url_for('views.login') }}">Ingresá</a></p>
+    </div>
+  </form>
+</main>
+<script src="{{ url_for('tema.static', filename='js/marcador.js') }}" defer></script>
+</body>
+</html>

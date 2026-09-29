@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}{{ liga.nombre_corto }}{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..700&family=Doto:wght@400..900&display=swap" rel="stylesheet">
+{% include "_tokens.html" %}
+<link rel="stylesheet" href="{{ url_for('tema.static', filename='css/marcador.css') }}">
+{% block extra_styles %}{% endblock %}
+</head>
+{%- set ep = request.endpoint or '' -%}
+{%- set primera = liga.categorias[0] -%}
+<body class="{% block body_class %}{% endblock %}">
+
+{% if demo_mode %}<div class="demo-banner">Modo demo: estás viendo datos de prueba, aislados de la base de datos real</div>{% endif %}
+
+{% with mensajes = get_flashed_messages(with_categories=true) %}
+{% if mensajes %}
+<div class="flashes" role="status">
+  {% for categoria, mensaje in mensajes %}<div class="flash flash-{{ categoria }}">{{ mensaje }}</div>{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{# ───────── Barra lateral (escritorio) ───────── #}
+<aside class="rail" aria-label="Navegación principal">
+  <a href="{{ url_for('views.index') }}" class="rail-logo" aria-label="{{ liga.nombre }}: inicio"><img src="{{ url_for('static', filename=liga.logo) }}" alt=""></a>
+  <nav class="rail-nav">
+    <div class="it {{ 'on' if ep == 'views.index' }}">
+      <a href="{{ url_for('views.index') }}" aria-label="Inicio"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg></a>
+      <div class="fly"><b>Inicio</b></div>
+    </div>
+    <div class="it {{ 'on' if ep == 'views.fixture' }}">
+      <a href="{{ url_for('views.fixture', bloque=primera.bloque, categoria=primera.parametro_url) }}" aria-label="Fixture"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></a>
+      <div class="fly"><b>Fixture</b>{% for c in liga.categorias %}<a href="{{ url_for('views.fixture', bloque=c.bloque, categoria=c.parametro_url) }}">{{ c.etiqueta }}</a>{% endfor %}</div>
+    </div>
+    <div class="it {{ 'on' if ep == 'views.tabla_posiciones' }}">
+      <a href="{{ url_for('views.tabla_posiciones', categoria=primera.parametro_url) }}" aria-label="Posiciones"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg></a>
+      <div class="fly"><b>Posiciones</b>{% for c in liga.categorias %}<a href="{{ url_for('views.tabla_posiciones', categoria=c.parametro_url) }}">{{ c.etiqueta }}</a>{% endfor %}</div>
+    </div>
+    <div class="it {{ 'on' if ep == 'views.mostrar_estadisticas' }}">
+      <a href="{{ url_for('views.mostrar_estadisticas', categoria=primera.slug) }}" aria-label="Goleadores"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg></a>
+      <div class="fly"><b>Goleadores</b>{% for c in liga.categorias %}<a href="{{ url_for('views.mostrar_estadisticas', categoria=c.slug) }}">{{ c.etiqueta }}</a>{% endfor %}</div>
+    </div>
+    <div class="it {{ 'on' if ep in ('views.todas_noticias', 'views.noticia_detalle') }}">
+      <a href="{{ url_for('views.todas_noticias') }}" aria-label="Noticias"><svg viewBox="0 0 24 24"><path d="M4 5h13v14H6a2 2 0 01-2-2zM17 9h3v8a2 2 0 01-2 2M8 9h5M8 13h5"/></svg></a>
+      <div class="fly"><b>Noticias</b></div>
+    </div>
+    <div class="it {{ 'on' if ep == 'views.todos_videos' }}">
+      <a href="{{ url_for('views.todos_videos') }}" aria-label="Videos"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5l5 2.5-5 2.5z"/></svg></a>
+      <div class="fly"><b>Videos</b></div>
+    </div>
+  </nav>
+  <div class="rail-user">
+    {% if current_user.is_authenticated %}
+    {% if current_user.rol == 'administrador' %}
+    <div class="it"><a href="{{ url_for('views.adminview') }}" aria-label="Panel de administración"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg></a><div class="fly"><b>Panel de administración</b></div></div>
+    {% elif current_user.rol == 'periodista' %}
+    <div class="it"><a href="{{ url_for('views.panel_periodista') }}" aria-label="Panel de periodista"><svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg></a><div class="fly"><b>Panel de periodista</b></div></div>
+    {% endif %}
+    <div class="it"><a href="{{ url_for('views.logout') }}" aria-label="Salir"><svg viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 011 1v14a1 1 0 01-1 1h-4M10 8l-4 4 4 4M6 12h11"/></svg></a><div class="fly"><b>Salir</b></div></div>
+    {% else %}
+    <div class="it"><a href="{{ url_for('views.login') }}" aria-label="Ingresar"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></a><div class="fly"><b>Ingresar</b></div></div>
+    {% endif %}
+  </div>
+</aside>
+
+{# ───────── Barra superior y pestañas (celular) ───────── #}
+<header class="mtop">
+  <a href="{{ url_for('views.index') }}" class="mlogo"><img src="{{ url_for('static', filename=liga.logo) }}" alt=""><b>{{ liga.nombre_corto }}</b></a>
+  {% if current_user.is_authenticated %}
+    <a href="{{ url_for('views.logout') }}" class="mbtn">Salir</a>
+  {% else %}
+    <a href="{{ url_for('views.login') }}" class="mbtn">Ingresar</a>
+  {% endif %}
+</header>
+<nav class="mtabs" aria-label="Secciones">
+  <a href="{{ url_for('views.index') }}" class="{{ 'on' if ep == 'views.index' }}">Inicio</a>
+  <a href="{{ url_for('views.fixture', bloque=primera.bloque, categoria=primera.parametro_url) }}" class="{{ 'on' if ep == 'views.fixture' }}">Fixture</a>
+  <a href="{{ url_for('views.tabla_posiciones', categoria=primera.parametro_url) }}" class="{{ 'on' if ep == 'views.tabla_posiciones' }}">Posiciones</a>
+  <a href="{{ url_for('views.mostrar_estadisticas', categoria=primera.slug) }}" class="{{ 'on' if ep == 'views.mostrar_estadisticas' }}">Goleadores</a>
+  <a href="{{ url_for('views.todas_noticias') }}" class="{{ 'on' if ep in ('views.todas_noticias', 'views.noticia_detalle') }}">Noticias</a>
+  <a href="{{ url_for('views.todos_videos') }}" class="{{ 'on' if ep == 'views.todos_videos' }}">Videos</a>
+</nav>
+
+<div class="main">
+  <main>{% block content %}{% endblock %}</main>
+  <footer class="pie">
+    <div class="wrap pie-in">
+      <p><b>{{ liga.nombre }}</b><br>© {{ anio }} · Hecho con {{ producto }}</p>
+    </div>
+  </footer>
+</div>
+
+<script src="{{ url_for('tema.static', filename='js/marcador.js') }}" defer></script>
+{% block scripts %}{% endblock %}
+{% include "_selector_tema.html" ignore missing %}
+</body>
+</html>

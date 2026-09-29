@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_macros.html" import escudo with context %}
+{% block title %}{{ titulo }} - {{ liga.nombre_corto }}{% endblock %}
+
+{# Un partido: fecha, local, marcador (o "vs") y visitante, con sus goleadores. #}
+{% macro partido_fila(partido) %}
+<article class="fila">
+  <div class="cuando">{% if partido.fecha_partido %}<b>{{ partido.fecha_partido.strftime('%d/%m') }}</b>{% endif %}{% if partido.hora_partido %}{{ partido.hora_partido.strftime('%H:%M') }} hs{% endif %}</div>
+  <div class="lado">{{ escudo(partido.equipo_local.club) }}<div class="quien"><span>{{ partido.equipo_local.club.nombre }}</span>
+    {% if partido.goleadores_local %}<span class="goleadores-mini">{% for g in partido.goleadores_local %}{{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}</div></div>
+  <div class="score {{ '' if (mostrar_resultados and partido.jugado) else 'prox' }}">
+    {% if mostrar_resultados and partido.jugado %}{{ partido.goles_local }}-{{ partido.goles_visitante }}{% if partido.definido_por_penales %}<span class="goleadores-mini" style="font-family:var(--mono);font-size:11px;letter-spacing:0">({{ partido.penales_local }}-{{ partido.penales_visitante }}) pen.</span>{% endif %}{% else %}vs{% endif %}
+  </div>
+  <div class="lado der">{{ escudo(partido.equipo_visitante.club) }}<div class="quien" style="text-align:right"><span>{{ partido.equipo_visitante.club.nombre }}</span>
+    {% if partido.goleadores_visitante %}<span class="goleadores-mini">{% for g in partido.goleadores_visitante %}{{ g.nombre }} ({{ g.goles }}){% if not loop.last %}, {% endif %}{% endfor %}</span>{% endif %}</div></div>
+</article>
+{% endmacro %}
+
+{% block content %}
+{# Se abre por defecto la última jornada con resultados. #}
+{% set ns = namespace(ultima=0) %}
+{% for nombre, ps in fechas_partidos.items() %}{% if ps | selectattr('jugado') | list %}{% set ns.ultima = loop.index0 %}{% endif %}{% endfor %}
+<section class="page">
+  <div class="wrap">
+    <div class="sec-head">
+      <h1>{{ titulo }}</h1>
+      <nav class="tabs" aria-label="Categoría">
+        {% for c in liga.categorias %}<a href="{{ url_for('views.fixture', bloque=c.bloque, categoria=c.parametro_url) }}">{{ c.etiqueta }}</a>{% endfor %}
+      </nav>
+    </div>
+
+    {% if fechas_partidos %}
+    <div class="tabs jornadas" data-group="jornada" role="tablist">
+      {% for nombre, ps in fechas_partidos.items() %}
+      <button type="button" role="tab" data-key="j{{ loop.index0 }}" aria-selected="{{ 'true' if loop.index0 == ns.ultima else 'false' }}">{{ nombre }}</button>
+      {% endfor %}
+    </div>
+
+    {% for nombre, ps in fechas_partidos.items() %}
+    <div class="pane" data-group="jornada" data-key="j{{ loop.index0 }}">
+      <div class="lista">
+      {% if ps and ps[0].es_ida_vuelta %}
+        {% set ida = ps | selectattr('jornada', 'equalto', 1) | list %}
+        {% set vuelta = ps | selectattr('jornada', 'equalto', 2) | list %}
+        {% if ida %}<p class="ronda" style="padding:12px 20px 0">Ida</p>{% for p in ida %}{{ partido_fila(p) }}{% endfor %}{% endif %}
+        {% if vuelta %}<p class="ronda" style="padding:12px 20px 0">Vuelta</p>{% for p in vuelta %}{{ partido_fila(p) }}{% endfor %}{% endif %}
+      {% else %}
+        {% for p in ps %}{{ partido_fila(p) }}{% endfor %}
+      {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="vacio">Todavía no hay partidos cargados para {{ titulo }}.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

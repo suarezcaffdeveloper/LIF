@@ -1,0 +1,6 @@
+{
+  "nombre": "Marcador",
+  "descripcion": "Oscuro y de tablero: inicio con el marcador electrónico del estadio y cuenta regresiva en dígitos LED, barra lateral de íconos y datos en tipografía de matriz de puntos.",
+  "modo": "oscuro",
+  "portada": true
+}

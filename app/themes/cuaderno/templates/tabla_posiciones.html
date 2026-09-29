@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "_macros.html" import escudo with context %}
+{% set cat = liga.categoria(categoria) %}
+{% block title %}Posiciones {{ cat.etiqueta if cat else categoria|capitalize }} - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <div class="sec-cab">
+      <div><h1>Posiciones</h1><p class="meta">{{ cat.etiqueta_larga if cat else categoria|capitalize }} · Temporada {{ anio }}</p></div>
+      <nav class="pest" aria-label="Categoría">
+        {% for c in liga.categorias %}<a href="{{ url_for('views.tabla_posiciones', categoria=c.parametro_url) }}" {% if c.slug == categoria %}aria-current="page"{% endif %}>{{ c.etiqueta }}</a>{% endfor %}
+      </nav>
+    </div>
+
+    <div class="cols">
+      <div class="caja">
+        {% if tabla %}
+        {% set maximo = tabla[0].cantidad_puntos or 1 %}
+        <div class="tabla-wrap">
+          <table>
+            <thead><tr><th></th><th>Club</th><th>PJ</th><th class="hm">G</th><th class="hm">E</th><th class="hm">P</th><th class="hm">GF</th><th class="hm">GC</th><th>DG</th><th>Pts</th><th class="hm">Forma</th></tr></thead>
+            <tbody>
+              {% for fila in tabla %}
+              <tr class="{{ 'q' if loop.index <= clasificados }}">
+                <td class="pos">{{ loop.index }}</td>
+                <td><div class="club-cel">{{ escudo({'escudo_url': fila.escudo_url, 'nombre': fila.nombre_equipo}) }}{{ fila.nombre_equipo }}</div></td>
+                <td>{{ fila.partidos_jugados }}</td>
+                <td class="hm">{{ fila.partidos_ganados }}</td>
+                <td class="hm">{{ fila.partidos_empatados }}</td>
+                <td class="hm">{{ fila.partidos_perdidos }}</td>
+                <td class="hm">{{ fila.goles_a_favor }}</td>
+                <td class="hm">{{ fila.goles_en_contra }}</td>
+                <td>{{ '+' if fila.diferencia_gol > 0 }}{{ fila.diferencia_gol }}</td>
+                <td><div class="ptcol"><span class="raya"><i data-w="{{ (fila.cantidad_puntos / maximo * 100) | round(0) | int }}"></i></span><span class="pts">{{ fila.cantidad_puntos }}</span></div></td>
+                <td class="hm"><div class="forma">{% for r in rachas.get(fila.nombre_equipo, []) %}<i class="{{ r }}" title="{{ {'G': 'Ganó', 'E': 'Empató', 'P': 'Perdió'}.get(r, r) }}"></i>{% else %}—{% endfor %}</div></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if clasificados %}<div class="leyenda">Clasifica a la fase final</div>{% endif %}
+        {% else %}
+        <div class="vacio" style="border:0">Todavía no hay datos de posiciones en esta categoría.</div>
+        {% endif %}
+      </div>
+
+      <div class="pila">
+        <div class="caja">
+          <div class="caja-tit">Estadísticas</div>
+          {% if stats %}
+          <div class="dato"><small>Más goleador</small><b>{{ stats.mas_goleador.nombre_equipo }}</b><span>{{ stats.mas_goleador.goles_a_favor }} goles a favor</span></div>
+          <div class="dato"><small>Menos goleado</small><b>{{ stats.menos_goleado.nombre_equipo }}</b><span>{{ stats.menos_goleado.goles_en_contra }} goles en contra</span></div>
+          <div class="dato"><small>Mejor diferencia</small><b>{{ stats.mejor_diferencia.nombre_equipo }}</b><span>{{ '+' if stats.mejor_diferencia.diferencia_gol > 0 }}{{ stats.mejor_diferencia.diferencia_gol }} de diferencia</span></div>
+          {% else %}
+          <div class="dato"><span>Todavía no hay estadísticas disponibles.</span></div>
+          {% endif %}
+        </div>
+        <div class="caja">
+          <div class="caja-tit">Cruces de la fase final</div>
+          {% if cruces %}
+            {% for a, b in cruces %}<div class="cruce"><span>{{ a.nombre_equipo }}</span><em>VS</em><span>{{ b.nombre_equipo }}</span></div>{% endfor %}
+          {% else %}
+          <div class="dato"><span>No hay suficientes equipos para definir los cruces.</span></div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

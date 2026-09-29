@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import escudo with context %}
+{% block title %}{{ club.nombre }} · Planteles - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <a href="{{ url_for('views.index') }}" class="atras"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>Volver al inicio</a>
+
+    <div class="club-cab">
+      {{ escudo(club) }}
+      <div>
+        <h1>{{ club.nombre }}</h1>
+        {% if club.localidad %}<p>{{ club.localidad }}</p>{% endif %}
+      </div>
+    </div>
+
+    <div class="tabs" data-group="plantel" role="tablist">
+      {% for cat in categorias %}
+      <button type="button" role="tab" data-key="{{ cat }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ planteles[cat].label }} · {{ planteles[cat].jugadores | length }}</button>
+      {% endfor %}
+    </div>
+
+    {% for cat in categorias %}
+    <div class="pane" data-group="plantel" data-key="{{ cat }}">
+      {% if planteles[cat].jugadores %}
+      <p class="conteo">{{ planteles[cat].jugadores | length }} {{ 'jugador' if planteles[cat].jugadores | length == 1 else 'jugadores' }}</p>
+      <div class="jugadores">
+        {% for j in planteles[cat].jugadores %}
+        <div class="jug"><span class="av">{{ j.nombre[0] }}{{ j.apellido[0] }}</span><div><b>{{ j.apellido }}, {{ j.nombre }}</b><small>Carnet {{ j.numero_carnet }}</small></div></div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="vacio" style="margin-top:20px">No hay jugadores registrados en esta categoría.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

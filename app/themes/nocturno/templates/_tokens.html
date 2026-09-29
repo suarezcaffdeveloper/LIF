@@ -1,0 +1,21 @@
+{#- Paleta del tema Nocturno. Si la liga define color_marca se deriva el neón a partir de él;
+    si no, se usa el lima propio del tema. -#}
+{% set marca = liga.color_marca %}
+<style>
+:root{
+  --void:#070807; --carbon:#0C0E0C; --panel:#121512; --panel-2:#181C18;
+  --line:rgba(235,245,235,.07); --line-strong:rgba(235,245,235,.16);
+  --text:#E4EAE4; --text-dim:#7A857A; --text-faint:#4A534A;
+  {% if marca %}
+  --neon:{{ marca }};
+  --neon-soft:color-mix(in srgb,{{ marca }} 55%,#fff);
+  --neon-glow:color-mix(in srgb,{{ marca }} 35%,transparent);
+  --neon-faint:color-mix(in srgb,{{ marca }} 10%,transparent);
+  {% else %}
+  --neon:#C8FF3D; --neon-soft:#DCFF85;
+  --neon-glow:rgba(200,255,61,.35); --neon-faint:rgba(200,255,61,.1);
+  {% endif %}
+  --live:#FF4D5E;
+  --n-letras:{{ liga.nombre_corto|length }};
+}
+</style>

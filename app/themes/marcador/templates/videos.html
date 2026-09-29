@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Videos - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <div class="sec-head"><h1>Videos</h1></div>
+    {% if videos %}
+    <div class="cards">
+      {% for video in videos %}
+      <article class="ncard">
+        <div class="vf"><iframe src="{{ video.url | replace('watch?v=', 'embed/') }}" title="{{ video.titulo_video }}" loading="lazy" allowfullscreen></iframe></div>
+        <div class="bd">
+          <span class="meta">{{ video.fecha_subida.strftime('%d/%m/%Y') }}</span>
+          <h3>{{ video.titulo_video }}</h3>
+          {% if video.descripcion %}<p>{{ video.descripcion }}</p>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="vacio">Todavía no hay videos publicados.</div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% set cat = liga.categoria(categoria|lower) %}
+{% block title %}Goleadores {{ cat.etiqueta if cat else categoria|capitalize }} - {{ liga.nombre_corto }}{% endblock %}
+
+{% macro ranking(filas, clase='', compacta=false) %}
+{% set con_total = filas | selectattr(4) | list %}
+{% if con_total %}
+<div class="rank {{ 'compact' if compacta }}">
+  {% for carnet, nombre, apellido, club_nombre, total in con_total %}
+  <div class="rk"><span class="n">{{ '%02d' % loop.index }}</span><div><b>{{ nombre }} {{ apellido }}</b><small>{{ club_nombre }}</small></div><span class="tot {{ clase }}">{{ total }}</span></div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="s-sub" style="margin:0">Todavía no hay datos cargados.</p>
+{% endif %}
+{% endmacro %}
+
+{% block content %}
+<section class="page">
+  <div class="wrap">
+    <header class="s-head rv">
+      <div>
+        <h1>Golea<em>dores</em></h1>
+        <p class="s-sub">{{ cat.etiqueta_larga if cat else categoria|capitalize }} · Temporada {{ anio }}</p>
+      </div>
+      <nav class="tabs tabs-links" aria-label="Categoría">
+        {% for c in liga.categorias %}<a href="{{ url_for('views.mostrar_estadisticas', categoria=c.slug) }}" {% if c.slug == categoria|lower %}aria-current="page"{% endif %}>{{ c.etiqueta }}</a>{% endfor %}
+      </nav>
+    </header>
+
+    <div class="cols">
+      <div class="panel rv"><h3>Máximos goleadores</h3>{{ ranking(goles) }}</div>
+      <div class="stack">
+        <div class="panel rv d1"><h3>Tarjetas amarillas</h3>{{ ranking(amarillas, 'am', true) }}</div>
+        <div class="panel rv d2"><h3>Tarjetas rojas</h3>{{ ranking(rojas, 'ro', true) }}</div>
+      </div>
+    </div>
+
+    {% if stats %}
+    <div class="stats-grid">
+      {% for clave, stat in stats.items() %}
+      <div class="stat-card rv" style="--d:{{ loop.index0 }}"><small>{{ stat.titulo }}</small><b>{{ stat.equipo }}</b><span>{{ stat.valor }}</span></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

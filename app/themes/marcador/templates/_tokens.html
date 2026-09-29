@@ -1,0 +1,16 @@
+{#- Paleta del tema Marcador. Si la liga define color_marca, el ámbar LED se deriva de ese color;
+    si no, se usa el ámbar propio del tema. -#}
+{% set marca = liga.color_marca %}
+<style>
+:root{
+  --ink-950:#0F0D0B; --ink-900:#171411; --ink-800:#201C18; --ink-700:#2C2722;
+  --crema:#F3EBDD; --tenue:#A79F92; --live:#E5533D;
+  {% if marca %}
+  --led-500:{{ marca }};
+  --led-400:color-mix(in srgb,{{ marca }} 78%,#fff);
+  --led-600:color-mix(in srgb,{{ marca }} 82%,#000);
+  {% else %}
+  --led-500:#FFB627; --led-400:#FFCB5C; --led-600:#E39A0B;
+  {% endif %}
+}
+</style>

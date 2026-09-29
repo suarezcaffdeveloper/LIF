@@ -65,12 +65,24 @@ Los temas que no lo piden reciben `portada = None` y no pagan las consultas extr
 |---|---|---|
 | `clasico` | oscuro | Diseño original. Es el tema base: lo que otro tema no define se toma de acá. |
 | `cancha` | claro | Editorial y pensado para celular. Sigla gigante con césped en movimiento, nav flotante que se oscurece al scrollear, barra de navegación inferior en el celular. |
-
 | `reflectores` | oscuro | Estadio nocturno. Reflectores que oscilan, cancha que se dibuja al cargar, nav de vidrio que se esconde al bajar, sliders que se arrastran y contadores animados. |
+| `marcador` | oscuro | Tablero de estadio. Inicio con el marcador electrónico (cuenta regresiva en dígitos LED de matriz de puntos), barra lateral de íconos en escritorio y pestañas fijas en celular, goleadores como gráfico de barras y puntos como barra LED. |
+| `cuaderno` | claro | Cuaderno del técnico. Papel cuadriculado y tinta con tiza roja, pizarra táctica en el inicio con fichas de escudos que se arrastran y una flecha que las sigue, listas con renglones y margen, goleadores en columnas rayadas, tipografía serif y anotaciones a mano. |
+| `nocturno` | oscuro | Neón nocturno premium. Tipografía enorme con mucho aire, acento neón que respira en elementos clave, nav y dock de cristal esmerilado, secciones que aparecen con fade-up al scrollear y estados de goles con brillo. |
+
+`nocturno` toma su neón de `color_marca` (lima por defecto).
+
+`cuaderno` toma su color de tiza de `color_marca` (rojo por defecto).
+
+`marcador` toma su color LED de `color_marca` (ámbar por defecto).
 
 `reflectores` toma su acento de `color_marca` (azul por defecto). Además de lo que usa `cancha`, el inicio le pide a `portada` los `totales` (`partidos` jugados y `goles`) para los contadores.
 
 `cancha` deriva su paleta de dos colores opcionales de la liga: `color_marca` (verde por defecto) y `color_marca_2` (naranja por defecto). Se definen en `app/ligas/<liga>/__init__.py`.
+
+### Ocultar un tema
+
+Con `"visible": false` en su `theme.json`, un tema no aparece en el selector de la demo ni se puede elegir con `?tema=`. Sigue instalado: los otros temas toman de `clasico` las páginas que no definen. Hoy `clasico` está oculto.
 
 ## Modo escaparate (demo pública)
 

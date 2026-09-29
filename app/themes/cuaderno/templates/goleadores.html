@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% set cat = liga.categoria(categoria|lower) %}
+{% block title %}Goleadores {{ cat.etiqueta if cat else categoria|capitalize }} - {{ liga.nombre_corto }}{% endblock %}
+
+{# Lista de jugadores con su club y el total en una tarjeta de color (amarilla / roja). #}
+{% macro tarjetas(filas, clase) %}
+{% set con_total = filas | selectattr(4) | list %}
+{% if con_total %}
+{% for carnet, nombre, apellido, club_nombre, total in con_total %}
+<div class="rk-fila"><span class="n">{{ loop.index }}</span><div><b>{{ nombre }} {{ apellido }}</b><small>{{ club_nombre }}</small></div><span class="carta {{ clase }}">{{ total }}</span></div>
+{% endfor %}
+{% else %}
+<div class="dato"><span>Todavía no hay datos cargados.</span></div>
+{% endif %}
+{% endmacro %}
+
+{% block content %}
+{% set con_goles = goles | selectattr(4) | list %}
+<section class="page">
+  <div class="wrap">
+    <div class="sec-cab">
+      <div><h1>Goleadores</h1><p class="meta">{{ cat.etiqueta_larga if cat else categoria|capitalize }} · Temporada {{ anio }}</p></div>
+      <nav class="pest" aria-label="Categoría">
+        {% for c in liga.categorias %}<a href="{{ url_for('views.mostrar_estadisticas', categoria=c.slug) }}" {% if c.slug == categoria|lower %}aria-current="page"{% endif %}>{{ c.etiqueta }}</a>{% endfor %}
+      </nav>
+    </div>
+
+    <div class="cols">
+      <div class="caja">
+        <div class="caja-tit">Máximos goleadores</div>
+        {% if con_goles %}
+        {% set mayor = con_goles[0][4] or 1 %}
+        <div class="columnas">
+          {% for carnet, nombre, apellido, club_nombre, total in con_goles[:8] %}
+          <div class="col">
+            <span class="v">{{ total }}</span>
+            <div class="bloque" data-h="{{ (total / mayor * 62) | round(0) | int }}"></div>
+            <div class="nombre">{{ apellido }}<small>{{ club_nombre }}</small></div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="vacio" style="margin:20px">Todavía no hay goles cargados.</div>
+        {% endif %}
+      </div>
+      <div class="pila">
+        <div class="caja"><div class="caja-tit">Tarjetas amarillas</div>{{ tarjetas(amarillas, 'am') }}</div>
+        <div class="caja"><div class="caja-tit">Tarjetas rojas</div>{{ tarjetas(rojas, 'ro') }}</div>
+      </div>
+    </div>
+
+    <div class="stats3">
+      {% for clave, stat in stats.items() %}
+      <div class="stat"><small>{{ stat.titulo }}</small><b>{{ stat.equipo }}</b><span>{{ stat.valor }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

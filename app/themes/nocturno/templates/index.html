@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+{% from "_macros.html" import escudo, fecha_corta, hora with context %}
+{% block title %}Inicio - {{ liga.nombre_corto }}{% endblock %}
+
+{% block content %}
+{% set cats = portada.categorias if portada else [] %}
+{% set con_partidos = cats | selectattr('partidos') | list %}
+
+{# ═════════ Hero ═════════ #}
+<section class="hero" id="inicio" data-dock="inicio">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-orb" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="hero-meta rv">
+      <span class="pulse-dot"></span>
+      <span>Temporada {{ anio }}</span>
+      <span class="sep">/</span>
+      <span>{{ liga.nombre }}</span>
+    </div>
+    <h1 class="hero-title rv d1">
+      {% for linea in liga.hero_lineas %}
+      <span class="line"><span class="word">{{ linea }}</span></span>
+      {% endfor %}
+    </h1>
+    <div class="hero-foot rv d2">
+      <p>{{ liga.descripcion }}</p>
+      <div class="hero-actions">
+        <a href="#fecha" class="btn btn-neon">Ver la fecha</a>
+        <a href="#tabla" class="btn btn-ghost">Posiciones</a>
+      </div>
+    </div>
+  </div>
+  <a class="scroll-cue" href="#fecha" aria-label="Bajar a la fecha"><span></span></a>
+</section>
+
+{# ═════════ Cinta de resultados ═════════ #}
+{% set jugados = [] %}
+{% for c in cats %}{% for p in c.partidos if p.jugado %}{% if jugados.append(p) %}{% endif %}{% endfor %}{% endfor %}
+{% if jugados %}
+<div class="tape" aria-hidden="true"><div class="tape-track">
+  {% for _ in range(2) %}{% for _ in range(2) %}
+    {% for p in jugados %}<span>{{ p.equipo_local.club.nombre }} <b>{{ p.goles_local }}–{{ p.goles_visitante }}</b> {{ p.equipo_visitante.club.nombre }}</span>{% endfor %}
+  {% endfor %}{% endfor %}
+</div></div>
+{% endif %}
+
+{# ═════════ La fecha ═════════ #}
+<section class="s" id="fecha" data-dock="resultados">
+  <div class="wrap">
+    <header class="s-head rv">
+      <div>
+        <h2>La <em>fecha</em></h2>
+        {% if con_partidos %}<p class="s-sub">Fecha {{ con_partidos[0].jornada }} en juego</p>{% endif %}
+      </div>
+      {% if cats %}
+      <div class="tabs" data-group="fixture" role="tablist">
+        {% for c in cats %}<button type="button" role="tab" data-key="{{ c.categoria.slug }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ c.categoria.etiqueta }}</button>{% endfor %}
+      </div>
+      {% endif %}
+    </header>
+
+    <div class="fecha-grid">
+      <div class="fecha-main rv">
+        {% for c in cats %}
+        <div class="pane" data-group="fixture" data-key="{{ c.categoria.slug }}">
+          {% if c.partidos %}
+          <div class="matches">
+            {% for p in c.partidos %}
+            {% set gana_l = p.jugado and p.goles_local > p.goles_visitante %}
+            {% set gana_v = p.jugado and p.goles_visitante > p.goles_local %}
+            <article class="match {{ 'played' if p.jugado }}">
+              <div class="match-top">
+                <span>{{ fecha_corta(p.fecha_partido) }}</span>
+                <span class="st">{{ 'Final' if p.jugado else hora(p.hora_partido) }}</span>
+              </div>
+              <div class="match-body">
+                <div class="tm {{ 'w' if gana_l }}">{{ escudo(p.equipo_local.club) }}<span>{{ p.equipo_local.club.nombre }}</span></div>
+                <div class="score">
+                  {% if p.jugado %}<b>{{ p.goles_local }}</b><i>–</i><b>{{ p.goles_visitante }}</b>
+                  {% else %}<em>vs</em>{% endif %}
+                </div>
+                <div class="tm r {{ 'w' if gana_v }}">{{ escudo(p.equipo_visitante.club) }}<span>{{ p.equipo_visitante.club.nombre }}</span></div>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+          <p class="more-link"><a href="{{ url_for('views.fixture', bloque=c.categoria.bloque, categoria=c.categoria.parametro_url) }}">Fixture completo de {{ c.categoria.etiqueta }}<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></p>
+          {% else %}
+          <div class="empty">Todavía no hay partidos cargados en {{ c.categoria.etiqueta_larga }}.</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% if not cats %}<div class="empty">Todavía no hay partidos cargados.</div>{% endif %}
+      </div>
+
+      <aside class="next rv d1">
+        {% set p = portada.proximo if portada else none %}
+        {% if p %}
+        {% set cp = liga.categoria(p.categoria.strip().lower()) %}
+        <div class="next-card">
+          <div class="next-glow" aria-hidden="true"></div>
+          <small>Próximo partido{% if cp %} · {{ cp.etiqueta }}{% endif %}</small>
+          <div class="next-vs">
+            <div class="t">{{ escudo(p.equipo_local.club) }}<span>{{ p.equipo_local.club.nombre }}</span></div>
+            <em>vs</em>
+            <div class="t">{{ escudo(p.equipo_visitante.club) }}<span>{{ p.equipo_visitante.club.nombre }}</span></div>
+          </div>
+          <div class="cd" id="cd" data-objetivo="{{ p.fecha_partido.isoformat() ~ 'T' ~ (p.hora_partido.strftime('%H:%M:%S') if p.hora_partido else '00:00:00') }}">
+            <div><b>00</b><span>días</span></div><div><b>00</b><span>hs</span></div><div><b>00</b><span>min</span></div><div><b>00</b><span>seg</span></div>
+          </div>
+          {% if cp %}<a href="{{ url_for('views.fixture', bloque=cp.bloque, categoria=cp.parametro_url) }}" class="btn btn-neon btn-full">Ver fixture</a>{% endif %}
+        </div>
+        {% else %}
+        <div class="next-card">
+          <small>Próximo partido</small>
+          <p class="next-empty">Cuando se cargue la próxima fecha, vas a ver acá cuánto falta para que arranque.</p>
+          <a href="{{ url_for('views.fixture', bloque=liga.categorias[0].bloque, categoria=liga.categorias[0].parametro_url) }}" class="btn btn-ghost btn-full">Ver el fixture</a>
+        </div>
+        {% endif %}
+      </aside>
+    </div>
+  </div>
+</section>
+
+{# ═════════ Posiciones ═════════ #}
+<section class="s" id="tabla" data-dock="tabla">
+  <div class="wrap">
+    <header class="s-head rv">
+      <h2>Posi<em>ciones</em></h2>
+      {% if cats %}
+      <div class="tabs" data-group="tabla" role="tablist">
+        {% for c in cats %}<button type="button" role="tab" data-key="{{ c.categoria.slug }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ c.categoria.etiqueta }}</button>{% endfor %}
+      </div>
+      {% endif %}
+    </header>
+    {% for c in cats %}
+    <div class="pane" data-group="tabla" data-key="{{ c.categoria.slug }}">
+      {% if c.tabla %}
+      <div class="standings rv">
+        <div class="st-row st-head"><span>#</span><span>Club</span><span>PJ</span><span>DG</span><span>Pts</span></div>
+        {% for f in c.tabla[:8] %}
+        <div class="st-row {{ 'q' if loop.index <= clasificados }}">
+          <span class="pos">{{ loop.index }}</span>
+          <span class="cl">{{ escudo({'escudo_url': f.escudo_url, 'nombre': f.nombre_equipo}) }}{{ f.nombre_equipo }}</span>
+          <span class="dim">{{ f.partidos_jugados }}</span>
+          <span class="dim">{{ '+' if f.diferencia_gol > 0 }}{{ f.diferencia_gol }}</span>
+          <span class="pts">{{ f.cantidad_puntos }}</span>
+        </div>
+        {% endfor %}
+        {% if clasificados %}<p class="st-foot"><i></i>Clasifican a la fase final</p>{% endif %}
+      </div>
+      <p class="more-link"><a href="{{ url_for('views.tabla_posiciones', categoria=c.categoria.parametro_url) }}">Ver tabla completa<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></p>
+      {% else %}
+      <div class="empty">Todavía no hay datos de posiciones en {{ c.categoria.etiqueta_larga }}.</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# ═════════ Goleadores ═════════ #}
+<section class="s" id="goleadores" data-dock="goleadores">
+  <div class="wrap">
+    <header class="s-head rv">
+      <h2>Golea<em>dores</em></h2>
+      {% if cats %}
+      <div class="tabs" data-group="goles" role="tablist">
+        {% for c in cats %}<button type="button" role="tab" data-key="{{ c.categoria.slug }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ c.categoria.etiqueta }}</button>{% endfor %}
+      </div>
+      {% endif %}
+    </header>
+    {% for c in cats %}
+    {% if c.goleadores %}
+    <div class="pane scorers" data-group="goles" data-key="{{ c.categoria.slug }}">
+      {% for g in c.goleadores %}
+      {% set club = clubes | selectattr('nombre', 'equalto', g.club_nombre) | first %}
+      <article class="scorer rv" style="--d:{{ loop.index0 }}">
+        <span class="rank">{{ '%02d' % loop.index }}</span>
+        {{ escudo(club) }}
+        <div class="who"><b>{{ g.nombre }} {{ g.apellido }}</b><small>{{ g.club_nombre }}</small></div>
+        <span class="goals">{{ g.total }}</span>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="pane" data-group="goles" data-key="{{ c.categoria.slug }}"><div class="empty">Todavía no hay goles cargados en {{ c.categoria.etiqueta_larga }}.</div></div>
+    {% endif %}
+    {% endfor %}
+    {% if cats %}<p class="more-link rv"><a href="{{ url_for('views.mostrar_estadisticas', categoria=liga.categorias[0].slug) }}">Estadísticas completas<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></p>{% endif %}
+  </div>
+</section>
+
+{# ═════════ Clubes ═════════ #}
+<section class="s" id="clubes">
+  <div class="wrap">
+    <header class="s-head rv"><h2>Los <em>clubes</em></h2></header>
+    {% if clubes %}
+    <div class="clubs-grid">
+      {% for club in clubes %}
+      <a href="{{ url_for('views.club_plantel', club_id=club.id) }}" class="club-tile rv" style="--d:{{ loop.index0 }}">
+        {{ escudo(club) }}<span>{{ club.nombre }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">Todavía no hay clubes cargados.</div>
+    {% endif %}
+  </div>
+</section>
+
+{# ═════════ Noticias ═════════ #}
+{% if noticias %}
+<section class="s" id="noticias" data-dock="noticias">
+  <div class="wrap">
+    <header class="s-head rv">
+      <h2>Noti<em>cias</em></h2>
+      <a href="{{ url_for('views.todas_noticias') }}" class="btn btn-ghost btn-sm">Ver todas</a>
+    </header>
+    <div class="news-grid">
+      {% set n = noticias[0] %}
+      <a href="{{ url_for('views.noticia_detalle', noticia_id=n.id_noticia) }}" class="news-hero rv">
+        <div class="ph">{% if n.imagen_url %}<img src="{{ n.imagen_url }}" alt="" loading="lazy">{% endif %}</div>
+        <div class="news-hero-body">
+          <span class="kicker">{{ n.categoria or 'Noticias' }}</span>
+          <h3>{{ n.titulo }}</h3>
+          <p>{{ n.contenido | striptags | truncate(140) }}</p>
+        </div>
+      </a>
+      <div class="news-side">
+        {% for n in noticias[1:] %}
+        <a href="{{ url_for('views.noticia_detalle', noticia_id=n.id_noticia) }}" class="news-item rv" style="--d:{{ loop.index0 }}">
+          <small>{{ n.categoria or 'Noticias' }} · {{ n.fecha_publicacion.strftime('%d/%m/%Y') }}</small>
+          <h4>{{ n.titulo }}</h4>
+          <span class="arrow"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ═════════ Videos ═════════ #}
+{% if videos %}
+<section class="s s-alt" id="videos">
+  <div class="wrap">
+    <header class="s-head rv">
+      <h2>Vi<em>deos</em></h2>
+      <a href="{{ url_for('views.todos_videos') }}" class="btn btn-ghost btn-sm">Ver todos</a>
+    </header>
+    <div class="videos-grid">
+      {% for v in videos %}
+      <a href="{{ v.url }}" target="_blank" rel="noopener" class="video-tile rv {{ 'big' if loop.first }}" style="--d:{{ loop.index0 }}">
+        <img src="https://img.youtube.com/vi/{{ v.url | youtube_id }}/hqdefault.jpg" alt="" loading="lazy" onerror="this.remove()">
+        <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg></span>
+        <div class="video-info"><h4>{{ v.titulo_video }}</h4><small>{{ v.fecha_subida.strftime('%d/%m/%Y') }}</small></div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
