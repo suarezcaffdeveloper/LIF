@@ -63,7 +63,9 @@ Con un solo comando (desde la raíz del proyecto) se generan las siete imágenes
 venv\Scripts\python.exe landing\herramientas\capturar_diseno.py cuaderno
 ```
 
-Después hay que agregar el diseño en `index.html` (una imagen más en el notebook y en el celular del hero, y un botón en la sección "Elegí cómo se ve tu liga") y su nombre en la lista `nombres` de `js/landing.js`. Hoy la landing muestra Cancha, Reflectores y Cuaderno; Marcador y Clásico quedaron afuera a propósito.
+Después hay que agregar el diseño en `index.html` (una imagen más en el notebook y en el celular del hero, y un botón en la sección "Elegí cómo se ve tu liga") y su nombre en la lista `nombres` de `js/landing.js`. Hoy la landing muestra Cancha, Reflectores, Cuaderno, Nocturno y Tribuna; Marcador y Clásico quedaron afuera a propósito.
+
+Las capturas de los paneles de administrador y periodista (`admin-*.webp`, `periodista-*.webp`) se regeneran con `venv\Scripts\python.exe landing\herramientas\capturar_admin.py`.
 
 ## Lo que la landing promete (y lo que no)
 
