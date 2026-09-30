@@ -108,6 +108,9 @@ def create_app():
     DATABASE_URL = _normalizar_db_url("DATABASE_URL", DATABASE_URL)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+    # Verifica la conexión antes de usarla: evita errores si Postgres cortó una
+    # conexión ociosa mientras el servicio estaba inactivo.
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # -----------------------

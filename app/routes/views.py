@@ -52,6 +52,19 @@ def admin_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+@views.route('/health')
+def health():
+    """Ping liviano para un monitor externo (UptimeRobot, etc.): mantiene despierto
+    el servicio en Render free y toca la base para que tampoco quede fría."""
+    try:
+        db.session.execute(db.text("SELECT 1"))
+    except Exception:
+        current_app.logger.exception("Health check: la base no respondió")
+        db.session.rollback()
+        return "db error", 503
+    return "ok", 200
+
+
 @views.route('/')
 def index():
     clubes = Club.query.all()
