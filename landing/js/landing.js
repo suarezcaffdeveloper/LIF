@@ -206,8 +206,8 @@
       e.preventDefault();
       var d = new FormData(form), nombre = (d.get('nombre') || '').trim(), contacto = (d.get('contacto') || '').trim();
       if (!nombre || !contacto) { estadoForm.textContent = 'Completá tu nombre y un email o teléfono para poder responderte.'; return; }
-      var datos = { nombre: nombre, liga: d.get('liga'), contacto: contacto, mensaje: d.get('mensaje'), _subject: asunto, _template: 'table' };
-      if (C.FORM_ENDPOINT) {
+      var datos = { nombre: nombre, liga: d.get('liga'), contacto: contacto, mensaje: d.get('mensaje'), access_key: C.FORM_ACCESS_KEY, subject: asunto, from_name: 'ElTablón (web)' };
+      if (C.FORM_ENDPOINT && C.FORM_ACCESS_KEY) {
         estadoForm.textContent = 'Enviando…';
         fetch(C.FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify(datos) })
           .then(function (r) { if (!r.ok) throw new Error(); estadoForm.textContent = '¡Listo! Recibimos tu consulta y te respondemos a la brevedad.'; form.reset(); })

@@ -16,7 +16,9 @@ window.ELTABLON = {
 
   // Formulario: URL de un servicio que reciba los datos (por ejemplo Formspree: "https://formspree.io/f/xxxxxxx").
   // Si queda vacío, el formulario abre el programa de correo del visitante con el mensaje ya escrito.
-  FORM_ENDPOINT: "https://formsubmit.co/ajax/suarezz.santi01@gmail.com",
+  FORM_ENDPOINT: "https://api.web3forms.com/submit",
+  // Clave gratuita de Web3Forms: se pide en https://web3forms.com escribiendo el email que va a recibir las consultas.
+  FORM_ACCESS_KEY: "cc67ab2d-7970-4cb9-beac-6401bfb1017d",
 
   // Demo en vivo: dirección donde publiques la instancia con LIGA=demo y DEMO_TEMAS=1.
   // Con DEMO_EN_VIVO en false, la landing muestra capturas en lugar de incrustar el sitio.
