@@ -104,7 +104,8 @@ ul,ol{list-style:none}
 .st-excel td{padding:5px 8px;border-top:1px solid #d6dbe1}
 .st-excel small{padding:6px 8px;margin:0;background:#f3f4f6}
 .st-papel{background:#fff1a8;border-radius:2px;font-family:var(--f-mano);font-size:22px;line-height:1.05;padding:16px}
-.st-foto{aspect-ratio:4/3;padding:0;background:linear-gradient(135deg,#6b7280,#374151);display:grid;place-items:center;color:rgba(255,255,255,.7);filter:blur(1.2px)}
+.st-foto{aspect-ratio:4/3;padding:4px;background:#d9dde1;display:grid;place-items:center;filter:blur(.6px)}
+.st-foto svg{width:100%;height:100%;display:block}
 .st-pdf{display:flex;align-items:center;gap:10px}
 .st-pdf b{background:var(--bengala);color:#fff;padding:8px 6px;border-radius:3px;font-size:12px}
 .sitio-final{position:absolute;inset:4% 0 auto 0;opacity:0;transform:scale(.86);transform-origin:50% 50%;border-radius:12px;overflow:hidden;background:#0b0f16;box-shadow:0 40px 80px rgba(0,0,0,.55)}

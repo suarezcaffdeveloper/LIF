@@ -8,11 +8,11 @@ window.ELTABLON = {
   EJEMPLO: true,
 
   // WhatsApp: número completo con código de país, sin "+" ni espacios (Argentina: 549 + área + número).
-  WHATSAPP: "5490000000000",
+  WHATSAPP: "5493468522516",
   WHATSAPP_MENSAJE: "Hola! Vi ElTablón y quiero conocer el sistema para mi liga.",
 
   // Email de contacto.
-  EMAIL: "hola@eltablon.example",
+  EMAIL: "suarezz.santi01@gmail.com",
 
   // Formulario: URL de un servicio que reciba los datos (por ejemplo Formspree: "https://formspree.io/f/xxxxxxx").
   // Si queda vacío, el formulario abre el programa de correo del visitante con el mensaje ya escrito.
