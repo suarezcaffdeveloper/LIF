@@ -727,13 +727,5 @@ function fasePermitePenales(nombreFase) {
   return fasesConPenales.includes(nombreFase);
 }
 
-/* ================= FLASH AUTO-HIDE ================= */
-setTimeout(() => {
-  document.querySelectorAll("#flash-container .flash-alert").forEach(a => {
-    a.style.transition = "opacity 0.8s";
-    a.style.opacity    = "0";
-    setTimeout(() => a.remove(), 800);
-  });
-}, 3500);
 </script>
 {% endblock %}

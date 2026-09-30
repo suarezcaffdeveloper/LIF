@@ -17,8 +17,7 @@
 
 <main class="auth">
   <div class="auth-side" aria-hidden="true">
-    <div class="banderines"><div class="band-track">{% for _ in range(20) %}<i class="band {{ ['b1','b2','b3'][loop.index0 % 3] }}"></i>{% endfor %}</div></div>
-    <div class="auth-grada">{% for fila in range(3) %}<div class="fila f{{ fila }}">{% for i in range(22) %}<span class="hincha" style="--i:{{ i }};--f:{{ fila }}"><b></b></span>{% endfor %}</div>{% endfor %}</div>
+    <div class="auth-crowd"><canvas class="hinchada" data-variante="auth" data-texto="{{ liga.nombre_corto }}"></canvas></div>
     <strong class="auth-sigla">{{ liga.nombre_corto }}</strong>
   </div>
   <div class="auth-card">
@@ -49,6 +48,7 @@
     </form>
   </div>
 </main>
+<script src="{{ url_for('tema.static', filename='js/hinchada.js') }}" defer></script>
 <script src="{{ url_for('tema.static', filename='js/tribuna.js') }}" defer></script>
 </body>
 </html>

@@ -13,20 +13,6 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  /* ───── La ola: se pausa cuando la tribuna no se ve ───── */
-  var grada = $('.grada');
-  if (grada && 'IntersectionObserver' in window) {
-    new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        grada.style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
-        $$('.hincha', grada).forEach(function (h) {
-          h.style.animationPlayState = e.isIntersecting ? 'running' : 'paused';
-        });
-      });
-    }, { threshold: 0.05 }).observe(grada);
-    if (reduce) $$('.hincha', grada).forEach(function (h) { h.style.animation = 'none'; });
-  }
-
   /* ───── Reveal on scroll: .rv aparece con fade-up ───── */
   var rv = $$('.rv');
   if (rv.length && 'IntersectionObserver' in window) {

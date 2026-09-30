@@ -8,16 +8,12 @@
 
 {# ═════════ Hero ═════════ #}
 <section class="hero" id="inicio" data-dock="inicio">
-  {# banderines #}
-  <div class="banderines" aria-hidden="true">
-    <div class="band-track">
-      {% for _ in range(24) %}<i class="band {{ ['b1','b2','b3'][loop.index0 % 3] }}"></i>{% endfor %}
-    </div>
-  </div>
+  {# la hinchada: al costado, de fondo #}
+  <div class="hero-crowd" aria-hidden="true"><canvas class="hinchada" data-variante="hero" data-texto="{{ liga.nombre_corto }}"></canvas></div>
 
   <div class="wrap hero-in">
     <div class="hero-meta rv">
-      <span class="pulse-dot"></span>
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
       <span>Temporada {{ anio }}</span>
       <span class="sep">/</span>
       <span>{{ liga.nombre }}</span>
@@ -36,30 +32,17 @@
     </div>
   </div>
 
-  {# la tribuna: hinchas que hacen la ola #}
-  <div class="tribuna" aria-hidden="true">
-    <div class="grada">
-      {% for fila in range(4) %}
-      <div class="fila f{{ fila }}">
-        {% for i in range(28) %}
-        <span class="hincha" style="--i:{{ i }};--f:{{ fila }}"><b></b></span>
-        {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-    <div class="valla"><span>{{ liga.nombre_corto }}</span><span>Fútbol</span><span>{{ liga.nombre_corto }}</span><span>Temporada {{ anio }}</span><span>{{ liga.nombre_corto }}</span><span>Fútbol</span></div>
-  </div>
-
-  <a class="scroll-cue" href="#fecha" aria-label="Bajar a la fecha"><span></span></a>
 </section>
 
 {# ═════════ Cinta de resultados ═════════ #}
 {% set jugados = [] %}
 {% for c in cats %}{% for p in c.partidos if p.jugado %}{% if jugados.append(p) %}{% endif %}{% endfor %}{% endfor %}
-{% if jugados %}
+{% set cinta = jugados if jugados else [] %}
+{% if not jugados %}{% for c in cats %}{% for p in c.partidos %}{% if cinta.append(p) %}{% endif %}{% endfor %}{% endfor %}{% endif %}
+{% if cinta %}
 <div class="tape" aria-hidden="true"><div class="tape-track">
   {% for _ in range(2) %}{% for _ in range(2) %}
-    {% for p in jugados %}<span>{{ p.equipo_local.club.nombre }} <b>{{ p.goles_local }}–{{ p.goles_visitante }}</b> {{ p.equipo_visitante.club.nombre }}</span>{% endfor %}
+    {% for p in cinta %}{% if p.jugado %}<span>{{ p.equipo_local.club.nombre }} <b>{{ p.goles_local }}–{{ p.goles_visitante }}</b> {{ p.equipo_visitante.club.nombre }}</span>{% else %}<span>{{ p.equipo_local.club.nombre }} <b>vs</b> {{ p.equipo_visitante.club.nombre }}</span>{% endif %}{% endfor %}
   {% endfor %}{% endfor %}
 </div></div>
 {% endif %}
@@ -69,7 +52,7 @@
   <div class="wrap">
     <header class="s-head rv">
       <div>
-        <span class="kicker">01 — En juego</span>
+        <span class="kicker">01 — En juego<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
         <h2>La <em>fecha</em></h2>
         {% if con_partidos %}<p class="s-sub">Fecha {{ con_partidos[0].jornada }} de la temporada</p>{% endif %}
       </div>
@@ -102,7 +85,7 @@
                 </div>
                 <div class="tm r {{ 'w' if gana_v }}">{{ escudo(p.equipo_visitante.club) }}<span>{{ p.equipo_visitante.club.nombre }}</span></div>
               </div>
-              <div class="tk-code" aria-hidden="true"><span class="barcode"></span><small>{{ 'LIF' ~ '%03d' % loop.index }}</small></div>
+              <div class="tk-code" aria-hidden="true"><span class="barcode"></span><small>{{ liga.nombre_corto|upper|replace(' ', '')|truncate(5, true, '') ~ '%03d' % loop.index }}</small></div>
             </article>
             {% endfor %}
           </div>
@@ -148,7 +131,7 @@
   <div class="wrap">
     <header class="s-head rv">
       <div>
-        <span class="kicker">02 — Clasificación</span>
+        <span class="kicker">02 — Clasificación<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
         <h2>Posi<em>ciones</em></h2>
       </div>
       {% if cats %}
@@ -187,7 +170,7 @@
   <div class="wrap">
     <header class="s-head rv">
       <div>
-        <span class="kicker">03 — Estadísticas</span>
+        <span class="kicker">03 — Estadísticas<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
         <h2>Golea<em>dores</em></h2>
       </div>
       {% if cats %}
@@ -202,7 +185,7 @@
       {% for g in c.goleadores %}
       {% set club = clubes | selectattr('nombre', 'equalto', g.club_nombre) | first %}
       <article class="scorer rv" style="--d:{{ loop.index0 }}">
-        <span class="rank">{{ '%02d' % loop.index }}</span>
+        <span class="pos-n">{{ '%02d' % loop.index }}</span>
         {{ escudo(club) }}
         <div class="who"><b>{{ g.nombre }} {{ g.apellido }}</b><small>{{ g.club_nombre }}</small></div>
         <span class="goals">{{ g.total }}</span>
@@ -222,7 +205,7 @@
   <div class="wrap">
     <header class="s-head rv">
       <div>
-        <span class="kicker">04 — Participantes</span>
+        <span class="kicker">04 — Participantes<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
         <h2>Los <em>clubes</em></h2>
       </div>
     </header>
@@ -246,7 +229,7 @@
   <div class="wrap">
     <header class="s-head rv">
       <div>
-        <span class="kicker">05 — Actualidad</span>
+        <span class="kicker">05 — Actualidad<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
         <h2>Noti<em>cias</em></h2>
       </div>
       <a href="{{ url_for('views.todas_noticias') }}" class="btn btn-line btn-sm">Ver todas</a>
@@ -281,7 +264,7 @@
   <div class="wrap">
     <header class="s-head rv">
       <div>
-        <span class="kicker">06 — Multimedios</span>
+        <span class="kicker">06 — Multimedios<span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span>
         <h2>Vi<em>deos</em></h2>
       </div>
       <a href="{{ url_for('views.todos_videos') }}" class="btn btn-line btn-sm">Ver todos</a>
