@@ -168,8 +168,8 @@ ul,ol{list-style:none}
 .escena .navegador img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top}
 .escena{position:absolute;inset:0;opacity:0;transform:translateY(24px);transition:opacity .5s var(--ease),transform .6s var(--ease);pointer-events:none;display:grid;align-items:center}
 .escena.on{opacity:1;transform:none}
-.escena .celu{position:absolute;bottom:auto;right:auto;width:min(31%,178px)}
-.celu-a{left:14%;top:0}.celu-b{right:14%;top:12%}
+.escena .celu{position:absolute;bottom:auto;right:auto;width:min(34%,196px)}
+.celu-a{left:10%;top:0}.celu-b{right:10%;top:10%}
 @media(max-width:900px){
   .perfiles-grid{grid-template-columns:minmax(0,1fr)}
   .perfiles-der{height:auto}
