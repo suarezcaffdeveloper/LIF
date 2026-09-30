@@ -4,7 +4,7 @@ Uso, desde la raíz del proyecto:
 
     venv\\Scripts\\python.exe landing\\herramientas\\capturar_admin.py
 
-Crea en landing/assets/img/: admin-*.webp y periodista-*.webp (1440x900).
+Crea en landing/assets/img/: admin-*.webp y periodista-*.webp (1440x900), en modo claro.
 Igual que capturar_diseno.py: siembra una SQLite temporal, levanta la demo en un puerto local y
 apaga todo al terminar. Para entrar con sesión usa una ruta auxiliar que existe solo en ese
 servidor temporal (no forma parte de la app).
@@ -34,7 +34,7 @@ PAGINAS = [
 ]
 
 SERVIDOR = f"""
-from flask import redirect, request
+from flask import redirect, request, make_response
 from flask_login import login_user
 from app import app
 from app.models.models import Usuario
@@ -42,7 +42,9 @@ from app.models.models import Usuario
 @app.route('/__entrar')
 def __entrar():
     login_user(Usuario.query.filter_by(email=request.args['email']).first())
-    return redirect(request.args['a'])
+    resp = make_response(redirect(request.args['a']))
+    resp.set_cookie('admin_tema', 'claro')  # el panel se captura en modo claro
+    return resp
 
 app.run(port={PUERTO}, debug=False)
 """
