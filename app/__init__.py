@@ -58,6 +58,11 @@ def _normalizar_db_url(nombre_var, valor):
     if valor.startswith("postgres://"):
         valor = valor.replace("postgres://", "postgresql://", 1)
 
+    # SQLAlchemy 2.1 usa psycopg (v3) por defecto para 'postgresql://'; acá
+    # usamos psycopg2, así que lo pedimos explícito.
+    if valor.startswith("postgresql://"):
+        valor = valor.replace("postgresql://", "postgresql+psycopg2://", 1)
+
     try:
         sa.engine.make_url(valor)
     except sa.exc.ArgumentError as e:

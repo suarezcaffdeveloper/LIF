@@ -4,6 +4,7 @@ psycopg2-binary
 python-dotenv
 
 Flask-SQLAlchemy
+SQLAlchemy<2.1
 Flask-Migrate
 Flask-Login
 Flask-Mail
